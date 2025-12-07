@@ -1,124 +1,181 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
-    <meta charset="UTF-8">
-    <title>Happy 的个人主页</title>
-    <!-- Google 字体 -->
-    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
-    <style>
-        body {
-            font-family: 'Roboto', sans-serif;
-            text-align: center;
-            margin: 0;
-            padding: 0;
-            background: linear-gradient(135deg, #f0f8ff, #e6f7ff);
-            min-height: 100vh;
-        }
-        .header {
-            padding: 50px 20px;
-            background: #4CAF50;
-            color: white;
-        }
-        .header img {
-            width: 120px;
-            height: 120px;
-            border-radius: 50%;
-            border: 4px solid white;
-            margin-bottom: 20px;
-        }
-        .header h1 {
-            margin: 10px 0;
-        }
-        .content {
-            padding: 40px 20px;
-        }
-        .contact {
-            background: #fff;
-            display: inline-block;
-            padding: 20px 40px;
-            border-radius: 15px;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
-            margin-top: 30px;
-        }
-        .contact h2 {
-            margin-bottom: 20px;
-            color: #4CAF50;
-        }
-        .contact p {
-            font-size: 18px;
-            margin: 10px 0;
-        }
-        .contact strong {
-            color: #2196F3;
-        }
-        .qr {
-            display: flex;
-            justify-content: center;
-            gap: 40px;
-            margin-top: 20px;
-        }
-        .qr div {
-            text-align: center;
-        }
-        .qr img {
-            width: 120px;
-            height: 120px;
-            border-radius: 15px;
-            border: 2px solid #ccc;
-        }
-        .footer {
-            margin-top: 50px;
-            padding: 20px;
-            font-size: 14px;
-            color: #888;
-        }
-        a.button {
-            display: inline-block;
-            margin: 10px;
-            padding: 10px 20px;
-            background: #2196F3;
-            color: white;
-            border-radius: 25px;
-            text-decoration: none;
-            transition: 0.3s;
-        }
-        a.button:hover {
-            background: #1976d2;
-        }
-    </style>
+<meta charset="UTF-8">
+<title>Happy 的个人主页</title>
+<link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
+<style>
+    /* 动态背景 */
+    @keyframes gradientBG {
+        0% {background-position: 0% 50%;}
+        50% {background-position: 100% 50%;}
+        100% {background-position: 0% 50%;}
+    }
+    body {
+        margin: 0;
+        font-family: 'Roboto', sans-serif;
+        background: linear-gradient(-45deg, #f0f8ff, #e6f7ff, #ffe4e1, #f5f5dc);
+        background-size: 400% 400%;
+        animation: gradientBG 20s ease infinite;
+        color: #333;
+    }
+    header {
+        text-align: center;
+        padding: 60px 20px;
+        color: white;
+        position: relative;
+    }
+    header img {
+        width: 140px;
+        height: 140px;
+        border-radius: 50%;
+        border: 4px solid white;
+        margin-bottom: 20px;
+        transition: transform 0.3s ease;
+    }
+    header img:hover {
+        transform: scale(1.1);
+    }
+    header h1 {
+        margin: 10px 0;
+        font-size: 36px;
+    }
+    header p {
+        font-size: 18px;
+        margin: 5px 0;
+    }
+    nav {
+        margin-top: 20px;
+    }
+    nav a {
+        margin: 0 15px;
+        text-decoration: none;
+        color: white;
+        font-weight: bold;
+        transition: 0.3s;
+    }
+    nav a:hover {
+        color: #ffeb3b;
+    }
+    section {
+        padding: 60px 20px;
+        text-align: center;
+    }
+    section h2 {
+        font-size: 28px;
+        color: #4CAF50;
+        margin-bottom: 30px;
+    }
+    .cards {
+        display: flex;
+        justify-content: center;
+        flex-wrap: wrap;
+        gap: 30px;
+    }
+    .card {
+        background: rgba(255,255,255,0.9);
+        padding: 30px 20px;
+        border-radius: 15px;
+        width: 300px;
+        box-shadow: 0 6px 20px rgba(0,0,0,0.1);
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+    .card:hover {
+        transform: translateY(-10px);
+        box-shadow: 0 12px 30px rgba(0,0,0,0.2);
+    }
+    .card img {
+        width: 120px;
+        height: 120px;
+        border-radius: 15px;
+        margin-bottom: 15px;
+    }
+    .card p {
+        font-size: 16px;
+    }
+    .contact .qr {
+        display: flex;
+        justify-content: center;
+        margin-top: 20px;
+    }
+    .contact .qr img {
+        width: 140px;
+        height: 140px;
+        border-radius: 15px;
+        border: 2px solid #ccc;
+    }
+    footer {
+        text-align: center;
+        padding: 20px;
+        background: rgba(0,0,0,0.05);
+        color: #666;
+    }
+    a.button {
+        display: inline-block;
+        margin: 10px;
+        padding: 10px 25px;
+        background: #2196F3;
+        color: white;
+        border-radius: 25px;
+        text-decoration: none;
+        transition: 0.3s;
+    }
+    a.button:hover {
+        background: #1976d2;
+    }
+</style>
 </head>
 <body>
-    <div class="header">
-        <!-- 替换下面 src 链接为你的头像地址 -->
-        <img src="https://github.com/Happyma-4869/Happyma-4869.github.io/blob/main/%E5%BE%AE%E4%BF%A1%E5%9B%BE%E7%89%87_20251207233412_9_79.jpg?raw=true"头像">
-        <h1>欢迎来到 Happy 的个人主页</h1>
-        <p>这里记录我的日常和点滴 😊</p>
-        <a class="button" href="#contact">联系我</a>
+
+<header>
+    <!-- 头像 -->
+    <img src="https://github.com/Happyma-4869/Happyma-4869.github.io/blob/main/%E5%BE%AE%E4%BF%A1%E5%9B%BE%E7%89%87_20251207233412_9_79.jpg?raw=true" alt="头像">
+    <h1>欢迎来到 Happy 的主页</h1>
+    <p>记录我的日常和点滴 😊</p>
+    <nav>
+        <a href="#about">关于我</a>
+        <a href="#diary">日记</a>
+        <a href="#contact">联系我</a>
+    </nav>
+</header>
+
+<section id="about">
+    <h2>关于我</h2>
+    <div class="cards">
+        <div class="card">
+            <img src="https://github.com/Happyma-4869/Happyma-4869.github.io/blob/main/%E5%BE%AE%E4%BF%A1%E5%9B%BE%E7%89%87_20251207233412_9_79.jpg?raw=true" alt="头像">
+            <p>Hi，我是 Happy，一名热爱生活的大学生，喜欢记录生活点滴和尝试新鲜事物。</p>
+        </div>
     </div>
+</section>
 
-    <div class="content" id="contact">
-        <div class="contact">
-            <h2>联系我</h2>
-            <p>微信：<strong>H4ppy_ma</strong></p>
-            <p>QQ：<strong>1348790438</strong></p>
+<section id="diary">
+    <h2>我的日记</h2>
+    <div class="cards">
+        <div class="card">
+            <p>2025-12-07: 今天学习了网页设计，搭建了个人主页！</p>
+        </div>
+        <div class="card">
+        </div>
+    </div>
+</section>
 
-            <div class="qr">
-                <div>
-                    <p>微信扫码</p>
-                    <!-- 替换为你的微信二维码图片地址 -->
-                    <img src="https://github.com/Happyma-4869/Happyma-4869.github.io/blob/main/%E5%BE%AE%E4%BF%A1%E5%9B%BE%E7%89%87_20251207233522_10_79.jpg?raw=true"微信二维码">
-                </div>
-                <div>
-                    <p>QQ扫码</p>
-                    <!-- 替换为你的 QQ 二维码图片地址 -->
-                    <img src="https://github.com/Happyma-4869/Happyma-4869.github.io/blob/main/%E5%BE%AE%E4%BF%A1%E5%9B%BE%E7%89%87_20251207233554_11_79.jpg?raw=true" alt="QQ二维码">
-                </div>
+<section id="contact">
+    <h2>联系我</h2>
+    <p>微信：<strong>H4ppy_ma</strong></p>
+    <div class="contact">
+        <div class="qr">
+            <div>
+                <p>微信扫码</p>
+                <img src="https://github.com/Happyma-4869/Happyma-4869.github.io/blob/main/%E5%BE%AE%E4%BF%A1%E5%9B%BE%E7%89%87_20251207233522_10_79.jpg?raw=true" alt="微信二维码">
             </div>
         </div>
     </div>
+</section>
 
-    <div class="footer">
-        &copy; 2025 Happyma.top
-    </div>
+<footer>
+    &copy; 2025 Happyma.top
+</footer>
+
 </body>
 </html>
