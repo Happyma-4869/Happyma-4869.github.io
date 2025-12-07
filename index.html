@@ -21,22 +21,13 @@ body {
     color: #333;
     scroll-behavior: smooth;
     overflow-x: hidden;
-    transition: background 0.5s, color 0.5s;
+    transition: background 0.5s;
 }
 
 /* 夜间模式 */
 body.dark {
     background: linear-gradient(-45deg, #1a1a1a, #2b2b2b, #3c3c3c, #444);
     color: #eee;
-}
-
-/* 夜间模式卡片 & 日记文字 */
-body.dark .card {
-    background: rgba(50,50,50,0.9);
-    color: #eee;
-}
-body.dark .card .tag {
-    background: linear-gradient(45deg,#ff9800,#ff5722);
 }
 
 /* 粒子背景 */
@@ -77,7 +68,7 @@ nav {
     top: 0;
     z-index: 5;
     border-radius: 10px;
-    transition: background 0.3s, box-shadow 0.3s;
+    transition: background 0.3s, box-shadow 0.3s; /* 3️⃣动态样式 */
 }
 nav.scrolled {
     background: rgba(0,0,0,0.7);
@@ -90,7 +81,7 @@ nav a {
     font-weight: bold;
     transition: 0.3s;
 }
-nav a.active { color: #ffeb3b; }
+nav a.active { color: #ffeb3b; } /* 1️⃣1️⃣高亮导航 */
 nav a:hover { color: #ffeb3b; }
 
 /* 日间/夜间切换按钮 */
@@ -107,24 +98,6 @@ nav a:hover { color: #ffeb3b; }
     transition: background 0.3s;
 }
 #modeToggle:hover { background: linear-gradient(45deg,#1976d2,#1aa8c7); }
-
-/* 返回顶部按钮 */
-#toTopBtn {
-    position: fixed;
-    bottom: 30px;
-    right: 30px;
-    background: linear-gradient(45deg,#4caf50,#81c784);
-    color: white;
-    border: none;
-    padding: 12px 18px;
-    border-radius: 50px;
-    cursor: pointer;
-    font-size: 16px;
-    z-index: 10;
-    display: none;
-    transition: 0.3s;
-}
-#toTopBtn:hover { background: linear-gradient(45deg,#388e3c,#66bb6a); }
 
 /* 分区 */
 section {
@@ -147,7 +120,7 @@ section h2 {
     width: 320px;
     margin: 0 auto 40px;
     box-shadow: 0 6px 20px rgba(0,0,0,0.1);
-    transition: transform 0.3s ease, box-shadow 0.3s ease, opacity 0.8s ease;
+    transition: transform 0.3s ease, box-shadow 0.3s ease, opacity 0.8s ease, transform 0.8s ease;
     opacity: 0; 
     transform: translateY(30px) scale(0.95);
 }
@@ -156,7 +129,7 @@ section h2 {
     transform: translateY(0) scale(1);
 }
 .card:hover {
-    transform: translateY(-10px) scale(1) rotate(1deg);
+    transform: translateY(-10px) scale(1);
     box-shadow: 0 12px 30px rgba(0,0,0,0.2);
 }
 .card img {
@@ -232,16 +205,13 @@ footer { text-align: center; padding: 20px; background: rgba(0,0,0,0.05); color:
     <p>记录我的日常和点滴 😊</p>
     <nav id="mainNav">
         <a href="#about">关于我</a>
-        <a href="#diary">日记</a>
         <a href="#contact">联系我</a>
     </nav>
 </header>
 
+<!-- 日夜切换按钮 9️⃣ -->
 <div id="modeToggle">🌙 日/夜切换</div>
 
-<button id="toTopBtn">⬆️ 顶部</button>
-
-<!-- 关于我 -->
 <section id="about">
     <h2>关于我</h2>
     <div class="card">
@@ -255,16 +225,6 @@ footer { text-align: center; padding: 20px; background: rgba(0,0,0,0.05); color:
     </div>
 </section>
 
-<!-- 日记区 -->
-<section id="diary">
-    <h2>我的日记 📖</h2>
-    <div class="card">
-        <p><strong>2025年12月8日</strong></p>
-        <p>今天是我初次创建我的个人网站，目前还在测试中，以后我会逐步完善。耶✌</p>
-    </div>
-</section>
-
-<!-- 联系我 -->
 <section id="contact">
     <h2>联系我</h2>
     <p>微信：<strong>H4ppy_ma</strong></p>
@@ -284,59 +244,27 @@ footer { text-align: center; padding: 20px; background: rgba(0,0,0,0.05); color:
 </div>
 
 <script>
-// 滚动显示 + 卡片漂浮旋转
+// 滚动显示动画
 function showOnScroll() {
     const cards = document.querySelectorAll('.card');
     cards.forEach(card => {
         const rect = card.getBoundingClientRect();
-        if (rect.top < window.innerHeight - 50) {
-            card.classList.add('show');
-            card.style.transform = `translateY(${Math.sin(window.scrollY/50)*5}px) scale(1) rotate(${Math.sin(window.scrollY/50)}deg)`;
-        }
+        if (rect.top < window.innerHeight - 50) card.classList.add('show');
     });
 }
 window.addEventListener('scroll', showOnScroll);
 window.addEventListener('load', showOnScroll);
 
-// 粒子效果 + 鼠标微动
+// 粒子效果
 const canvas = document.getElementById('particles');
 const ctx = canvas.getContext('2d');
 let particlesArray = [];
-let mouse = {x:null, y:null};
 canvas.width = window.innerWidth;
 canvas.height = window.innerHeight;
 window.addEventListener('resize', () => { canvas.width = window.innerWidth; canvas.height = window.innerHeight; initParticles(); });
-window.addEventListener('mousemove', e => { mouse.x = e.x; mouse.y = e.y; });
-
-class Particle {
-    constructor(){
-        this.x=Math.random()*canvas.width;
-        this.y=Math.random()*canvas.height;
-        this.size=Math.random()*3+1;
-        this.speedX=Math.random()*1-0.5;
-        this.speedY=Math.random()*1-0.5;
-    }
-    update(){
-        this.x += this.speedX + (mouse.x? (mouse.x - this.x)*0.0005:0);
-        this.y += this.speedY + (mouse.y? (mouse.y - this.y)*0.0005:0);
-        if(this.x>canvas.width)this.x=0;
-        if(this.x<0)this.x=canvas.width;
-        if(this.y>canvas.height)this.y=0;
-        if(this.y<0)this.y=canvas.height;
-    }
-    draw(){
-        ctx.fillStyle='rgba(255,255,255,0.7)';
-        ctx.beginPath();
-        ctx.arc(this.x,this.y,this.size,0,Math.PI*2);
-        ctx.fill();
-    }
-}
+class Particle { constructor(){ this.x=Math.random()*canvas.width; this.y=Math.random()*canvas.height; this.size=Math.random()*3+1; this.speedX=Math.random()*1-0.5; this.speedY=Math.random()*1-0.5; } update(){ this.x+=this.speedX; this.y+=this.speedY; if(this.x>canvas.width)this.x=0; if(this.x<0)this.x=canvas.width; if(this.y>canvas.height)this.y=0; if(this.y<0)this.y=canvas.height; } draw(){ ctx.fillStyle='rgba(255,255,255,0.7)'; ctx.beginPath(); ctx.arc(this.x,this.y,this.size,0,Math.PI*2); ctx.fill(); } }
 function initParticles(){ particlesArray=[]; for(let i=0;i<100;i++){ particlesArray.push(new Particle()); } }
-function animateParticles(){ 
-    ctx.clearRect(0,0,canvas.width,canvas.height); 
-    particlesArray.forEach(p=>{p.update();p.draw();}); 
-    requestAnimationFrame(animateParticles); 
-}
+function animateParticles(){ ctx.clearRect(0,0,canvas.width,canvas.height); particlesArray.forEach(p=>{p.update();p.draw();}); requestAnimationFrame(animateParticles); }
 initParticles();
 animateParticles();
 
@@ -363,16 +291,6 @@ window.addEventListener('scroll', () => {
             link.classList.add('active');
         }else{ link.classList.remove('active'); }
     });
-
-    // 返回顶部按钮显示
-    const toTopBtn = document.getElementById('toTopBtn');
-    if(window.scrollY > 200) toTopBtn.style.display = 'block';
-    else toTopBtn.style.display = 'none';
-});
-
-// 返回顶部按钮点击事件
-document.getElementById('toTopBtn').addEventListener('click', () => {
-    window.scrollTo({top:0, behavior:'smooth'});
 });
 </script>
 </body>
