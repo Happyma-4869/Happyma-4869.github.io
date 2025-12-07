@@ -68,7 +68,7 @@ nav {
     top: 0;
     z-index: 5;
     border-radius: 10px;
-    transition: background 0.3s, box-shadow 0.3s; /* 3️⃣动态样式 */
+    transition: background 0.3s, box-shadow 0.3s;
 }
 nav.scrolled {
     background: rgba(0,0,0,0.7);
@@ -81,7 +81,7 @@ nav a {
     font-weight: bold;
     transition: 0.3s;
 }
-nav a.active { color: #ffeb3b; } /* 1️⃣1️⃣高亮导航 */
+nav a.active { color: #ffeb3b; }
 nav a:hover { color: #ffeb3b; }
 
 /* 日间/夜间切换按钮 */
@@ -120,7 +120,7 @@ section h2 {
     width: 320px;
     margin: 0 auto 40px;
     box-shadow: 0 6px 20px rgba(0,0,0,0.1);
-    transition: transform 0.3s ease, box-shadow 0.3s ease, opacity 0.8s ease, transform 0.8s ease;
+    transition: transform 0.3s ease, box-shadow 0.3s ease, opacity 0.8s ease;
     opacity: 0; 
     transform: translateY(30px) scale(0.95);
 }
@@ -129,7 +129,7 @@ section h2 {
     transform: translateY(0) scale(1);
 }
 .card:hover {
-    transform: translateY(-10px) scale(1);
+    transform: translateY(-10px) scale(1) rotate(1deg);
     box-shadow: 0 12px 30px rgba(0,0,0,0.2);
 }
 .card img {
@@ -209,7 +209,6 @@ footer { text-align: center; padding: 20px; background: rgba(0,0,0,0.05); color:
     </nav>
 </header>
 
-<!-- 日夜切换按钮 9️⃣ -->
 <div id="modeToggle">🌙 日/夜切换</div>
 
 <section id="about">
@@ -244,12 +243,16 @@ footer { text-align: center; padding: 20px; background: rgba(0,0,0,0.05); color:
 </div>
 
 <script>
-// 滚动显示动画
+// 滚动显示动画 + 卡片轻微漂浮/旋转
 function showOnScroll() {
     const cards = document.querySelectorAll('.card');
     cards.forEach(card => {
         const rect = card.getBoundingClientRect();
-        if (rect.top < window.innerHeight - 50) card.classList.add('show');
+        if (rect.top < window.innerHeight - 50) {
+            card.classList.add('show');
+            // 漂浮小动画
+            card.style.transform += ` rotate(${(window.scrollY % 2 - 1) * 1}deg) translateY(${Math.sin(window.scrollY/50)*5}px)`;
+        }
     });
 }
 window.addEventListener('scroll', showOnScroll);
