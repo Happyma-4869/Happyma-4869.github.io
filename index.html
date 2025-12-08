@@ -1,4 +1,198 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<title>Happy 的个人主页</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
+<style>
+/* 基本设置 */
+body, html {margin:0; padding:0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", sans-serif; overflow-x:hidden; color:#333; transition: color 0.5s;}
+body.dark { color:#eee; }
+#bgVideo {position:fixed; top:0; left:0; width:100%; height:100%; object-fit:cover; z-index:0; transition: filter 0.5s;}
+body.dark #bgVideo { filter: brightness(40%) contrast(110%); }
+
+/* 粒子 */
+#particles {position:fixed; top:0; left:0; width:100%; height:100%; pointer-events:none; z-index:0;}
+
+/* 卡片苹果风格 */
+.card {
+    background: rgba(255, 255, 255, 0.6);
+    backdrop-filter: blur(20px);
+    border-radius: 20px;
+    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.1);
+    padding: 25px 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    transition: transform 0.3s ease, box-shadow 0.3s ease, background 0.5s;
+}
+.card:hover { transform: translateY(-5px); box-shadow: 0 12px 35px rgba(0,0,0,0.15); }
+body.dark .card { background: rgba(40,40,40,0.7); color:#eee; }
+
+.card .tags { margin-top:10px; }
+.card .tag { display:inline-block; background:linear-gradient(45deg,#5ac8fa,#007aff); color:white; padding:5px 10px; margin:3px; border-radius:15px; font-size:12px; transition:0.2s; }
+.card .tag:hover { transform:scale(1.1); }
+
+/* 头部 */
+header { text-align:center; padding:60px 20px 20px; position:relative; z-index:1;}
+header img { width:140px; height:140px; border-radius:50%; border:4px solid rgba(255,255,255,0.8); margin-bottom:20px; transition:transform 0.3s;}
+header img:hover {transform:scale(1.1);}
+header h1, header p { color: inherit; margin:0;}
+header h1{margin:10px 0; font-size:36px;}
+header p{font-size:18px; margin:5px 0;}
+
+/* 导航 */
+nav { margin-top:20px; background:rgba(255,255,255,0.2); padding:10px 0; position:sticky; top:0; z-index:5; border-radius:10px; transition:0.3s; }
+nav.scrolled { background:rgba(0,0,0,0.5); box-shadow:0 4px 10px rgba(0,0,0,0.3);}
+nav a { margin:0 15px; text-decoration:none; font-weight:bold; transition:0.3s;}
+nav a.active { color:#ffeb3b;}
+nav a:hover { color:#ffeb3b; }
+
+/* 日夜切换 */
+#modeToggle { position:fixed; top:20px; right:20px; padding:8px 15px; background:linear-gradient(135deg,#5ac8fa,#007aff); color:white; border-radius:20px; cursor:pointer; z-index:10; transition:0.3s;}
+#modeToggle:hover { background:linear-gradient(135deg,#007aff,#5ac8fa); }
+
+/* 返回顶部按钮 */
+#toTopBtn { position:fixed; bottom:30px; right:30px; background:linear-gradient(135deg,#5ac8fa,#007aff); color:white; border:none; padding:12px 18px; border-radius:50px; cursor:pointer; font-size:16px; z-index:10; display:none; transition:0.3s;}
+#toTopBtn:hover { background:linear-gradient(135deg,#007aff,#5ac8fa); }
+
+/* 联系我 */
+.contact .qr { display:flex; justify-content:center; margin-top:20px; }
+.contact .qr img { width:140px; height:140px; border-radius:15px; border:2px solid #ccc; cursor:pointer; transition:0.3s;}
+.contact .qr img:hover { transform:scale(1.1); }
+
+/* 弹窗 */
+#qrModal { display:none; position:fixed; z-index:10; left:0; top:0; width:100%; height:100%; background:rgba(255,255,255,0.3); backdrop-filter:blur(15px); justify-content:center; align-items:center; border-radius:20px;}
+#qrModal img { max-width:300px; border-radius:20px; border:3px solid #fff;}
+#qrModal.show { display:flex; }
+
+/* 分区 */
+section { padding:60px 20px; text-align:center; position:relative; z-index:1; }
+section h2 { font-size:28px; color:#007aff; margin-bottom:30px; }
+
+textarea, input[type="date"] { width:90%; padding:10px; border-radius:12px; border:none; box-shadow: inset 0 2px 5px rgba(0,0,0,0.1); resize:none; margin:0 auto; display:block; text-align:left; }
+.diary-actions { display:flex; justify-content:center; gap:10px; margin-top:10px; }
+.diary-actions button, #addDiaryBtn { padding:8px 12px; cursor:pointer; border:none; border-radius:15px; background:linear-gradient(135deg,#5ac8fa,#007aff); color:white; font-weight:bold; transition:0.3s;}
+.diary-actions button:hover, #addDiaryBtn:hover { background:linear-gradient(135deg,#007aff,#5ac8fa); }
+
+/* 响应式 */
+@media(max-width:600px){ header img{width:100px;height:100px;} .card{width:90%;} nav a{margin:0 8px; font-size:14px;} }
+</style>
+</head>
+<body>
+
+<video id="bgVideo" autoplay muted loop>
+  <source src="https://github.com/Happyma-4869/Happyma-4869.github.io/blob/main/Video%20Project%204.mp4?raw=true" type="video/mp4">
+</video>
+<canvas id="particles"></canvas>
+
+<header>
+  <img src="https://github.com/Happyma-4869/Happyma-4869.github.io/blob/main/%E5%BE%AE%E4%BF%A1%E5%9B%BE%E7%89%87_20251207233412_9_79.jpg?raw=true" alt="头像">
+  <h1>欢迎来到 Happy 的主页</h1>
+  <p>记录我的日常和点滴 😊</p>
+  <nav id="mainNav">
+      <a href="#about">关于我</a>
+      <a href="#diary">日记</a>
+      <a href="#contact">联系我</a>
+  </nav>
+</header>
+
+<div id="modeToggle">🌙 日/夜切换</div>
+<button id="toTopBtn">⬆️ 顶部</button>
+
+<section id="about">
+  <h2>关于我</h2>
+  <div class="card show">
+    <p>Hi 我是happy  我来自河南郑州市  目前是郑州市西亚斯大一学生  在此我想分享我的生活</p>
+    <div class="tags">
+      <span class="tag">学习</span>
+      <span class="tag">游戏</span>
+      <span class="tag">音乐</span>
+      <span class="tag">编程</span>
+    </div>
+  </div>
+</section>
+
+<section id="diary">
+  <h2>我的日记 📖</h2>
+  <div class="card">
+    <input type="date" id="diaryDate" />
+    <textarea id="diaryContent" placeholder="写下今天的日记..." rows="3"></textarea>
+    <button id="addDiaryBtn">添加日记</button>
+  </div>
+  <div id="diaryList"></div>
+</section>
+
+<section id="contact">
+  <h2>联系我</h2>
+  <p>微信：<strong>H4ppy_ma</strong></p>
+  <div class="contact">
+      <div class="qr">
+          <img id="qrImg" src="https://github.com/Happyma-4869/Happyma-4869.github.io/blob/main/%E5%BE%AE%E4%BF%A1%E5%9B%BE%E7%89%87_20251207233522_10_79.jpg?raw=true" alt="微信二维码">
+      </div>
+  </div>
+</section>
+
+<footer>&copy; 2025 Happyma.top</footer>
+<div id="qrModal"><img src="https://github.com/Happyma-4869/Happyma-4869.github.io/blob/main/%E5%BE%AE%E4%BF%A1%E5%9B%BE%E7%89%87_20251207233522_10_79.jpg?raw=true" alt="微信二维码大图"></div>
+
 <script>
+// ---------------- 日记功能 ----------------
+const diaryList=document.getElementById('diaryList');
+const addDiaryBtn=document.getElementById('addDiaryBtn');
+const diaryDate=document.getElementById('diaryDate');
+const diaryContent=document.getElementById('diaryContent');
+
+let diaries=JSON.parse(localStorage.getItem('diaries'))||[
+  {date:'2025-12-08', content:'今天是我初次创建我的个人网站  目前还在测试中  以后我会逐步完善耶✌'}
+];
+
+function renderDiaries(){
+  diaryList.innerHTML='';
+  diaries.forEach((d,i)=>{
+    const card=document.createElement('div');
+    card.className='card show';
+    card.innerHTML=`<p><strong>${d.date}</strong></p>
+                    <p>${d.content}</p>
+                    <div class="diary-actions">
+                      <button onclick="editDiary(${i})">编辑</button>
+                      <button onclick="deleteDiary(${i})">删除</button>
+                    </div>`;
+    diaryList.appendChild(card);
+  });
+  localStorage.setItem('diaries', JSON.stringify(diaries));
+}
+renderDiaries();
+
+addDiaryBtn.addEventListener('click',()=>{
+  const dateVal=diaryDate.value||new Date().toISOString().split('T')[0];
+  const contentVal=diaryContent.value.trim();
+  if(!contentVal){ alert('请填写内容'); return; }
+  diaries.unshift({date:dateVal, content:contentVal});
+  diaryDate.value=''; diaryContent.value='';
+  renderDiaries();
+});
+
+function deleteDiary(i){ diaries.splice(i,1); renderDiaries(); }
+function editDiary(i){
+  const newContent=prompt('请输入新的日记内容：', diaries[i].content);
+  if(newContent===null) return;
+  diaries[i].content=newContent;
+  renderDiaries();
+}
+
+// ---------------- 日夜模式 ----------------
+const modeToggle=document.getElementById('modeToggle');
+modeToggle.addEventListener('click',()=>{
+    document.body.classList.toggle('dark');
+});
+
+// ---------------- 返回顶部 ----------------
+const toTopBtn=document.getElementById('toTopBtn');
+window.addEventListener('scroll',()=>{ toTopBtn.style.display=(window.scrollY>200)?'block':'none'; });
+toTopBtn.addEventListener('click',()=>{ window.scrollTo({top:0, behavior:'smooth'}); });
+
 // ---------------- 粒子动画 ----------------
 const canvas = document.getElementById('particles');
 const ctx = canvas.getContext('2d');
@@ -23,14 +217,13 @@ class Particle {
         this.x += this.speedX;
         this.y += this.speedY;
 
-        // 如果鼠标在附近，轻微偏移
         if(mouse.x && mouse.y){
             let dx = mouse.x - this.x;
             let dy = mouse.y - this.y;
             let dist = Math.sqrt(dx*dx + dy*dy);
-            if(dist < 100){ // 100px 范围内轻微靠近
-                this.x += dx*0.002;
-                this.y += dy*0.002;
+            if(dist < 100){
+                this.x += dx*0.0015;
+                this.y += dy*0.0015;
             }
         }
 
@@ -49,17 +242,46 @@ class Particle {
 
 function initParticles(){
     particlesArray=[];
-    let count = 80; // 适中密度
-    for(let i=0;i<count;i++){
+    for(let i=0;i<120;i++){
         particlesArray.push(new Particle());
     }
 }
 initParticles();
-
 function animateParticles(){
     ctx.clearRect(0,0,canvas.width,canvas.height);
     particlesArray.forEach(p=>{p.update();p.draw();});
     requestAnimationFrame(animateParticles);
 }
 animateParticles();
+
+// ---------------- 微信二维码弹窗 ----------------
+const qrImg=document.getElementById('qrImg');
+const qrModal=document.getElementById('qrModal');
+qrImg.addEventListener('click',()=>qrModal.classList.add('show'));
+qrModal.addEventListener('click',()=>qrModal.classList.remove('show'));
+
+// ---------------- 卡片滚动动画 ----------------
+function showOnScroll() {
+    const cards = document.querySelectorAll('.card');
+    cards.forEach(card => {
+        const rect = card.getBoundingClientRect();
+        if (rect.top < window.innerHeight - 50) card.classList.add('show');
+    });
+}
+window.addEventListener('scroll', showOnScroll);
+window.addEventListener('load', showOnScroll);
+
+// ---------------- 导航高亮 ----------------
+const mainNav = document.getElementById('mainNav');
+const navLinks = mainNav.querySelectorAll('a');
+window.addEventListener('scroll', () => {
+    navLinks.forEach(link => {
+        const section = document.querySelector(link.getAttribute('href'));
+        if(section.offsetTop - 70 <= window.scrollY && section.offsetTop + section.offsetHeight > window.scrollY){
+            link.classList.add('active');
+        } else { link.classList.remove('active'); }
+    });
+});
 </script>
+</body>
+</html>
