@@ -26,11 +26,13 @@ body.dark #bgVideo { filter: brightness(40%) contrast(110%); }
     flex-direction: column;
     gap: 12px;
     transition: transform 0.3s ease, box-shadow 0.3s ease, background 0.5s;
+    width: 320px;
+    margin: 0 auto 40px;
 }
 .card:hover { transform: translateY(-5px); box-shadow: 0 12px 35px rgba(0,0,0,0.15); }
 body.dark .card { background: rgba(40,40,40,0.7); color:#eee; }
 
-.card .tags { margin-top:10px; }
+.card .tags { margin-top:10px; text-align:center; }
 .card .tag { display:inline-block; background:linear-gradient(45deg,#5ac8fa,#007aff); color:white; padding:5px 10px; margin:3px; border-radius:15px; font-size:12px; transition:0.2s; }
 .card .tag:hover { transform:scale(1.1); }
 
@@ -211,7 +213,7 @@ class Particle {
         this.size = Math.random()*2+1.5;
         this.speedX = (Math.random()-0.5)*0.5;
         this.speedY = (Math.random()-0.5)*0.5;
-        this.color = 'rgba(255,255,255,0.7)';
+        this.color = document.body.classList.contains('dark') ? 'rgba(255,255,255,0.9)' : 'rgba(255,255,255,0.3)';
     }
     update(){
         this.x += this.speedX;
@@ -253,6 +255,13 @@ function animateParticles(){
     requestAnimationFrame(animateParticles);
 }
 animateParticles();
+
+// 更新粒子颜色随日夜切换
+modeToggle.addEventListener('click',()=>{
+    particlesArray.forEach(p=>{
+        p.color = document.body.classList.contains('dark') ? 'rgba(255,255,255,0.9)' : 'rgba(255,255,255,0.3)';
+    });
+});
 
 // ---------------- 微信二维码弹窗 ----------------
 const qrImg=document.getElementById('qrImg');
