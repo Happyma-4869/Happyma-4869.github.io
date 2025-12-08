@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <title>Happy 的个人主页</title>
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <style>
 /* ---------------- 基础 ---------------- */
 body, html {
@@ -11,7 +11,7 @@ body, html {
   font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",sans-serif;
   color:#333;
   overflow-x:hidden;
-  transition: color 0.5s, background 0.5s;
+  transition: color 0.5s, background 0.5s, filter 0.3s;
   scroll-behavior: smooth;
 }
 body.dark { color:#eee; }
@@ -21,9 +21,11 @@ body {
   background: url('https://github.com/Happyma-4869/Happyma-4869.github.io/blob/main/preview.jpg?raw=true') no-repeat center center fixed;
   background-size: cover;
   position: relative;
+  filter: brightness(1);
+  transition: filter 0.3s;
 }
 body.dark {
-  background-color: rgba(0,0,0,0.5);
+  background-color: rgba(0,0,50,0.5);
   background-blend-mode: overlay;
 }
 
@@ -45,14 +47,14 @@ body.dark {
   display:flex;
   flex-direction:column;
   gap:12px;
-  transition: transform 0.3s ease, box-shadow 0.3s ease, background 0.5s;
   width:320px;
   margin:0 auto 40px;
   opacity:0;
   transform: translateY(20px);
+  transition: transform 0.6s cubic-bezier(0.5,0,0.1,1), opacity 0.6s, box-shadow 0.4s, background 0.5s;
 }
-.card.show { opacity:1; transform: translateY(0); transition: opacity 0.6s ease, transform 0.6s ease;}
-.card:hover { transform: translateY(-5px); box-shadow: 0 12px 35px rgba(0,0,0,0.15);}
+.card.show { opacity:1; transform: translateY(0); }
+.card:hover { transform: translateY(-5px); box-shadow: 0 16px 40px rgba(0,0,0,0.15); }
 body.dark .card { background: rgba(40,40,40,0.7); color:#eee; box-shadow:0 8px 30px rgba(255,255,255,0.1); }
 
 .card .tags { margin-top:10px; text-align:center; }
@@ -64,14 +66,14 @@ body.dark .card { background: rgba(40,40,40,0.7); color:#eee; box-shadow:0 8px 3
   margin:3px;
   border-radius:15px;
   font-size:12px;
-  transition:0.2s;
+  transition: transform 0.2s, box-shadow 0.3s;
 }
-.card .tag:hover { transform:scale(1.1); }
+.card .tag:hover { transform:scale(1.1); box-shadow:0 4px 12px rgba(0,0,0,0.2); }
 
 /* ---------------- 头部 ---------------- */
 header { text-align:center; padding:60px 20px 20px; position:relative; z-index:1;}
-header img { width:140px; height:140px; border-radius:50%; border:4px solid rgba(255,255,255,0.8); margin-bottom:20px; transition:transform 0.3s;}
-header img:hover {transform:scale(1.1);}
+header img { width:140px; height:140px; border-radius:50%; border:4px solid rgba(255,255,255,0.8); margin-bottom:20px; transition: transform 0.3s, box-shadow 0.3s; }
+header img:hover {transform:scale(1.1); box-shadow:0 8px 20px rgba(0,0,0,0.2);}
 header h1, header p { color: inherit; margin:0;}
 header h1{margin:10px 0; font-size:36px;}
 header p{font-size:18px; margin:5px 0;}
@@ -88,8 +90,8 @@ nav a:hover { color:#ffeb3b; }
 #modeToggle:hover { background:linear-gradient(135deg,#007aff,#5ac8fa); transform: scale(1.05); }
 
 /* ---------------- 返回顶部 ---------------- */
-#toTopBtn { position:fixed; bottom:30px; right:30px; background:linear-gradient(135deg,#5ac8fa,#007aff); color:white; border:none; padding:12px 18px; border-radius:25px; cursor:pointer; font-size:16px; z-index:10; display:none; transition:0.3s, transform 0.2s;}
-#toTopBtn:hover { background:linear-gradient(135deg,#007aff,#5ac8fa); transform:scale(1.05); }
+#toTopBtn { position:fixed; bottom:30px; right:30px; background:linear-gradient(135deg,#5ac8fa,#007aff); color:white; border:none; padding:12px 18px; border-radius:25px; cursor:pointer; font-size:16px; z-index:10; display:none; transition:0.3s, transform 0.2s, box-shadow 0.3s;}
+#toTopBtn:hover { background:linear-gradient(135deg,#007aff,#5ac8fa); transform:scale(1.05); box-shadow:0 8px 20px rgba(0,0,0,0.3); }
 
 /* ---------------- 联系我 ---------------- */
 .contact .qr { display:flex; justify-content:center; margin-top:20px; }
@@ -116,11 +118,28 @@ textarea, input[type="date"] {
 }
 .diary-actions button:hover, #addDiaryBtn:hover { background:linear-gradient(135deg,#007aff,#5ac8fa); transform:scale(1.05); box-shadow:0 8px 20px rgba(0,0,0,0.3); }
 
-/* ---------------- 响应式 ---------------- */
-@media(max-width:600px){
-  header img{width:100px;height:100px;}
-  .card{width:90%;}
-  nav a{margin:0 8px; font-size:14px;}
+/* ---------------- 响应式优化 ---------------- */
+@media (max-width:400px){
+  header img { width:80px; height:80px; }
+  header h1 { font-size:24px; }
+  header p { font-size:14px; }
+  .card { width:90%; padding:20px; margin-bottom:30px; }
+  nav a { margin:0 5px; font-size:12px; }
+  #modeToggle, #toTopBtn { padding:6px 12px; font-size:14px; }
+}
+@media (min-width:401px) and (max-width:768px){
+  header img { width:100px; height:100px; }
+  header h1 { font-size:28px; }
+  header p { font-size:16px; }
+  .card { width:80%; padding:22px; margin-bottom:35px; }
+  nav a { margin:0 10px; font-size:14px; }
+}
+@media (min-width:769px){
+  header img { width:140px; height:140px; }
+  header h1 { font-size:36px; }
+  header p { font-size:18px; }
+  .card { width:320px; padding:25px; margin-bottom:40px; }
+  nav a { margin:0 15px; font-size:16px; }
 }
 </style>
 </head>
@@ -243,7 +262,6 @@ window.addEventListener('mousemove', e=>{ mouse.x=e.x; mouse.y=e.y; });
 function resizeCanvas(){ canvas.width=window.innerWidth; canvas.height=window.innerHeight; }
 window.addEventListener('resize', resizeCanvas);
 resizeCanvas();
-
 class Particle{
   constructor(){
     this.originX=Math.random()*canvas.width;
@@ -272,7 +290,6 @@ class Particle{
     ctx.fill();
   }
 }
-
 function initParticles(){
   particlesArray=[];
   let count=document.body.classList.contains('dark')?150:80;
@@ -292,13 +309,23 @@ const qrModal=document.getElementById('qrModal');
 qrImg.addEventListener('click',()=>qrModal.classList.add('show'));
 qrModal.addEventListener('click',()=>qrModal.classList.remove('show'));
 
-// ---------------- 卡片滚动动画 ----------------
+// ---------------- 卡片滚动动画 + 光晕 & 背景亮度 ----------------
 function showOnScroll() {
     const cards = document.querySelectorAll('.card');
+    const windowBottom = window.innerHeight;
     cards.forEach(card => {
         const rect = card.getBoundingClientRect();
-        if (rect.top < window.innerHeight - 50) card.classList.add('show');
+        if (rect.top < windowBottom - 50) {
+            card.classList.add('show');
+            // 光晕动画
+            card.style.boxShadow = '0 16px 40px rgba(0,0,0,0.15), 0 0 20px rgba(0,122,255,0.2)';
+        } else {
+            card.style.boxShadow = '';
+        }
     });
+    // 背景亮度随滚动微调
+    let scrollPercent = Math.min(window.scrollY / (document.body.scrollHeight - window.innerHeight), 1);
+    document.body.style.filter = `brightness(${1 - 0.15*scrollPercent})`;
 }
 window.addEventListener('scroll', showOnScroll);
 window.addEventListener('load', showOnScroll);
