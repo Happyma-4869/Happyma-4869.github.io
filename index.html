@@ -2,334 +2,294 @@
 <html lang="zh-CN">
 <head>
 <meta charset="UTF-8">
-<title>Happy 的个人主页 & Merry Christmas 3D Tree</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Happy 的个人主页</title>
 <style>
-body, html { margin:0; padding:0; font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",sans-serif; color:#333; overflow-x:hidden; transition: color 0.5s; }
-body.dark { color:#eee; }
+  /* 全局样式 */
+  body, html {
+    margin: 0;
+    padding: 0;
+    font-family: -apple-system, BlinkMacSystemFont, "San Francisco", "Helvetica Neue", Helvetica, Arial, sans-serif;
+    scroll-behavior: smooth;
+    transition: background-color 0.5s, color 0.5s;
+    overflow-x: hidden;
+    background: #f0f0f0;
+    color: #111;
+  }
+  /* 视频背景 */
+  #bg-video {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    z-index: -2;
+    transition: filter 0.5s, transform 1s;
+  }
+  body.dark #bg-video {
+    filter: brightness(0.5) saturate(0.7);
+  }
+  /* 背景覆盖层 */
+  #overlay {
+    position: fixed;
+    top:0;
+    left:0;
+    width:100%;
+    height:100%;
+    background: rgba(255,255,255,0.1);
+    z-index:-1;
+    transition: background 0.5s;
+  }
+  body.dark #overlay {
+    background: rgba(0,0,0,0.3);
+  }
+  /* 顶部固定开关 */
+  #mode-toggle {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    background: rgba(255,255,255,0.25);
+    backdrop-filter: blur(15px);
+    border-radius: 25px;
+    border: none;
+    padding: 10px 25px;
+    cursor: pointer;
+    font-weight: bold;
+    color: #111;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    transition: all 0.3s;
+    z-index: 10;
+  }
+  #mode-toggle:hover {
+    transform: scale(1.05);
+    box-shadow: 0 6px 18px rgba(0,0,0,0.25);
+  }
 
-/* 背景视频 */
-#bgVideo { position:fixed; top:0; left:0; width:100%; height:100%; object-fit:cover; z-index:0; transition: filter 0.5s; }
-body.dark #bgVideo { filter: brightness(40%) contrast(110%); }
+  /* 中心容器 */
+  .container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+    padding: 20px;
+    text-align: center;
+  }
 
-/* 粒子画布 */
-#particles { position:fixed; top:0; left:0; width:100%; height:100%; pointer-events:none; z-index:0; }
+  /* 玻璃感卡片 */
+  .card {
+    background: rgba(255,255,255,0.15);
+    backdrop-filter: blur(20px);
+    border-radius: 25px;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.15);
+    padding: 30px;
+    margin: 20px 0;
+    max-width: 450px;
+    width: 90%;
+    color: #111;
+    transition: transform 0.3s, box-shadow 0.3s;
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  .card:hover {
+    transform: translateY(-8px) scale(1.02);
+    box-shadow: 0 16px 48px rgba(0,0,0,0.25);
+  }
+  .card.show {
+    opacity: 1;
+    transform: translateY(0);
+    transition: all 0.8s ease;
+  }
 
-/* 苹果风格卡片 */
-.card { background: rgba(255,255,255,0.6); backdrop-filter: blur(20px); border-radius: 25px; box-shadow: 0 8px 30px rgba(0,0,0,0.1); padding:25px 20px; display:flex; flex-direction:column; gap:12px; transition: transform 0.3s ease, box-shadow 0.3s ease, background 0.5s; width:320px; margin:0 auto 40px; }
-.card:hover { transform: translateY(-5px); box-shadow: 0 12px 35px rgba(0,0,0,0.15);}
-body.dark .card { background: rgba(40,40,40,0.7); color:#eee; }
-.card .tags { margin-top:10px; text-align:center; }
-.card .tag { display:inline-block; background:linear-gradient(45deg,#5ac8fa,#007aff); color:white; padding:5px 10px; margin:3px; border-radius:15px; font-size:12px; transition:0.2s; }
-.card .tag:hover { transform:scale(1.1); }
+  /* 夜间模式卡片 */
+  body.dark .card {
+    background: rgba(20,20,30,0.35);
+    color: #fff;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.3);
+  }
 
-/* 头部 */
-header { text-align:center; padding:60px 20px 20px; position:relative; z-index:1;}
-header img { width:140px; height:140px; border-radius:50%; border:4px solid rgba(255,255,255,0.8); margin-bottom:20px; transition:transform 0.3s;}
-header img:hover {transform:scale(1.1);}
-header h1, header p { color: inherit; margin:0;}
-header h1{margin:10px 0; font-size:36px;}
-header p{font-size:18px; margin:5px 0;}
+  /* 头像 */
+  .avatar {
+    width: 130px;
+    height: 130px;
+    border-radius: 50%;
+    border: 2px solid rgba(255,255,255,0.5);
+    margin-bottom: 20px;
+    transition: transform 0.3s;
+  }
+  .avatar:hover {
+    transform: scale(1.05);
+  }
 
-/* 导航 */
-nav { margin-top:20px; background:rgba(255,255,255,0.2); padding:10px 0; position:sticky; top:0; z-index:5; border-radius:20px; transition:0.3s;}
-nav.scrolled { background:rgba(0,0,0,0.5); box-shadow:0 4px 10px rgba(0,0,0,0.3);}
-nav a { margin:0 15px; text-decoration:none; font-weight:bold; transition:0.3s;}
-nav a.active { color:#ffeb3b;}
-nav a:hover { color:#ffeb3b; }
+  /* 按钮 */
+  .btn {
+    display: inline-block;
+    padding: 12px 25px;
+    border-radius: 20px;
+    border: none;
+    background: rgba(255,255,255,0.25);
+    backdrop-filter: blur(15px);
+    color: #111;
+    cursor: pointer;
+    margin-top: 10px;
+    font-weight: bold;
+    transition: transform 0.2s, box-shadow 0.2s;
+  }
+  .btn:hover {
+    transform: scale(1.05);
+    box-shadow: 0 8px 24px rgba(0,0,0,0.3);
+  }
+  body.dark .btn {
+    color: #fff;
+    background: rgba(255,255,255,0.15);
+  }
 
-/* 日夜切换按钮 */
-#modeToggle { position:fixed; top:20px; right:20px; padding:8px 15px; background:linear-gradient(135deg,#5ac8fa,#007aff); color:white; border-radius:25px; cursor:pointer; z-index:10; transition:0.3s;}
-#modeToggle:hover { background:linear-gradient(135deg,#007aff,#5ac8fa); }
+  /* 二维码弹出 */
+  #qr-modal {
+    position: fixed;
+    top:0;
+    left:0;
+    width:100%;
+    height:100%;
+    background: rgba(0,0,0,0.7);
+    display: none;
+    justify-content: center;
+    align-items: center;
+    z-index: 20;
+    backdrop-filter: blur(5px);
+    opacity: 0;
+    transition: opacity 0.3s;
+  }
+  #qr-modal.show {
+    display: flex;
+    opacity: 1;
+  }
+  #qr-modal img {
+    width: 260px;
+    border-radius: 25px;
+    box-shadow: 0 12px 40px rgba(0,0,0,0.5);
+    transform: scale(0.8);
+    transition: transform 0.3s;
+  }
+  #qr-modal.show img {
+    transform: scale(1);
+  }
 
-/* 返回顶部 */
-#toTopBtn { position:fixed; bottom:30px; right:30px; background:linear-gradient(135deg,#5ac8fa,#007aff); color:white; border:none; padding:12px 18px; border-radius:25px; cursor:pointer; font-size:16px; z-index:10; display:none; transition:0.3s;}
-#toTopBtn:hover { background:linear-gradient(135deg,#007aff,#5ac8fa); }
+  /* 返回顶部按钮 */
+  #backTop {
+    position: fixed;
+    bottom: 40px;
+    right: 40px;
+    background: rgba(255,255,255,0.25);
+    backdrop-filter: blur(15px);
+    border-radius: 50%;
+    width: 55px;
+    height: 55px;
+    border: none;
+    color: #111;
+    font-size: 26px;
+    cursor: pointer;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    z-index: 10;
+    transition: transform 0.3s, box-shadow 0.3s, opacity 0.3s;
+  }
+  #backTop:hover {
+    transform: scale(1.15);
+    box-shadow: 0 12px 36px rgba(0,0,0,0.3);
+  }
+  body.dark #backTop {
+    color: #fff;
+    background: rgba(255,255,255,0.15);
+  }
 
-/* 联系我 */
-.contact .qr { display:flex; justify-content:center; margin-top:20px; }
-.contact .qr img { width:140px; height:140px; border-radius:25px; border:2px solid #ccc; cursor:pointer; transition:0.3s;}
-.contact .qr img:hover { transform:scale(1.1); }
+  /* 夜间模式文本颜色 */
+  body.dark {
+    color: #fff;
+  }
 
-/* 弹窗 */
-#qrModal { display:none; position:fixed; z-index:10; left:0; top:0; width:100%; height:100%; background:rgba(255,255,255,0.3); backdrop-filter:blur(15px); justify-content:center; align-items:center; border-radius:25px;}
-#qrModal img { max-width:300px; border-radius:25px; border:3px solid #fff;}
-#qrModal.show { display:flex; }
-
-/* 分区 */
-section { padding:60px 20px; text-align:center; position:relative; z-index:1; }
-section h2 { font-size:28px; color:#007aff; margin-bottom:30px; }
-
-/* 响应式 */
-@media(max-width:600px){
-  header img{width:100px;height:100px;}
-  .card{width:90%;}
-  nav a{margin:0 8px; font-size:14px;}
-}
-
-/* 3D 圣诞树 */
-#tree3DContainer { position:fixed; top:0; right:0; width:40%; height:100%; z-index:1; pointer-events:auto; }
-#treeTitle { position:absolute; top:20px; width:100%; text-align:center; color:#FFD700; font-size:48px; font-weight:bold; text-shadow:0 0 10px #FFD700; z-index:10; }
+  /* 响应式 */
+  @media(max-width: 600px){
+    .card { padding: 20px; }
+    .avatar { width: 100px; height: 100px; }
+    #mode-toggle { padding: 8px 18px; font-size: 14px; }
+    #backTop { width: 45px; height: 45px; font-size: 22px; }
+  }
 </style>
 </head>
 <body>
 
-<video id="bgVideo" autoplay muted loop>
-  <source src="https://github.com/Happyma-4869/Happyma-4869.github.io/blob/main/Video%20Project%204.mp4?raw=true" type="video/mp4">
+<!-- 视频背景 -->
+<video id="bg-video" autoplay muted loop>
+  <source src="https://github.com/Happyma-4869/Happyma-4869.github.io/raw/refs/heads/main/Video%20Project%204.mp4" type="video/mp4">
 </video>
-<canvas id="particles"></canvas>
+<div id="overlay"></div>
 
-<header>
-  <img src="https://github.com/Happyma-4869/Happyma-4869.github.io/blob/main/%E5%BE%AE%E4%BF%A1%E5%9B%BE%E7%89%87_20251207233412_9_79.jpg?raw=true" alt="头像">
-  <h1>欢迎来到 Happy 的主页</h1>
-  <p>记录我的日常和点滴 😊</p>
-  <nav id="mainNav">
-      <a href="#about">关于我</a>
-      <a href="#diary">日记</a>
-      <a href="#contact">联系我</a>
-  </nav>
-</header>
+<!-- 日夜切换按钮 -->
+<button id="mode-toggle">🌙 夜间模式</button>
 
-<div id="modeToggle">🌙 日/夜切换</div>
-<button id="toTopBtn">⬆️ 顶部</button>
-
-<!-- 3D 树容器 -->
-<div id="tree3DContainer">
-  <div id="treeTitle">MERRY CHRISTMAS</div>
-</div>
-<audio id="bgMusic" src="https://www.bensound.com/bensound-music/bensound-snow.mp3" loop autoplay></audio>
-
-<section id="about">
-  <h2>关于我</h2>
-  <div class="card show">
-    <p>Hi 我是happy  我来自河南郑州市  目前是郑州市西亚斯大一学生  在此我想分享我的生活</p>
-    <div class="tags">
-      <span class="tag">学习</span>
-      <span class="tag">游戏</span>
-      <span class="tag">音乐</span>
-      <span class="tag">编程</span>
-    </div>
-  </div>
-</section>
-
-<section id="diary">
-  <h2>我的日记 📖</h2>
+<div class="container">
   <div class="card">
-    <input type="date" id="diaryDate" />
-    <textarea id="diaryContent" placeholder="写下今天的日记..." rows="3"></textarea>
-    <button id="addDiaryBtn">添加日记</button>
+    <img class="avatar" src="https://github.com/Happyma-4869/Happyma-4869.github.io/blob/main/%E5%BE%AE%E4%BF%A1%E5%9B%BE%E7%89%87_20251207233412_9_79.jpg?raw=true" alt="头像">
+    <h1>Hi，我是 Happy</h1>
+    <p>我来自河南郑州市，目前是郑州市西亚斯大一学生。在此我想分享我的生活。</p>
   </div>
-  <div id="diaryList"></div>
-</section>
 
-<section id="contact">
-  <h2>联系我</h2>
-  <p>微信：<strong>H4ppy_ma</strong></p>
-  <div class="contact">
-      <div class="qr">
-          <img id="qrImg" src="https://github.com/Happyma-4869/Happyma-4869.github.io/blob/main/%E5%BE%AE%E4%BF%A1%E5%9B%BE%E7%89%87_20251207233522_10_79.jpg?raw=true" alt="微信二维码">
-      </div>
+  <div class="card">
+    <h2>联系方式</h2>
+    <button class="btn" id="showQR">显示微信二维码</button>
+    <p>QQ邮箱：1348790438@qq.com</p>
+    <p>GitHub：<a href="https://github.com/Happyma-4869" style="color:#fff;">Happyma-4869</a></p>
   </div>
-</section>
+</div>
 
-<footer>&copy; 2025 Happyma.top</footer>
-<div id="qrModal"><img src="https://github.com/Happyma-4869/Happyma-4869.github.io/blob/main/%E5%BE%AE%E4%BF%A1%E5%9B%BE%E7%89%87_20251207233522_10_79.jpg?raw=true" alt="微信二维码大图"></div>
+<!-- 二维码弹出 -->
+<div id="qr-modal">
+  <img src="https://github.com/Happyma-4869/Happyma-4869.github.io/blob/main/%E5%BE%AE%E4%BF%A1%E5%9B%BE%E7%89%87_20251207233522_10_79.jpg?raw=true" alt="微信二维码">
+</div>
 
-<!-- Three.js -->
-<script src="https://cdn.jsdelivr.net/npm/three@0.158.0/build/three.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/three@0.158.0/examples/js/controls/OrbitControls.js"></script>
+<!-- 返回顶部按钮 -->
+<button id="backTop">↑</button>
+
 <script>
-// ---------------- 日记 ----------------
-const diaryList=document.getElementById('diaryList');
-const addDiaryBtn=document.getElementById('addDiaryBtn');
-const diaryDate=document.getElementById('diaryDate');
-const diaryContent=document.getElementById('diaryContent');
-let diaries=JSON.parse(localStorage.getItem('diaries'))||[{date:'2025-12-08', content:'今天是我初次创建我的个人网站  目前还在测试中  以后我会逐步完善耶✌'}];
-function renderDiaries(){
-  diaryList.innerHTML='';
-  diaries.forEach((d,i)=>{
-    const card=document.createElement('div');
-    card.className='card show';
-    card.innerHTML=`<p><strong>${d.date}</strong></p>
-                    <p>${d.content}</p>
-                    <div class="diary-actions">
-                      <button onclick="editDiary(${i})">编辑</button>
-                      <button onclick="deleteDiary(${i})">删除</button>
-                    </div>`;
-    diaryList.appendChild(card);
-  });
-  localStorage.setItem('diaries', JSON.stringify(diaries));
-}
-renderDiaries();
-addDiaryBtn.addEventListener('click',()=>{
-  const dateVal=diaryDate.value||new Date().toISOString().split('T')[0];
-  const contentVal=diaryContent.value.trim();
-  if(!contentVal){ alert('请填写内容'); return; }
-  diaries.unshift({date:dateVal, content:contentVal});
-  diaryDate.value=''; diaryContent.value='';
-  renderDiaries();
-});
-function deleteDiary(i){ diaries.splice(i,1); renderDiaries(); }
-function editDiary(i){
-  const newContent=prompt('请输入新的日记内容：', diaries[i].content);
-  if(newContent===null) return;
-  diaries[i].content=newContent;
-  renderDiaries();
-}
-
-// ---------------- 日夜模式 ----------------
-const modeToggle=document.getElementById('modeToggle');
-modeToggle.addEventListener('click',()=>{
+  // 日夜模式切换
+  const modeToggle = document.getElementById('mode-toggle');
+  modeToggle.addEventListener('click', ()=>{
     document.body.classList.toggle('dark');
-    particlesArray.forEach(p=>{
-        p.color=document.body.classList.contains('dark')?'rgba(255,255,255,0.9)':'rgba(255,255,255,0.3)';
-    });
-    initParticles();
-});
-
-// ---------------- 返回顶部 ----------------
-const toTopBtn=document.getElementById('toTopBtn');
-window.addEventListener('scroll',()=>{ toTopBtn.style.display=(window.scrollY>200)?'block':'none'; });
-toTopBtn.addEventListener('click',()=>{ window.scrollTo({top:0, behavior:'smooth'}); });
-
-// ---------------- 粒子动画 ----------------
-const canvas=document.getElementById('particles');
-const ctx=canvas.getContext('2d');
-let particlesArray=[];
-let mouse={x:null,y:null};
-window.addEventListener('mousemove', e=>{ mouse.x=e.x; mouse.y=e.y; });
-function resizeCanvas(){ canvas.width=window.innerWidth; canvas.height=window.innerHeight; }
-window.addEventListener('resize', resizeCanvas);
-resizeCanvas();
-class Particle{
-  constructor(){
-    this.originX=Math.random()*canvas.width;
-    this.originY=Math.random()*canvas.height;
-    this.radius=Math.random()*2+1.5;
-    this.angle=Math.random()*Math.PI*2;
-    this.orbit=Math.random()*20+10;
-    this.speed=(Math.random()*0.01)+0.005;
-    this.color=document.body.classList.contains('dark')?'rgba(255,255,255,0.9)':'rgba(255,255,255,0.3)';
-  }
-  update(){
-    this.angle+=this.speed;
-    this.x=this.originX+Math.cos(this.angle)*this.orbit;
-    this.y=this.originY+Math.sin(this.angle)*this.orbit;
-    let dx=mouse.x-this.x, dy=mouse.y-this.y, dist=Math.sqrt(dx*dx+dy*dy);
-    if(dist<100){ this.x+=dx*0.002; this.y+=dy*0.002; }
-    if(this.x>canvas.width)this.originX=0;
-    if(this.x<0)this.originX=canvas.width;
-    if(this.y>canvas.height)this.originY=0;
-    if(this.y<0)this.originY=canvas.height;
-  }
-  draw(){ ctx.fillStyle=this.color; ctx.beginPath(); ctx.arc(this.x,this.y,this.radius,0,Math.PI*2); ctx.fill(); }
-}
-function initParticles(){ particlesArray=[]; let count=document.body.classList.contains('dark')?150:80; for(let i=0;i<count;i++){ particlesArray.push(new Particle()); } }
-initParticles();
-function animateParticles(){ ctx.clearRect(0,0,canvas.width,canvas.height); particlesArray.forEach(p=>{p.update();p.draw();}); requestAnimationFrame(animateParticles); }
-animateParticles();
-
-// ---------------- 微信二维码弹窗 ----------------
-const qrImg=document.getElementById('qrImg');
-const qrModal=document.getElementById('qrModal');
-qrImg.addEventListener('click',()=>qrModal.classList.add('show'));
-qrModal.addEventListener('click',()=>qrModal.classList.remove('show'));
-
-// ---------------- 卡片滚动动画 ----------------
-function showOnScroll() {
-    const cards = document.querySelectorAll('.card');
-    cards.forEach(card => {
-        const rect = card.getBoundingClientRect();
-        if (rect.top < window.innerHeight - 50) card.classList.add('show');
-    });
-}
-window.addEventListener('scroll', showOnScroll);
-window.addEventListener('load', showOnScroll);
-
-// ---------------- 导航高亮 ----------------
-const mainNav = document.getElementById('mainNav');
-const navLinks = mainNav.querySelectorAll('a');
-window.addEventListener('scroll', () => {
-    navLinks.forEach(link => {
-        const section = document.querySelector(link.getAttribute('href'));
-        if(section.offsetTop - 70 <= window.scrollY && section.offsetTop + section.offsetHeight > window.scrollY){
-            link.classList.add('active');
-        } else { link.classList.remove('active'); }
-    });
-});
-
-// ---------------- 3D 圣诞树 ----------------
-let scene, camera, renderer, controls, treeGroup;
-let sphereMesh, cubeMesh, starMesh;
-let treeInstancedCount = 500;
-let clock = new THREE.Clock();
-
-init3DTree();
-animate3DTree();
-
-function init3DTree(){
-    const container = document.getElementById('tree3DContainer');
-    scene = new THREE.Scene();
-    camera = new THREE.PerspectiveCamera(50, container.clientWidth/container.clientHeight, 0.1, 2000);
-    camera.position.set(0,50,100);
-    renderer = new THREE.WebGLRenderer({antialias:true, alpha:true});
-    renderer.setSize(container.clientWidth, container.clientHeight);
-    container.appendChild(renderer.domElement);
-    controls = new THREE.OrbitControls(camera, renderer.domElement);
-    controls.enableDamping = true;
-
-    // Lights
-    const ambient = new THREE.AmbientLight(0xffffff, 0.4); scene.add(ambient);
-    const directional = new THREE.DirectionalLight(0xffffff, 1); directional.position.set(50,100,50); scene.add(directional);
-
-    // Tree Group
-    treeGroup = new THREE.Group(); scene.add(treeGroup);
-
-    // Materials & Geometry
-    const sphereMaterialGold = new THREE.MeshStandardMaterial({color:0xFFD700, metalness:0.8, roughness:0.2});
-    const cubeMaterialGreen = new THREE.MeshStandardMaterial({color:0x006400, metalness:0.6, roughness:0.4});
-    const sphereGeo = new THREE.SphereGeometry(1.5,16,16);
-    const cubeGeo = new THREE.BoxGeometry(2,2,2);
-
-    sphereMesh = new THREE.InstancedMesh(sphereGeo, sphereMaterialGold, treeInstancedCount);
-    cubeMesh = new THREE.InstancedMesh(cubeGeo, cubeMaterialGreen, treeInstancedCount);
-    treeGroup.add(sphereMesh); treeGroup.add(cubeMesh);
-
-    const dummy = new THREE.Object3D();
-    for(let i=0;i<treeInstancedCount;i++){
-        const layer = Math.floor(Math.random()*15);
-        const radius = 2 + layer*1.5 + Math.random()*1;
-        const angle = Math.random()*Math.PI*2;
-        dummy.position.set(radius*Math.cos(angle), layer*1.5, radius*Math.sin(angle));
-        dummy.rotation.set(Math.random()*Math.PI, Math.random()*Math.PI, Math.random()*Math.PI);
-        dummy.updateMatrix();
-        if(i%2===0){ sphereMesh.setMatrixAt(i,dummy.matrix); if(Math.random()>0.5) sphereMesh.setColorAt(i,new THREE.Color(0xFF0000)); }
-        else{ cubeMesh.setMatrixAt(i,dummy.matrix); if(Math.random()>0.5) cubeMesh.setColorAt(i,new THREE.Color(0xFFD700)); }
+    if(document.body.classList.contains('dark')){
+      modeToggle.textContent = "☀️ 日间模式";
+    } else {
+      modeToggle.textContent = "🌙 夜间模式";
     }
-    sphereMesh.instanceMatrix.needsUpdate = true; cubeMesh.instanceMatrix.needsUpdate = true;
+  });
 
-    // Star
-    const starGeo = new THREE.OctahedronGeometry(3);
-    const starMat = new THREE.MeshStandardMaterial({color:0xFFFF00, metalness:1, roughness:0.2});
-    starMesh = new THREE.Mesh(starGeo, starMat);
-    starMesh.position.set(0,25,0);
-    treeGroup.add(starMesh);
+  // 微信二维码弹出
+  const qrBtn = document.getElementById('showQR');
+  const qrModal = document.getElementById('qr-modal');
+  qrBtn.addEventListener('click', ()=>{ qrModal.classList.add('show'); });
+  qrModal.addEventListener('click', ()=>{ qrModal.classList.remove('show'); });
 
-    // Handle resizing
-    window.addEventListener('resize', ()=>{
-        camera.aspect = container.clientWidth/container.clientHeight;
-        camera.updateProjectionMatrix();
-        renderer.setSize(container.clientWidth, container.clientHeight);
+  // 返回顶部按钮
+  const backTop = document.getElementById('backTop');
+  window.addEventListener('scroll', ()=>{
+    if(window.scrollY>200) backTop.style.display='flex';
+    else backTop.style.display='none';
+  });
+  backTop.addEventListener('click', ()=>{ window.scrollTo({top:0, behavior:'smooth'}); });
+
+  // 滚动淡入动画
+  const cards = document.querySelectorAll('.card');
+  const observer = new IntersectionObserver(entries=>{
+    entries.forEach(entry=>{
+      if(entry.isIntersecting){
+        entry.target.classList.add('show');
+      }
     });
-}
-
-function animate3DTree(){
-    requestAnimationFrame(animate3DTree);
-    const delta = clock.getDelta();
-    treeGroup.rotation.y += delta*0.2;
-    controls.update();
-    renderer.render(scene, camera);
-}
+  }, {threshold:0.2});
+  cards.forEach(card=>observer.observe(card));
 </script>
+
 </body>
 </html>
