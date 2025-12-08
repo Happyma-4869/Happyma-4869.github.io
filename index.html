@@ -22,8 +22,8 @@ body.dark { color:#eee; }
   width:100%; height:100%;
   object-fit:cover;
   z-index:0;
-  transition: filter 0.5s, transform 0.2s, opacity 0.3s;
-  will-change: transform, opacity;
+  transition: filter 0.5s, opacity 0.3s;
+  will-change: opacity;
 }
 body.dark #bgVideo { filter: brightness(40%) contrast(110%); }
 
@@ -310,13 +310,10 @@ const qrModal=document.getElementById('qrModal');
 qrImg.addEventListener('click',()=>qrModal.classList.add('show'));
 qrModal.addEventListener('click',()=>qrModal.classList.remove('show'));
 
-// ---------------- 卡片滚动动画 + 背景视差 + 光晕动态 ----------------
-const bgVideo=document.getElementById('bgVideo');
+// ---------------- 卡片滚动动画 + 光晕动态 ----------------
 window.addEventListener('mousemove', e=>{ mouse.x=e.clientX; mouse.y=e.clientY; });
 function showOnScroll() {
     const cards = document.querySelectorAll('.card');
-    const scrollY = window.scrollY;
-    const centerX = window.innerWidth/2;
     const centerY = window.innerHeight/2;
     cards.forEach(card => {
         const rect = card.getBoundingClientRect();
@@ -332,8 +329,6 @@ function showOnScroll() {
         const offsetY = dy*20;
         card.style.boxShadow = `0 8px 30px rgba(0,0,0,${0.1 + glow}), ${offsetX}px ${offsetY}px 25px rgba(0,122,255,${glow})`;
     });
-    // 背景视差
-    bgVideo.style.transform = `translateY(${scrollY*0.25}px)`;
 }
 window.addEventListener('scroll', showOnScroll);
 window.addEventListener('load', showOnScroll);
