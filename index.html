@@ -7,7 +7,9 @@
 <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
 <style>
 body, html {margin:0; padding:0; font-family:'Roboto', sans-serif; overflow-x:hidden; color:#333;}
-#bgVideo {position:fixed; top:0; left:0; width:100%; height:100%; object-fit:cover; z-index:0;}
+#bgVideo {position:fixed; top:0; left:0; width:100%; height:100%; object-fit:cover; z-index:0; transition: filter 0.5s;}
+body.dark #bgVideo { filter: brightness(40%) contrast(110%); }
+
 #particles {position:fixed; top:0; left:0; width:100%; height:100%; pointer-events:none; z-index:0;}
 body.dark { color:#eee; }
 .card { background:rgba(255,255,255,0.95); color:inherit; padding:20px; border-radius:15px; width:320px; margin:20px auto; box-shadow:0 6px 20px rgba(0,0,0,0.1); transition:0.5s; display:flex; flex-direction:column; gap:10px; }
@@ -16,6 +18,7 @@ body.dark .card { background:rgba(50,50,50,0.9); }
 .card .tags { margin-top:10px;}
 .card .tag { display:inline-block; background:linear-gradient(45deg,#ff6b6b,#ffcc33); color:white; padding:5px 10px; margin:3px; border-radius:15px; font-size:12px; transition:0.2s;}
 .card .tag:hover { transform:scale(1.1); }
+
 header { text-align:center; padding:60px 20px 20px; position:relative; z-index:1;}
 header img { width:140px; height:140px; border-radius:50%; border:4px solid white; margin-bottom:20px; transition:transform 0.3s;}
 header img:hover {transform:scale(1.1);}
@@ -27,22 +30,29 @@ nav.scrolled { background:rgba(0,0,0,0.7); box-shadow:0 4px 10px rgba(0,0,0,0.3)
 nav a { margin:0 15px; text-decoration:none; font-weight:bold; transition:0.3s;}
 nav a.active { color:#ffeb3b;}
 nav a:hover { color:#ffeb3b; }
+
 #modeToggle { position:fixed; top:20px; right:20px; padding:8px 15px; background:linear-gradient(45deg,#2196F3,#21CBF3); color:white; border-radius:20px; cursor:pointer; z-index:10; transition:0.3s;}
 #modeToggle:hover { background:linear-gradient(45deg,#1976d2,#1aa8c7); }
+
 #toTopBtn { position:fixed; bottom:30px; right:30px; background:linear-gradient(45deg,#4caf50,#81c784); color:white; border:none; padding:12px 18px; border-radius:50px; cursor:pointer; font-size:16px; z-index:10; display:none; transition:0.3s;}
 #toTopBtn:hover { background:linear-gradient(45deg,#388e3c,#66bb6a); }
+
 .contact .qr { display:flex; justify-content:center; margin-top:20px; }
 .contact .qr img { width:140px; height:140px; border-radius:15px; border:2px solid #ccc; cursor:pointer; transition:0.3s;}
 .contact .qr img:hover { transform:scale(1.1); }
+
 #qrModal { display:none; position:fixed; z-index:10; left:0; top:0; width:100%; height:100%; background:rgba(0,0,0,0.6); justify-content:center; align-items:center; }
 #qrModal img { max-width:300px; border-radius:15px; border:3px solid #fff;}
 #qrModal.show { display:flex; }
+
 section { padding:60px 20px; text-align:center; position:relative; z-index:1; }
 section h2 { font-size:28px; color:#4CAF50; margin-bottom:30px; }
+
 .diary-actions { display:flex; flex-direction:column; gap:5px; margin-top:10px;}
 .diary-actions button, #addDiaryBtn { padding:8px 12px; cursor:pointer; border:none; border-radius:10px; background:linear-gradient(45deg,#2196F3,#21CBF3); color:white; font-weight:bold; transition:0.3s;}
 .diary-actions button:hover, #addDiaryBtn:hover { background:linear-gradient(45deg,#1976d2,#1aa8c7);}
 textarea, input[type="date"] { width:100%; padding:8px; border-radius:10px; border:1px solid #ccc; resize:none;}
+
 @media(max-width:600px){ header img{width:100px;height:100px;} .card{width:90%;} nav a{margin:0 8px; font-size:14px;} }
 </style>
 </head>
@@ -181,6 +191,31 @@ const qrImg=document.getElementById('qrImg');
 const qrModal=document.getElementById('qrModal');
 qrImg.addEventListener('click',()=>qrModal.classList.add('show'));
 qrModal.addEventListener('click',()=>qrModal.classList.remove('show'));
+
+// 滚动显示卡片
+function showOnScroll() {
+    const cards = document.querySelectorAll('.card');
+    cards.forEach(card => {
+        const rect = card.getBoundingClientRect();
+        if (rect.top < window.innerHeight - 50) {
+            card.classList.add('show');
+        }
+    });
+}
+window.addEventListener('scroll', showOnScroll);
+window.addEventListener('load', showOnScroll);
+
+// 导航滚动高亮
+const mainNav = document.getElementById('mainNav');
+const navLinks = mainNav.querySelectorAll('a');
+window.addEventListener('scroll', () => {
+    navLinks.forEach(link => {
+        const section = document.querySelector(link.getAttribute('href'));
+        if(section.offsetTop - 70 <= window.scrollY && section.offsetTop + section.offsetHeight > window.scrollY){
+            link.classList.add('active');
+        }else{ link.classList.remove('active'); }
+    });
+});
 </script>
 
 </body>
