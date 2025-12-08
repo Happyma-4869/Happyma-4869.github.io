@@ -3,12 +3,11 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width,initial-scale=1" />
-<title>Happy 的个人主页 — 圣诞升级版</title>
+<title>Happy 的个人主页 — 圣诞升级版（修复版）</title>
 <style>
-/* ---------- 基础样式 ---------- */
-:root{--card-w:320px;}
+:root{--card-w:320px}
 *{box-sizing:border-box}
-html,body{height:100%;margin:0;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",sans-serif;background:#0f1720;color:#222;transition:color .3s;background-attachment:fixed;}
+html,body{height:100%;margin:0;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",sans-serif;background:#0f1720;color:#222;transition:color .3s}
 body.dark{background:#0b0b0d;color:#eee}
 
 /* 背景视频 & 粒子 */
@@ -16,49 +15,27 @@ body.dark{background:#0b0b0d;color:#eee}
 body.dark #bgVideo{filter:brightness(.38) contrast(1.05)}
 #particles{position:fixed;left:0;top:0;width:100%;height:100%;pointer-events:none;z-index:1}
 
-/* ---------- 3D 圣诞树卡片（左侧） ---------- */
+/* 左侧圣诞树卡片（优先级在粒子之上，且可交互） */
 #treeCard{
-  position:fixed;
-  left:20px;
-  top:50%;
-  transform:translateY(-50%);
-  width:400px;
-  height:600px;
-  border-radius:24px;
-  background:rgba(255,255,255,0.06);
-  box-shadow:0 12px 40px rgba(2,6,23,0.6);
-  backdrop-filter:blur(8px);
-  overflow:hidden;
-  z-index:3;           /* 比粒子与视频高 */
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  cursor:pointer;
+  position:fixed; left:20px; top:50%; transform:translateY(-50%);
+  width:400px; height:600px; border-radius:24px;
+  background:rgba(255,255,255,0.04); box-shadow:0 12px 40px rgba(2,6,23,0.6);
+  backdrop-filter:blur(8px); overflow:hidden; z-index:5; cursor:pointer;
+  display:flex; align-items:center; justify-content:center;
+  pointer-events:auto;
 }
-#treeCard.hideOnMobile{display:block}
-#treeCanvas{width:100%;height:100%;display:block;}
+#treeCard canvas{width:100%;height:100%;display:block}
 
-/* 页面内容向右移以避开树（桌面） */
-.mainContent{
-  position:relative;
-  z-index:2;
-  margin-left:460px; /* 留出空间给左侧树 */
-  padding-bottom:60px;
-  min-height:100vh;
-}
-/* 移动端收起树并恢复布局 */
-@media(max-width:900px){
-  #treeCard{display:none}
-  .mainContent{margin-left:0}
-}
+/* 页面主体右移以避开树（桌面） */
+.mainContent{position:relative;z-index:2;margin-left:460px;padding-bottom:60px;min-height:100vh}
+/* 小屏隐藏树并恢复布局 */
+@media(max-width:900px){ #treeCard{display:none} .mainContent{margin-left:0} }
 
-/* ---------- 头部与导航 ---------- */
+/* 头部与导航 */
 header{text-align:center;padding:44px 20px 8px}
 header img{width:120px;height:120px;border-radius:50%;border:3px solid rgba(255,255,255,.08);display:block;margin:0 auto 12px;object-fit:cover}
-h1{margin:6px 0;font-size:28px;color:inherit}
+h1{margin:6px 0;font-size:28px}
 p.lead{margin:6px 0;color:rgba(255,255,255,.7);font-size:14px}
-
-/* 吸顶导航 */
 nav{position:sticky;top:12px;margin:14px auto 0;background:rgba(255,255,255,.02);padding:8px;border-radius:14px;width:fit-content;z-index:20}
 nav a{margin:0 12px;color:inherit;text-decoration:none;font-weight:600}
 
@@ -66,45 +43,42 @@ nav a{margin:0 12px;color:inherit;text-decoration:none;font-weight:600}
 #modeToggle{position:fixed;right:20px;top:20px;z-index:21;padding:8px 14px;border-radius:20px;background:linear-gradient(135deg,#5ac8fa,#007aff);color:white;cursor:pointer}
 #toTopBtn{position:fixed;right:20px;bottom:22px;z-index:21;padding:10px 14px;border-radius:24px;background:linear-gradient(135deg,#5ac8fa,#007aff);color:#fff;border:none;cursor:pointer;display:none}
 
-/* ---------- 卡片 / about / tags ---------- */
-section{padding:56px 18px; text-align:center}
+/* 卡片样式 */
+section{padding:56px 18px;text-align:center}
 .card{width:var(--card-w);margin:0 auto 22px;padding:18px;border-radius:18px;background:linear-gradient(180deg, rgba(255,255,255,0.06), rgba(255,255,255,0.03));backdrop-filter:blur(10px);box-shadow:0 10px 30px rgba(2,6,23,0.6);color:inherit}
 .card .tags{margin-top:8px}
 .tag{display:inline-block;padding:6px 10px;border-radius:12px;margin:4px;background:linear-gradient(45deg,#5ac8fa,#007aff);color:#fff;font-size:13px}
 
-/* ---------- 日记区域（小巧居中输入） ---------- */
+/* 日记：输入小巧并居中 */
 #diary .card{width:360px;padding:14px}
 input[type="date"],textarea{width:80%;padding:8px;border-radius:12px;border:none;margin:6px auto;display:block;background:rgba(0,0,0,0.25);color:inherit}
-#addDiaryBtn{display:inline-block;padding:10px 16px;border-radius:20px;background:linear-gradient(135deg,#3db0ff,#006ee6);color:#fff;border:none;font-weight:700;font-size:15px;cursor:pointer}
+#addDiaryBtn{display:inline-block;padding:12px 18px;border-radius:22px;background:linear-gradient(135deg,#3db0ff,#006ee6);color:#fff;border:none;font-weight:800;font-size:16px;cursor:pointer}
 .diary-actions button{padding:6px 10px;border-radius:16px;background:rgba(255,255,255,0.06);border:none;color:inherit;cursor:pointer;margin-left:6px;font-size:13px}
 
-/* 日记卡片内按钮分组 */
-.diary-entry .diary-actions{display:flex;justify-content:center;margin-top:10px}
-
-/* 联系区域（二维码） */
+/* 联系：二维码 */
 .contact .qr img{width:140px;height:140px;border-radius:18px;cursor:pointer}
 
-/* 小屏适配：缩小一些卡片 */
+/* QR modal（默认隐藏） */
+#qrModal{position:fixed;left:0;top:0;width:100%;height:100%;z-index:60;display:none;align-items:center;justify-content:center;background:rgba(0,0,0,0.6)}
+#qrModal img{max-width:320px;border-radius:16px;border:4px solid rgba(255,255,255,0.12)}
+
+/* 响应式小屏 */
 @media(max-width:480px){
-  #addDiaryBtn{padding:8px 12px;font-size:14px}
+  #addDiaryBtn{padding:10px 14px;font-size:15px}
   .card{width:92%}
 }
-
-/* 帮助类（隐藏播放按键等） */
-.hidden{display:none}
 </style>
 </head>
 <body>
 
-<!-- 背景 视频 与 全局粒子画布 -->
+<!-- 背景 视频 与 全局粒子 -->
 <video id="bgVideo" autoplay muted loop playsinline>
   <source src="https://github.com/Happyma-4869/Happyma-4869.github.io/blob/main/Video%20Project%204.mp4?raw=true" type="video/mp4">
 </video>
 <canvas id="particles"></canvas>
 
 <!-- 左侧 3D 圣诞树卡片（fixed） -->
-<div id="treeCard" aria-hidden="false" title="点击可以点亮/放大圣诞树">
-  <!-- three.js 渲染放这里 -->
+<div id="treeCard" title="点击树体放大或点亮装饰">
   <canvas id="treeCanvas"></canvas>
 </div>
 
@@ -158,8 +132,9 @@ input[type="date"],textarea{width:80%;padding:8px;border-radius:12px;border:none
 
   <footer style="text-align:center;padding:18px;color:rgba(255,255,255,0.45)">&copy; 2025 Happyma.top</footer>
 
-  <div id="qrModal" class="hidden" style="position:fixed;left:0;top:0;width:100%;height:100%;z-index:50;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,0.6)">
-    <img src="https://github.com/Happyma-4869/Happyma-4869.github.io/blob/main/%E5%BE%AE%E4%BF%A1%E5%9B%BE%E7%89%87_20251207233522_10_79.jpg?raw=true" alt="二维码大图" style="max-width:320px;border-radius:16px;border:4px solid rgba(255,255,255,0.12)">
+  <!-- QR modal -->
+  <div id="qrModal">
+    <img src="https://github.com/Happyma-4869/Happyma-4869.github.io/blob/main/%E5%BE%AE%E4%BF%A1%E5%9B%BE%E7%89%87_20251207233522_10_79.jpg?raw=true" alt="二维码大图">
   </div>
 </div>
 
@@ -169,7 +144,7 @@ input[type="date"],textarea{width:80%;padding:8px;border-radius:12px;border:none
 
 <script>
 /* ===========================
-   日记 / UI / 粒子 背景逻辑
+   日记 / UI / 背景粒子
    =========================== */
 const diaryList = document.getElementById('diaryList');
 const addDiaryBtn = document.getElementById('addDiaryBtn');
@@ -220,15 +195,14 @@ window.deleteDiary = function(i){
 };
 
 // QR modal
-qrImg.addEventListener('click', ()=>{ qrModal.classList.remove('hidden'); });
-qrModal.addEventListener('click', ()=>{ qrModal.classList.add('hidden'); });
+qrImg.addEventListener('click', ()=>{ qrModal.style.display = 'flex'; });
+qrModal.addEventListener('click', ()=>{ qrModal.style.display = 'none'; });
 
 // 日夜切换
 const modeToggle = document.getElementById('modeToggle');
 modeToggle.addEventListener('click', ()=>{
   document.body.classList.toggle('dark');
-  // 重新初始化粒子颜色密度
-  initParticles();
+  initParticles(); // 重刷粒子数量/颜色
 });
 
 // 返回顶部 & 导航高亮
@@ -247,7 +221,7 @@ window.addEventListener('scroll', ()=>{
 });
 toTopBtn.addEventListener('click', ()=> window.scrollTo({top:0,behavior:'smooth'}) );
 
-/* ---------- 背景粒子画布（canvas） ---------- */
+/* ---------- 背景粒子画布 ---------- */
 const canvas = document.getElementById('particles');
 const ctx = canvas.getContext('2d');
 let particlesArray = [];
@@ -255,13 +229,10 @@ let mouse = {x:null,y:null};
 function resizeCanvas(){ canvas.width = window.innerWidth; canvas.height = window.innerHeight; }
 window.addEventListener('resize', resizeCanvas);
 resizeCanvas();
-
 window.addEventListener('mousemove', e => { mouse.x = e.clientX; mouse.y = e.clientY; });
 
 class BGParticle {
-  constructor(){
-    this.reset();
-  }
+  constructor(){ this.reset(); }
   reset(){
     this.x = Math.random()*canvas.width;
     this.y = Math.random()*canvas.height;
@@ -275,13 +246,11 @@ class BGParticle {
     this.angle += this.speed;
     this.x += Math.cos(this.angle)*0.2;
     this.y += Math.sin(this.angle)*0.2;
-    // 鼠标牵引（轻微）
     if(mouse.x && mouse.y){
       const dx = mouse.x - this.x, dy = mouse.y - this.y;
       const dist = Math.sqrt(dx*dx+dy*dy);
       if(dist < 120){
-        this.x += dx*0.01;
-        this.y += dy*0.01;
+        this.x += dx*0.01; this.y += dy*0.01;
       }
     }
     if(this.x<0||this.x>canvas.width||this.y<0||this.y>canvas.height) this.reset();
@@ -295,19 +264,14 @@ function initParticles(){
   for(let i=0;i<count;i++) particlesArray.push(new BGParticle());
 }
 initParticles();
-
-function animateParticles(){
-  ctx.clearRect(0,0,canvas.width,canvas.height);
-  particlesArray.forEach(p=>{ p.update(); p.draw(); });
-  requestAnimationFrame(animateParticles);
-}
+function animateParticles(){ ctx.clearRect(0,0,canvas.width,canvas.height); particlesArray.forEach(p=>{ p.update(); p.draw(); }); requestAnimationFrame(animateParticles); }
 animateParticles();
 
 /* ===========================
-   three.js 3D 圣诞树（左侧小卡片）
-   - 点击装饰会闪烁/点亮
+   three.js 3D 圣诞树（左侧卡片）
+   - Canvas 在 #treeCanvas（不会 append 到 body）
+   - 点击装饰会闪烁
    - 滚动时树微动
-   - 有小光点粒子
    =========================== */
 const treeCanvas = document.getElementById('treeCanvas');
 const treeCard = document.getElementById('treeCard');
@@ -319,120 +283,91 @@ let dummy = new THREE.Object3D();
 let clock = new THREE.Clock();
 let raycaster = new THREE.Raycaster();
 let mouseN = new THREE.Vector2();
-let ornamentColors = {}; // 存 instanceId -> color (THREE.Color)
+let ornamentColors = {}; // 保存原色
 
-// 初始化 three 渲染器与场景
 function initTree3D(){
-  const w = treeCard.clientWidth;
-  const h = treeCard.clientHeight;
-
+  const w = treeCard.clientWidth, h = treeCard.clientHeight;
   renderer = new THREE.WebGLRenderer({canvas: treeCanvas, alpha:true, antialias:true});
-  renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio,2));
   renderer.setSize(w,h);
-  renderer.setClearColor(0x000000, 0); // 透明底
+  renderer.setClearColor(0x000000,0);
 
   scene = new THREE.Scene();
   camera = new THREE.PerspectiveCamera(50, w/h, 0.1, 2000);
   camera.position.set(0,24,80);
 
   controls = new THREE.OrbitControls(camera, renderer.domElement);
-  controls.enableZoom = false;
-  controls.enablePan = false;
-  controls.enableRotate = false; // 只用程序旋转，避免用户干扰卡片位置
+  controls.enableZoom = false; controls.enablePan = false; controls.enableRotate = false;
 
   // lights
-  const amb = new THREE.AmbientLight(0xffffff, 0.6); scene.add(amb);
-  const dir = new THREE.DirectionalLight(0xffffff, 0.8); dir.position.set(30,80,40); scene.add(dir);
+  const amb = new THREE.AmbientLight(0xffffff,0.6); scene.add(amb);
+  const dir = new THREE.DirectionalLight(0xffffff,0.8); dir.position.set(30,80,40); scene.add(dir);
 
-  // group
-  treeGroup = new THREE.Group();
-  scene.add(treeGroup);
+  treeGroup = new THREE.Group(); scene.add(treeGroup);
 
-  // geometry & materials
-  const sphereGeo = new THREE.SphereGeometry(1.6, 12, 12);
+  const sphereGeo = new THREE.SphereGeometry(1.6,12,12);
   const cubeGeo = new THREE.BoxGeometry(2.2,2.2,2.2);
-  const goldMat = new THREE.MeshStandardMaterial({color:0xFFD700, metalness:0.8, roughness:0.2});
-  const greenMat = new THREE.MeshStandardMaterial({color:0x0b6a2d, metalness:0.4, roughness:0.6});
+  const goldMat = new THREE.MeshStandardMaterial({color:0xFFD700,metalness:0.8,roughness:0.2});
+  const greenMat = new THREE.MeshStandardMaterial({color:0x0b6a2d,metalness:0.4,roughness:0.6});
 
-  // instanced meshes for ornaments
   sphereMesh = new THREE.InstancedMesh(sphereGeo, goldMat, instanceCount);
   cubeMesh = new THREE.InstancedMesh(cubeGeo, greenMat, instanceCount);
   sphereMesh.instanceMatrix.setUsage(THREE.DynamicDrawUsage);
   cubeMesh.instanceMatrix.setUsage(THREE.DynamicDrawUsage);
-  if(sphereMesh.instanceColor) sphereMesh.instanceColor.setUsage(THREE.DynamicDrawUsage);
-  if(cubeMesh.instanceColor) cubeMesh.instanceColor.setUsage(THREE.DynamicDrawUsage);
 
-  treeGroup.add(sphereMesh);
-  treeGroup.add(cubeMesh);
+  treeGroup.add(sphereMesh); treeGroup.add(cubeMesh);
 
-  // build tree silhouette by layering positions
   for(let i=0;i<instanceCount;i++){
-    const layer = Math.floor(Math.random()*18); // layers from 0..17
-    const y = layer * 1.6 - 10; // center roughly
-    const radius = 1 + (18 - layer) * 1.2 + Math.random()*0.6;
+    const layer = Math.floor(Math.random()*18);
+    const y = layer*1.6 - 10;
+    const radius = 1 + (18 - layer)*1.2 + Math.random()*0.6;
     const angle = Math.random()*Math.PI*2;
-    const x = Math.cos(angle) * radius;
-    const z = Math.sin(angle) * radius * 0.8; // squash z for silhouette
-
-    dummy.position.set(x, y, z);
-    dummy.rotation.set(Math.random()*Math.PI, Math.random()*Math.PI, Math.random()*Math.PI);
+    const x = Math.cos(angle)*radius;
+    const z = Math.sin(angle)*radius*0.8;
+    dummy.position.set(x,y,z);
+    dummy.rotation.set(Math.random()*Math.PI,Math.random()*Math.PI,Math.random()*Math.PI);
     dummy.scale.setScalar(0.8 + Math.random()*0.9);
     dummy.updateMatrix();
-
-    if(i % 2 === 0) {
-      sphereMesh.setMatrixAt(i, dummy.matrix);
-      // alternate colors
-      if(Math.random() > 0.6) { sphereMesh.setColorAt(i, new THREE.Color(0xFF2B2B)); ornamentColors['s_'+i] = new THREE.Color(0xFF2B2B); }
-      else { sphereMesh.setColorAt(i, new THREE.Color(0xFFD700)); ornamentColors['s_'+i] = new THREE.Color(0xFFD700); }
+    if(i%2===0){
+      sphereMesh.setMatrixAt(i,dummy.matrix);
+      if(Math.random()>0.6){ sphereMesh.setColorAt(i,new THREE.Color(0xFF2B2B)); ornamentColors['s_'+i]=new THREE.Color(0xFF2B2B); }
+      else { sphereMesh.setColorAt(i,new THREE.Color(0xFFD700)); ornamentColors['s_'+i]=new THREE.Color(0xFFD700); }
     } else {
-      cubeMesh.setMatrixAt(i, dummy.matrix);
-      if(Math.random() > 0.6) { cubeMesh.setColorAt(i, new THREE.Color(0xFFD700)); ornamentColors['c_'+i] = new THREE.Color(0xFFD700); }
-      else { cubeMesh.setColorAt(i, new THREE.Color(0x00A86B)); ornamentColors['c_'+i] = new THREE.Color(0x00A86B); }
+      cubeMesh.setMatrixAt(i,dummy.matrix);
+      if(Math.random()>0.6){ cubeMesh.setColorAt(i,new THREE.Color(0xFFD700)); ornamentColors['c_'+i]=new THREE.Color(0xFFD700); }
+      else { cubeMesh.setColorAt(i,new THREE.Color(0x00A86B)); ornamentColors['c_'+i]=new THREE.Color(0x00A86B); }
     }
   }
-  sphereMesh.instanceMatrix.needsUpdate = true;
-  cubeMesh.instanceMatrix.needsUpdate = true;
-  if(sphereMesh.instanceColor) sphereMesh.instanceColor.needsUpdate = true;
-  if(cubeMesh.instanceColor) cubeMesh.instanceColor.needsUpdate = true;
+  sphereMesh.instanceMatrix.needsUpdate=true; cubeMesh.instanceMatrix.needsUpdate=true;
+  if(sphereMesh.instanceColor) sphereMesh.instanceColor.needsUpdate=true;
+  if(cubeMesh.instanceColor) cubeMesh.instanceColor.needsUpdate=true;
 
   // star
   const starGeo = new THREE.OctahedronGeometry(3.4);
-  const starMat = new THREE.MeshStandardMaterial({color:0xFFF176, emissive:0xFFEE88, metalness:1, roughness:0.2});
-  starMesh = new THREE.Mesh(starGeo, starMat);
-  starMesh.position.set(0, 20, 0);
+  const starMat = new THREE.MeshStandardMaterial({color:0xFFF176,emissive:0xFFEE88,metalness:1,roughness:0.2});
+  starMesh = new THREE.Mesh(starGeo, starMat); starMesh.position.set(0,20,0);
   treeGroup.add(starMesh);
 
-  // tiny floating light particles around tree
   addTreeParticles();
 
-  // respond to canvas size change
-  window.addEventListener('resize', ()=> {
-    const ww = treeCard.clientWidth, hh = treeCard.clientHeight;
-    renderer.setSize(ww, hh);
-    camera.aspect = ww / hh;
-    camera.updateProjectionMatrix();
-  });
+  window.addEventListener('resize', ()=>{ const ww=treeCard.clientWidth, hh=treeCard.clientHeight; renderer.setSize(ww,hh); camera.aspect=ww/hh; camera.updateProjectionMatrix(); });
 
-  // pointer interactions
   renderer.domElement.addEventListener('pointermove', onPointerMove);
   renderer.domElement.addEventListener('pointerdown', onPointerDown);
 }
 
-// 小光点
 let treeParticles = [];
 function addTreeParticles(){
   const geo = new THREE.SphereGeometry(0.18,6,6);
   for(let i=0;i<60;i++){
-    const mat = new THREE.MeshStandardMaterial({color:0xffffff, emissive:0xffffff, emissiveIntensity:0.8, transparent:true, opacity: 0.9});
+    const mat = new THREE.MeshStandardMaterial({color:0xffffff,emissive:0xffffff,emissiveIntensity:0.8,transparent:true,opacity:0.9});
     const m = new THREE.Mesh(geo, mat);
     m.position.set((Math.random()-0.5)*16, Math.random()*24-2, (Math.random()-0.5)*12);
     m.userData = { speed: 0.02 + Math.random()*0.02, baseY: m.position.y, phase: Math.random()*Math.PI*2 };
-    treeParticles.push(m);
-    scene.add(m);
+    treeParticles.push(m); scene.add(m);
   }
 }
 
-// pointer handlers
 function onPointerMove(evt){
   const rect = renderer.domElement.getBoundingClientRect();
   mouseN.x = ((evt.clientX - rect.left) / rect.width) * 2 - 1;
@@ -440,95 +375,62 @@ function onPointerMove(evt){
 }
 
 function onPointerDown(evt){
-  // 检测点击到的 instancedMesh 实例
   const rect = renderer.domElement.getBoundingClientRect();
   const x = ((evt.clientX - rect.left)/rect.width)*2 -1;
   const y = -((evt.clientY - rect.top)/rect.height)*2 +1;
   raycaster.setFromCamera(new THREE.Vector2(x,y), camera);
-
-  // 优先检测球体
   let intersects = raycaster.intersectObject(sphereMesh);
   if(intersects.length>0){
     const instId = intersects[0].instanceId;
-    if(instId !== undefined){
-      toggleOrnamentColor('s', instId);
-      return;
-    }
+    if(instId !== undefined){ toggleOrnamentColor('s', instId); return; }
   }
-  // 再检测立方体
   intersects = raycaster.intersectObject(cubeMesh);
   if(intersects.length>0){
     const instId = intersects[0].instanceId;
-    if(instId !== undefined){
-      toggleOrnamentColor('c', instId);
-      return;
-    }
+    if(instId !== undefined){ toggleOrnamentColor('c', instId); return; }
   }
-  // 点击卡片本身：放大缩小（视觉交互）
   toggleTreeScale();
 }
 
 let isTreeScaled = false;
 function toggleTreeScale(){
-  if(!isTreeScaled){
-    treeCard.style.transform = 'translateY(-50%) scale(1.12)';
-    isTreeScaled = true;
-  } else {
-    treeCard.style.transform = 'translateY(-50%) scale(1)';
-    isTreeScaled = false;
-  }
+  if(!isTreeScaled){ treeCard.style.transform='translateY(-50%) scale(1.12)'; isTreeScaled=true; }
+  else { treeCard.style.transform='translateY(-50%) scale(1)'; isTreeScaled=false; }
 }
 
-// 切换某个装饰颜色为高亮发光或恢复原色
 function toggleOrnamentColor(type, id){
-  const key = (type === 's' ? 's_'+id : 'c_'+id);
-  const inst = (type === 's') ? sphereMesh : cubeMesh;
-  // if highlighted -> restore original; else set to white/emissive color
-  const current = ornamentColors[key];
-  if(!current) return;
-  // detect current: if white then restore original color saved in data structure? We'll toggle using a simple stored flag.
-  if(inst.userData && inst.userData[id] === 'lit'){
-    // 恢复
-    const orig = current; // ornamentColors stores original color
-    inst.setColorAt(id, orig);
-    inst.userData[id] = null;
+  const key = (type==='s'?'s_':'c_') + id;
+  const inst = (type==='s')? sphereMesh : cubeMesh;
+  const orig = ornamentColors[key];
+  if(!orig) return;
+  if(!inst.userData) inst.userData = {};
+  if(inst.userData[id] === 'lit'){
+    inst.setColorAt(id, orig); inst.userData[id] = null;
   } else {
-    inst.setColorAt(id, new THREE.Color(0xFFFFFF));
-    if(!inst.userData) inst.userData = {};
-    inst.userData[id] = 'lit';
-    // schedule auto-dim after short time
-    setTimeout(()=>{ if(inst.userData && inst.userData[id] === 'lit'){ inst.setColorAt(id, current); inst.userData[id]=null; if(inst.instanceColor) inst.instanceColor.needsUpdate=true; inst.instanceMatrix.needsUpdate=true;} }, 900);
+    inst.setColorAt(id, new THREE.Color(0xFFFFFF)); inst.userData[id] = 'lit';
+    setTimeout(()=>{ if(inst.userData && inst.userData[id] === 'lit'){ inst.setColorAt(id, orig); inst.userData[id] = null; if(inst.instanceColor) inst.instanceColor.needsUpdate=true; inst.instanceMatrix.needsUpdate=true; } }, 900);
   }
-  if(inst.instanceColor) inst.instanceColor.needsUpdate = true;
-  inst.instanceMatrix.needsUpdate = true;
+  if(inst.instanceColor) inst.instanceColor.needsUpdate=true;
+  inst.instanceMatrix.needsUpdate=true;
 }
 
-// animate loop
 function animateTree(){
   requestAnimationFrame(animateTree);
   const dt = clock.getDelta();
-
-  // slow automatic rotation
   treeGroup.rotation.y += dt * 0.12;
-
-  // subtle particle bob
   treeParticles.forEach(p=>{ p.position.y = p.userData.baseY + Math.sin(clock.elapsedTime*1.2 + p.userData.phase) * 0.6; });
-
-  // star twinkle
   if(starMesh) starMesh.scale.setScalar(1 + Math.sin(clock.elapsedTime*6)*0.06);
-
   controls.update();
   renderer.render(scene, camera);
 }
 
-// 页面滚动时微动圣诞树（上下移动）
 window.addEventListener('scroll', ()=>{
-  const maxShift = 10; // px
+  const maxShift = 10;
   const scrollFactor = window.scrollY / (document.body.scrollHeight - window.innerHeight);
-  treeGroup.position.y = (scrollFactor - 0.4) * maxShift;
+  if(treeGroup) treeGroup.position.y = (scrollFactor - 0.4) * maxShift;
 });
 
-/* 初始化一切 */
+/* 初始化三维树 */
 initTree3D();
 animateTree();
 </script>
