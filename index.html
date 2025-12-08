@@ -63,7 +63,7 @@ body.dark .card { background: rgba(40,40,40,0.7); color:#eee; }
 .card .tag:hover { transform:scale(1.1); }
 
 /* 头部 */
-header { text-align:center; padding:60px 20px 20px; position:relative; z-index:2;}
+header { text-align:center; padding:60px 20px 20px; position:relative; z-index:1;}
 header img { width:140px; height:140px; border-radius:50%; border:4px solid rgba(255,255,255,0.8); margin-bottom:20px; transition:transform 0.3s;}
 header img:hover {transform:scale(1.1);}
 header h1, header p { color: inherit; margin:0;}
@@ -96,7 +96,7 @@ nav a:hover { color:#ffeb3b; }
 #qrModal.show { display:flex; }
 
 /* 分区 */
-section { padding:60px 20px; text-align:center; position:relative; z-index:2; }
+section { padding:60px 20px; text-align:center; position:relative; z-index:1; }
 section h2 { font-size:28px; color:#007aff; margin-bottom:30px; }
 
 textarea, input[type="date"] {
@@ -110,15 +110,15 @@ textarea, input[type="date"] {
 }
 .diary-actions button:hover, #addDiaryBtn:hover { background:linear-gradient(135deg,#007aff,#5ac8fa); }
 
-/* 圣诞树 Canvas */
-#treeCanvas { position:fixed; top:0; left:0; width:100%; height:100%; z-index:1; pointer-events:none; }
-
 /* 响应式 */
 @media(max-width:600px){
   header img{width:100px;height:100px;}
   .card{width:90%;}
   nav a{margin:0 8px; font-size:14px;}
 }
+
+/* 圣诞树容器 */
+#treeContainer { position:fixed; left:20px; top:50%; transform:translateY(-50%); width:200px; height:300px; z-index:5; cursor:pointer; }
 </style>
 </head>
 <body>
@@ -127,7 +127,6 @@ textarea, input[type="date"] {
   <source src="https://github.com/Happyma-4869/Happyma-4869.github.io/blob/main/Video%20Project%204.mp4?raw=true" type="video/mp4">
 </video>
 <canvas id="particles"></canvas>
-<canvas id="treeCanvas"></canvas>
 
 <header>
   <img src="https://github.com/Happyma-4869/Happyma-4869.github.io/blob/main/%E5%BE%AE%E4%BF%A1%E5%9B%BE%E7%89%87_20251207233412_9_79.jpg?raw=true" alt="头像">
@@ -179,8 +178,10 @@ textarea, input[type="date"] {
 <footer>&copy; 2025 Happyma.top</footer>
 <div id="qrModal"><img src="https://github.com/Happyma-4869/Happyma-4869.github.io/blob/main/%E5%BE%AE%E4%BF%A1%E5%9B%BE%E7%89%87_20251207233522_10_79.jpg?raw=true" alt="微信二维码大图"></div>
 
-<script src="https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/three@0.160.0/examples/js/controls/OrbitControls.js"></script>
+<div id="treeContainer"></div>
+
+<script src="https://cdn.jsdelivr.net/npm/three@0.152.2/build/three.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.152.2/examples/js/controls/OrbitControls.js"></script>
 <script>
 // ---------------- 日记 ----------------
 const diaryList=document.getElementById('diaryList');
@@ -240,7 +241,6 @@ const canvas=document.getElementById('particles');
 const ctx=canvas.getContext('2d');
 let particlesArray=[];
 let mouse={x:null,y:null};
-window.addEventListener('mousemove', e=>{ mouse.x=e.x; mouse.y=e.y; });
 function resizeCanvas(){ canvas.width=window.innerWidth; canvas.height=window.innerHeight; }
 window.addEventListener('resize', resizeCanvas);
 resizeCanvas();
@@ -273,7 +273,6 @@ class Particle{
     ctx.fill();
   }
 }
-
 function initParticles(){
   particlesArray=[];
   let count=document.body.classList.contains('dark')?150:80;
@@ -316,61 +315,84 @@ window.addEventListener('scroll', () => {
     });
 });
 
-// ---------------- 三维圣诞树 ----------------
-const treeCanvas = document.getElementById('treeCanvas');
-const treeScene = new THREE.Scene();
-const treeCamera = new THREE.PerspectiveCamera(45, window.innerWidth/window.innerHeight,0.1,1000);
-treeCamera.position.set(0,5,10);
-
-const treeRenderer = new THREE.WebGLRenderer({canvas:treeCanvas, alpha:true, antialias:true});
-treeRenderer.setSize(window.innerWidth,window.innerHeight);
-treeRenderer.setPixelRatio(window.devicePixelRatio);
-
-const ambientLight = new THREE.AmbientLight(0xffffff,0.7);
-treeScene.add(ambientLight);
-const pointLight = new THREE.PointLight(0xffffff,1);
-pointLight.position.set(5,10,5);
-treeScene.add(pointLight);
-
-const tree = new THREE.Group();
-const coneMaterial = new THREE.MeshStandardMaterial({color:0x008000});
-for(let i=0;i<5;i++){
-  const cone = new THREE.Mesh(new THREE.ConeGeometry(2.5 - i*0.4,1.5,32), coneMaterial);
-  cone.position.y = i*1.2;
-  tree.add(cone);
-}
-const trunk = new THREE.Mesh(new THREE.CylinderGeometry(0.4,0.4,1,32), new THREE.MeshStandardMaterial({color:0x8B4513}));
-trunk.position.y = -0.5;
-tree.add(trunk);
+// ---------------- 圣诞树 ----------------
+const treeContainer=document.getElementById('treeContainer');
+const treeScene=new THREE.Scene();
+const treeCamera=new THREE.PerspectiveCamera(45, treeContainer.clientWidth/treeContainer.clientHeight,0.1,1000);
+const treeRenderer=new THREE.WebGLRenderer({alpha:true, antialias:true});
+treeRenderer.setSize(treeContainer.clientWidth, treeContainer.clientHeight);
+treeContainer.appendChild(treeRenderer.domElement);
+treeCamera.position.set(0,2,6);
+const tree=new THREE.Group();
 treeScene.add(tree);
 
-const star = new THREE.Mesh(new THREE.OctahedronGeometry(0.3), new THREE.MeshStandardMaterial({color:0xffff00, emissive:0xffff00, emissiveIntensity:1}));
-star.position.y = 5;
-treeScene.add(star);
+// 树干
+const trunkGeo=new THREE.CylinderGeometry(0.1,0.15,0.5,16);
+const trunkMat=new THREE.MeshStandardMaterial({color:0x8B4513});
+const trunk=new THREE.Mesh(trunkGeo,trunkMat);
+trunk.position.y=0.25;
+tree.add(trunk);
 
-const lightColors = [0xff0000,0xffff00,0x0000ff,0xff00ff,0x00ffff];
-const lights = [];
-for(let i=0;i<80;i++){
-  const sphere = new THREE.Mesh(new THREE.SphereGeometry(0.08,8,8), new THREE.MeshStandardMaterial({color:lightColors[i%lightColors.length]}));
-  sphere.position.set(Math.random()*2-1, Math.random()*4, Math.random()*2-1);
-  tree.add(sphere);
-  lights.push(sphere);
+// 树叶层次
+for(let i=0;i<5;i++){
+  const coneGeo=new THREE.ConeGeometry(0.8-i*0.12,0.6,16);
+  const coneMat=new THREE.MeshStandardMaterial({color:0x0a8d0a});
+  const cone=new THREE.Mesh(coneGeo,coneMat);
+  cone.position.y=0.5+i*0.25;
+  cone.rotation.y=Math.random()*0.1-0.05;
+  tree.add(cone);
 }
+
+// 星星
+const starGeo=new THREE.ConeGeometry(0.1,0.3,5);
+const starMat=new THREE.MeshStandardMaterial({color:0xffff00,emissive:0xffff00});
+const star=new THREE.Mesh(starGeo,starMat);
+star.position.y=1.8;
+star.rotation.x=Math.PI;
+tree.add(star);
+
+// 礼盒
+for(let i=0;i<6;i++){
+  const boxGeo=new THREE.BoxGeometry(0.15,0.15,0.15);
+  const colors=[0xff0000,0x0000ff,0xffff00,0xffa500,0x00ff00];
+  const boxMat=new THREE.MeshStandardMaterial({color:colors[i%colors.length]});
+  const box=new THREE.Mesh(boxGeo,boxMat);
+  box.position.set(Math.random()*0.5-0.25,0.075,Math.random()*0.5-0.25);
+  tree.add(box);
+}
+
+// 光源
+const light=new THREE.PointLight(0xffffff,1,20);
+light.position.set(2,5,5);
+treeScene.add(light);
+const ambient=new THREE.AmbientLight(0xffffff,0.3);
+treeScene.add(ambient);
+
+treeScene.add(tree);
+
+const controls=new THREE.OrbitControls(treeCamera, treeRenderer.domElement);
+controls.enablePan=false; controls.enableZoom=false;
+controls.autoRotate=true;
+controls.autoRotateSpeed=1;
+
+window.addEventListener('resize',()=>{
+  treeCamera.aspect=treeContainer.clientWidth/treeContainer.clientHeight;
+  treeCamera.updateProjectionMatrix();
+  treeRenderer.setSize(treeContainer.clientWidth,treeContainer.clientHeight);
+});
+
+treeContainer.addEventListener('click',()=>{
+  controls.enableZoom=true;
+  controls.enableRotate=true;
+  controls.autoRotate=false;
+});
 
 function animateTree(){
-  tree.rotation.y += 0.002;
-  lights.forEach(l=>{
-    l.material.emissiveIntensity = 0.5 + Math.sin(Date.now()*0.005 + l.position.y)*0.5;
-  });
-  treeRenderer.render(treeScene, treeCamera);
   requestAnimationFrame(animateTree);
+  controls.update();
+  treeRenderer.render(treeScene,treeCamera);
 }
 animateTree();
-window.addEventListener('resize',()=>{ 
-  treeCamera.aspect=window.innerWidth/window.innerHeight;
-  treeCamera.updateProjectionMatrix();
-  treeRenderer.setSize(window.innerWidth,window.innerHeight);
-});
 </script>
 </body>
 </html>
