@@ -1,524 +1,417 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
-<meta charset="utf-8" />
-<title>Happy 的个人主页（带可交互立体圣诞树）</title>
-<meta name="viewport" content="width=device-width,initial-scale=1" />
+<meta charset="UTF-8">
+<title>Happy 的个人主页</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <style>
-  /* ---------- 基础 & 苹果风格 ---------- */
-  :root{--accent:#007aff}
-  html,body{height:100%;margin:0;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",sans-serif;overflow-x:hidden; background:#f3f5f8;color:#222;transition:background .4s,color .4s}
-  body.dark{background:#0f1113;color:#eaeaea}
-  a{color:var(--accent)}
-  /* 视频 & 层次 */
-  #bgVideo{position:fixed;left:0;top:0;width:100%;height:100%;object-fit:cover;z-index:0;transition:filter .3s}
-  body.dark #bgVideo{filter:brightness(.45) contrast(1.1)}
-  canvas#particles{position:fixed;left:0;top:0;width:100%;height:100%;z-index:1;pointer-events:none}
-  /* 圣诞树左侧小窗 */
-  #treeContainer{
-    position:fixed;
-    left:20px;
-    top:50%;
-    transform:translateY(-50%);
-    width:220px;height:320px;
-    z-index:12;
-    border-radius:18px;
-    overflow:hidden;
-    box-shadow:0 10px 30px rgba(0,0,0,0.25);
-    background:linear-gradient(180deg,rgba(255,255,255,0.06),rgba(255,255,255,0.03));
-    backdrop-filter: blur(6px);
-    cursor:pointer;
-    transition:transform .25s ease, box-shadow .25s;
-  }
-  #treeContainer:hover{transform:translateY(-50%) scale(1.03); box-shadow:0 18px 50px rgba(0,0,0,0.35)}
-  #treeSmallCanvas{width:100%;height:100%;display:block}
-  /* 放大覆盖层 (模态) */
-  #treeOverlay{
-    position:fixed; inset:0; z-index:9999; display:none; align-items:center; justify-content:center;
-    background:rgba(0,0,0,0.45);
-  }
-  #treeOverlay.show{display:flex}
-  #treeOverlay .panel{
-    width:min(880px,92%); height:min(720px,84%); border-radius:18px; overflow:hidden;
-    background:linear-gradient(180deg, rgba(255,255,255,0.03), rgba(255,255,255,0.02));
-    backdrop-filter: blur(10px);
-    box-shadow:0 40px 120px rgba(0,0,0,0.6);
-    position:relative;
-  }
-  #treeOverlay canvas{width:100%;height:100%;display:block}
-  #treeClose{
-    position:absolute; right:12px; top:12px; z-index:10; background:rgba(0,0,0,0.35); color:#fff; border:none;
-    padding:8px 12px; border-radius:12px; cursor:pointer;
-  }
-  /* 页面主体 (保留你原来的结构样式) */
-  header{position:relative;z-index:5;text-align:center;padding:60px 20px 10px}
-  header img{width:140px;height:140px;border-radius:50%;border:4px solid rgba(255,255,255,0.85);display:block;margin:0 auto 12px;object-fit:cover}
-  header h1{margin:6px 0;font-size:32px}
-  header p{margin:0;color:inherit;opacity:.9}
-  nav{position:sticky;top:0;margin:18px auto 0;background:rgba(255,255,255,0.06);padding:8px;border-radius:16px;width:max-content;z-index:5}
-  nav a{margin:0 12px;text-decoration:none;color:inherit;font-weight:700}
-  /* 卡片苹果风格 */
-  .card{width:320px;margin:22px auto;padding:22px;border-radius:20px;background:rgba(255,255,255,0.6);backdrop-filter:blur(14px);box-shadow:0 12px 30px rgba(8,12,20,.08);transition:transform .25s}
-  body.dark .card{background:rgba(30,30,30,0.6);color:#eee}
-  .card:hover{transform:translateY(-6px)}
-  .tags{margin-top:10px;text-align:center}
-  .tag{display:inline-block;margin:4px;padding:6px 10px;border-radius:14px;background:linear-gradient(90deg,#5ac8fa,#007aff);color:#fff;font-size:13px}
-  /* 日记 */
-  textarea,input[type=date]{width:88%;display:block;margin:8px auto;border-radius:14px;padding:10px;border:none;box-shadow:inset 0 2px 8px rgba(0,0,0,0.06)}
-  .diary-actions{display:flex;justify-content:center;gap:10px;margin-top:8px}
-  button.primary{background:linear-gradient(90deg,#5ac8fa,#007aff);color:#fff;border:none;padding:10px 14px;border-radius:18px;cursor:pointer}
-  /* QR 弹窗 */
-  #qrModal{display:none;position:fixed;inset:0;z-index:40;background:rgba(0,0,0,0.45);align-items:center;justify-content:center}
-  #qrModal.show{display:flex}
-  #qrModal img{max-width:320px;border-radius:14px;border:6px solid rgba(255,255,255,0.9)}
-  /* 返回顶部 */
-  #toTopBtn{position:fixed;right:28px;bottom:28px;padding:10px 14px;border-radius:20px;border:none;background:linear-gradient(90deg,#4caf50,#2e7d32);color:#fff;cursor:pointer;z-index:20;display:none}
-  /* 响应 */
-  @media(max-width:720px){#treeContainer{left:10px;width:140px;height:200px} header img{width:100px;height:100px}}
+body, html {
+  margin:0; padding:0;
+  font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",sans-serif;
+  color:#333;
+  overflow-x:hidden;
+  transition: color 0.5s;
+}
+body.dark { color:#eee; }
+
+/* 背景视频 */
+#bgVideo {
+  position:fixed; top:0; left:0;
+  width:100%; height:100%;
+  object-fit:cover;
+  z-index:0;
+  transition: filter 0.5s;
+}
+body.dark #bgVideo { filter: brightness(40%) contrast(110%); }
+
+/* 粒子画布 */
+#particles {
+  position:fixed; top:0; left:0;
+  width:100%; height:100%;
+  pointer-events:none;
+  z-index:0;
+}
+
+/* 苹果风格卡片 */
+.card {
+  background: rgba(255,255,255,0.6);
+  backdrop-filter: blur(20px);
+  border-radius: 25px;
+  box-shadow: 0 8px 30px rgba(0,0,0,0.1);
+  padding:25px 20px;
+  display:flex;
+  flex-direction:column;
+  gap:12px;
+  transition: transform 0.3s ease, box-shadow 0.3s ease, background 0.5s;
+  width:320px;
+  margin:0 auto 40px;
+}
+.card:hover { transform: translateY(-5px); box-shadow: 0 12px 35px rgba(0,0,0,0.15);}
+body.dark .card { background: rgba(40,40,40,0.7); color:#eee; }
+
+.card .tags { margin-top:10px; text-align:center; }
+.card .tag {
+  display:inline-block;
+  background:linear-gradient(45deg,#5ac8fa,#007aff);
+  color:white;
+  padding:5px 10px;
+  margin:3px;
+  border-radius:15px;
+  font-size:12px;
+  transition:0.2s;
+}
+.card .tag:hover { transform:scale(1.1); }
+
+/* 头部 */
+header { text-align:center; padding:60px 20px 20px; position:relative; z-index:1;}
+header img { width:140px; height:140px; border-radius:50%; border:4px solid rgba(255,255,255,0.8); margin-bottom:20px; transition:transform 0.3s;}
+header img:hover {transform:scale(1.1);}
+header h1, header p { color: inherit; margin:0;}
+header h1{margin:10px 0; font-size:36px;}
+header p{font-size:18px; margin:5px 0;}
+
+/* 导航 */
+nav { margin-top:20px; background:rgba(255,255,255,0.2); padding:10px 0; position:sticky; top:0; z-index:5; border-radius:20px; transition:0.3s;}
+nav.scrolled { background:rgba(0,0,0,0.5); box-shadow:0 4px 10px rgba(0,0,0,0.3);}
+nav a { margin:0 15px; text-decoration:none; font-weight:bold; transition:0.3s;}
+nav a.active { color:#ffeb3b;}
+nav a:hover { color:#ffeb3b; }
+
+/* 日夜切换按钮 */
+#modeToggle { position:fixed; top:20px; right:20px; padding:8px 15px; background:linear-gradient(135deg,#5ac8fa,#007aff); color:white; border-radius:25px; cursor:pointer; z-index:10; transition:0.3s;}
+#modeToggle:hover { background:linear-gradient(135deg,#007aff,#5ac8fa); }
+
+/* 返回顶部 */
+#toTopBtn { position:fixed; bottom:30px; right:30px; background:linear-gradient(135deg,#5ac8fa,#007aff); color:white; border:none; padding:12px 18px; border-radius:25px; cursor:pointer; font-size:16px; z-index:10; display:none; transition:0.3s;}
+#toTopBtn:hover { background:linear-gradient(135deg,#007aff,#5ac8fa); }
+
+/* 联系我 */
+.contact .qr { display:flex; justify-content:center; margin-top:20px; }
+.contact .qr img { width:140px; height:140px; border-radius:25px; border:2px solid #ccc; cursor:pointer; transition:0.3s;}
+.contact .qr img:hover { transform:scale(1.1); }
+
+/* 弹窗 */
+#qrModal { display:none; position:fixed; z-index:10; left:0; top:0; width:100%; height:100%; background:rgba(255,255,255,0.3); backdrop-filter:blur(15px); justify-content:center; align-items:center; border-radius:25px;}
+#qrModal img { max-width:300px; border-radius:25px; border:3px solid #fff;}
+#qrModal.show { display:flex; }
+
+/* 分区 */
+section { padding:60px 20px; text-align:center; position:relative; z-index:1; }
+section h2 { font-size:28px; color:#007aff; margin-bottom:30px; }
+
+textarea, input[type="date"] {
+  width:90%; padding:10px; border-radius:20px; border:none; box-shadow: inset 0 2px 5px rgba(0,0,0,0.1);
+  resize:none; margin:0 auto; display:block; text-align:left;
+}
+.diary-actions { display:flex; justify-content:center; gap:10px; margin-top:10px; }
+.diary-actions button, #addDiaryBtn {
+  padding:8px 12px; cursor:pointer; border:none; border-radius:25px;
+  background:linear-gradient(135deg,#5ac8fa,#007aff); color:white; font-weight:bold; transition:0.3s;
+}
+.diary-actions button:hover, #addDiaryBtn:hover { background:linear-gradient(135deg,#007aff,#5ac8fa); }
+
+/* 圣诞树容器 */
+#xmasTreeContainer { position:fixed; left:20px; top:50%; transform:translateY(-50%); width:200px; height:400px; cursor:pointer; z-index:9; }
+
+/* 响应式 */
+@media(max-width:600px){
+  header img{width:100px;height:100px;}
+  .card{width:90%;}
+  nav a{margin:0 8px; font-size:14px;}
+  #xmasTreeContainer{display:none;}
+}
 </style>
 </head>
 <body>
-  <!-- 视频背景 -->
-  <video id="bgVideo" autoplay muted loop playsinline>
-    <source src="https://github.com/Happyma-4869/Happyma-4869.github.io/blob/main/Video%20Project%204.mp4?raw=true" type="video/mp4">
-  </video>
 
-  <!-- 粒子 -->
-  <canvas id="particles"></canvas>
+<video id="bgVideo" autoplay muted loop>
+  <source src="https://github.com/Happyma-4869/Happyma-4869.github.io/blob/main/Video%20Project%204.mp4?raw=true" type="video/mp4">
+</video>
+<canvas id="particles"></canvas>
 
-  <!-- 左侧小圣诞树容器 -->
-  <div id="treeContainer" title="点击以放大互动圣诞树"></div>
+<div id="xmasTreeContainer"></div>
 
-  <!-- 放大交互层 -->
-  <div id="treeOverlay" aria-hidden="true">
-    <div class="panel">
-      <button id="treeClose">关闭 ✕</button>
-      <canvas id="treeFullCanvas"></canvas>
+<header>
+  <img src="https://github.com/Happyma-4869/Happyma-4869.github.io/blob/main/%E5%BE%AE%E4%BF%A1%E5%9B%BE%E7%89%87_20251207233412_9_79.jpg?raw=true" alt="头像">
+  <h1>欢迎来到 Happy 的主页</h1>
+  <p>记录我的日常和点滴 😊</p>
+  <nav id="mainNav">
+      <a href="#about">关于我</a>
+      <a href="#diary">日记</a>
+      <a href="#contact">联系我</a>
+  </nav>
+</header>
+
+<div id="modeToggle">🌙 日/夜切换</div>
+<button id="toTopBtn">⬆️ 顶部</button>
+
+<section id="about">
+  <h2>关于我</h2>
+  <div class="card show">
+    <p>Hi 我是happy  我来自河南郑州市  目前是郑州市西亚斯大一学生  在此我想分享我的生活</p>
+    <div class="tags">
+      <span class="tag">学习</span>
+      <span class="tag">游戏</span>
+      <span class="tag">音乐</span>
+      <span class="tag">编程</span>
     </div>
   </div>
+</section>
 
-  <!-- 页面内容（保留） -->
-  <header>
-    <img src="https://github.com/Happyma-4869/Happyma-4869.github.io/blob/main/%E5%BE%AE%E4%BF%A1%E5%9B%BE%E7%89%87_20251207233412_9_79.jpg?raw=true" alt="头像">
-    <h1>欢迎来到 Happy 的主页</h1>
-    <p>记录我的日常和点滴 😊</p>
-    <nav id="mainNav">
-      <a href="#about">关于我</a><a href="#diary">日记</a><a href="#contact">联系我</a>
-    </nav>
-  </header>
+<section id="diary">
+  <h2>我的日记 📖</h2>
+  <div class="card">
+    <input type="date" id="diaryDate" />
+    <textarea id="diaryContent" placeholder="写下今天的日记..." rows="3"></textarea>
+    <button id="addDiaryBtn">添加日记</button>
+  </div>
+  <div id="diaryList"></div>
+</section>
 
-  <div style="height:18px"></div>
+<section id="contact">
+  <h2>联系我</h2>
+  <p>微信：<strong>H4ppy_ma</strong></p>
+  <div class="contact">
+      <div class="qr">
+          <img id="qrImg" src="https://github.com/Happyma-4869/Happyma-4869.github.io/blob/main/%E5%BE%AE%E4%BF%A1%E5%9B%BE%E7%89%87_20251207233522_10_79.jpg?raw=true" alt="微信二维码">
+      </div>
+  </div>
+</section>
 
-  <section id="about">
-    <h2 style="color:var(--accent)">关于我</h2>
-    <div class="card">
-      <p>Hi 我是happy  我来自河南郑州市  目前是郑州市西亚斯大一学生  在此我想分享我的生活</p>
-      <div class="tags"><span class="tag">学习</span><span class="tag">游戏</span><span class="tag">音乐</span><span class="tag">编程</span></div>
-    </div>
-  </section>
+<footer>&copy; 2025 Happyma.top</footer>
+<div id="qrModal"><img src="https://github.com/Happyma-4869/Happyma-4869.github.io/blob/main/%E5%BE%AE%E4%BF%A1%E5%9B%BE%E7%89%87_20251207233522_10_79.jpg?raw=true" alt="微信二维码大图"></div>
 
-  <section id="diary">
-    <h2 style="color:var(--accent)">我的日记 📖</h2>
-    <div class="card">
-      <input type="date" id="diaryDate" />
-      <textarea id="diaryContent" rows="4" placeholder="写下今天的日记..."></textarea>
-      <div class="diary-actions"><button id="addDiaryBtn" class="primary">添加日记</button></div>
-    </div>
-    <div id="diaryList"></div>
-  </section>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
 
-  <section id="contact">
-    <h2 style="color:var(--accent)">联系我</h2>
-    <div class="card">
-      <p>微信：<strong>H4ppy_ma</strong></p>
-      <div class="contact"><div class="qr"><img id="qrImg" src="https://github.com/Happyma-4869/Happyma-4869.github.io/blob/main/%E5%BE%AE%E4%BF%A1%E5%9B%BE%E7%89%87_20251207233522_10_79.jpg?raw=true" alt="微信二维码" style="width:140px;height:140px;border-radius:14px"></div></div>
-    </div>
-  </section>
-
-  <footer style="text-align:center;padding:24px 10px;z-index:5">&copy; 2025 Happyma.top</footer>
-
-  <!-- QR 模态 -->
-  <div id="qrModal"><img src="https://github.com/Happyma-4869/Happyma-4869.github.io/blob/main/%E5%BE%AE%E4%BF%A1%E5%9B%BE%E7%89%87_20251207233522_10_79.jpg?raw=true" alt="二维码大图"></div>
-
-  <!-- 返回顶部 -->
-  <button id="toTopBtn" aria-label="回到顶部">⬆️ 顶部</button>
-
-  <!-- three.js -->
-  <script src="https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/three@0.160.0/examples/js/controls/OrbitControls.js"></script>
-
-  <script>
-  /* ============================
-     日记（localStorage） + 页面常规交互
-     ============================ */
-  const diaryList = document.getElementById('diaryList');
-  const addDiaryBtn = document.getElementById('addDiaryBtn');
-  const diaryDate = document.getElementById('diaryDate');
-  const diaryContent = document.getElementById('diaryContent');
-
-  let diaries = JSON.parse(localStorage.getItem('diaries')) || [
-    {date:'2025-12-08', content:'今天是我初次创建我的个人网站  目前还在测试中  以后我会逐步完善耶✌'}
-  ];
-
-  function renderDiaries(){
-    diaryList.innerHTML = '';
-    diaries.forEach((d, i) => {
-      const card = document.createElement('div');
-      card.className = 'card';
-      card.innerHTML = `<p><strong>${d.date}</strong></p><p>${d.content}</p>
-        <div style="display:flex;justify-content:center;gap:8px;margin-top:10px">
-          <button onclick="editDiary(${i})" class="primary" style="background:#999;padding:6px 10px">编辑</button>
-          <button onclick="deleteDiary(${i})" class="primary" style="background:#e94f37">删除</button>
-        </div>`;
-      diaryList.appendChild(card);
-    });
-    localStorage.setItem('diaries', JSON.stringify(diaries));
-  }
-  window.editDiary = function(i){
-    const nx = prompt('请输入新的日记内容：', diaries[i].content);
-    if(nx === null) return;
-    diaries[i].content = nx;
-    renderDiaries();
-  };
-  window.deleteDiary = function(i){
-    if(!confirm('确定删除这一条日记吗？')) return;
-    diaries.splice(i,1); renderDiaries();
-  };
-
-  addDiaryBtn.addEventListener('click', ()=>{
-    const dateVal = diaryDate.value || new Date().toISOString().split('T')[0];
-    const contentVal = diaryContent.value.trim();
-    if(!contentVal){ alert('请填写内容'); return; }
-    diaries.unshift({date:dateVal, content:contentVal});
-    diaryDate.value=''; diaryContent.value='';
-    renderDiaries();
+<script>
+// ---------------- 日记 ----------------
+const diaryList=document.getElementById('diaryList');
+const addDiaryBtn=document.getElementById('addDiaryBtn');
+const diaryDate=document.getElementById('diaryDate');
+const diaryContent=document.getElementById('diaryContent');
+let diaries=JSON.parse(localStorage.getItem('diaries'))||[{date:'2025-12-08', content:'今天是我初次创建我的个人网站  目前还在测试中  以后我会逐步完善耶✌'}];
+function renderDiaries(){
+  diaryList.innerHTML='';
+  diaries.forEach((d,i)=>{
+    const card=document.createElement('div');
+    card.className='card show';
+    card.innerHTML=`<p><strong>${d.date}</strong></p>
+                    <p>${d.content}</p>
+                    <div class="diary-actions">
+                      <button onclick="editDiary(${i})">编辑</button>
+                      <button onclick="deleteDiary(${i})">删除</button>
+                    </div>`;
+    diaryList.appendChild(card);
   });
+  localStorage.setItem('diaries', JSON.stringify(diaries));
+}
+renderDiaries();
+addDiaryBtn.addEventListener('click',()=>{
+  const dateVal=diaryDate.value||new Date().toISOString().split('T')[0];
+  const contentVal=diaryContent.value.trim();
+  if(!contentVal){ alert('请填写内容'); return; }
+  diaries.unshift({date:dateVal, content:contentVal});
+  diaryDate.value=''; diaryContent.value='';
   renderDiaries();
+});
+function deleteDiary(i){ diaries.splice(i,1); renderDiaries(); }
+function editDiary(i){
+  const newContent=prompt('请输入新的日记内容：', diaries[i].content);
+  if(newContent===null) return;
+  diaries[i].content=newContent;
+  renderDiaries();
+}
 
-  // QR modal
-  const qrImg = document.getElementById('qrImg');
-  const qrModal = document.getElementById('qrModal');
-  qrImg.addEventListener('click', ()=> qrModal.classList.add('show'));
-  qrModal.addEventListener('click', ()=> qrModal.classList.remove('show'));
-
-  // toTop
-  const toTopBtn = document.getElementById('toTopBtn');
-  window.addEventListener('scroll', ()=> { toTopBtn.style.display = (window.scrollY>200) ? 'block' : 'none' });
-  toTopBtn.addEventListener('click', ()=> window.scrollTo({top:0, behavior:'smooth'}));
-
-  // nav highlight & card show on scroll
-  window.addEventListener('scroll', ()=>{
-    document.querySelectorAll('.card').forEach(card=>{
-      const r = card.getBoundingClientRect();
-      if(r.top < window.innerHeight - 60) card.classList.add('show');
-    });
-    document.querySelectorAll('#mainNav a').forEach(link=>{
-      const sec = document.querySelector(link.getAttribute('href'));
-      if(!sec) return;
-      if(sec.offsetTop - 80 <= window.scrollY && sec.offsetTop + sec.offsetHeight > window.scrollY) link.classList.add('active');
-      else link.classList.remove('active');
-    });
-  });
-
-  /* ============================
-     粒子（白色） - 白天淡 夜间亮
-     ============================ */
-  const partCanvas = document.getElementById('particles');
-  const pctx = partCanvas.getContext('2d');
-  let particles = [];
-  function resizeParticles(){ partCanvas.width = innerWidth; partCanvas.height = innerHeight; }
-  window.addEventListener('resize', resizeParticles);
-  resizeParticles();
-
-  let mouse = {x: null, y: null};
-  window.addEventListener('mousemove', (e)=> { mouse.x = e.clientX; mouse.y = e.clientY; });
-
-  function initParticles(){
-    particles = [];
-    const count = document.body.classList.contains('dark') ? 150 : 80;
-    for(let i=0;i<count;i++){
-      particles.push({
-        x: Math.random()*partCanvas.width,
-        y: Math.random()*partCanvas.height,
-        r: Math.random()*2+1,
-        angle: Math.random()*Math.PI*2,
-        orbit: Math.random()*20+8,
-        speed: Math.random()*0.01+0.004,
-        baseX: Math.random()*partCanvas.width,
-        baseY: Math.random()*partCanvas.height
-      });
-    }
-  }
-  initParticles();
-  function drawParticles(){
-    pctx.clearRect(0,0,partCanvas.width,partCanvas.height);
-    particles.forEach(p=>{
-      p.angle += p.speed;
-      p.x = p.baseX + Math.cos(p.angle)*p.orbit;
-      p.y = p.baseY + Math.sin(p.angle)*p.orbit;
-      // 微靠近鼠标
-      if(mouse.x && mouse.y){
-        const dx = mouse.x - p.x, dy = mouse.y - p.y;
-        const d = Math.sqrt(dx*dx+dy*dy);
-        if(d<120){ p.x += dx*0.002; p.y += dy*0.002; }
-      }
-      pctx.beginPath();
-      pctx.fillStyle = document.body.classList.contains('dark') ? 'rgba(255,255,255,0.92)' : 'rgba(255,255,255,0.28)';
-      pctx.arc(p.x, p.y, p.r, 0, Math.PI*2);
-      pctx.fill();
-    });
-    requestAnimationFrame(drawParticles);
-  }
-  drawParticles();
-
-  // night/day toggle affecting particles
-  const modeToggle = document.getElementById('modeToggle');
-  modeToggle.addEventListener('click', ()=>{
+// ---------------- 日夜模式 ----------------
+const modeToggle=document.getElementById('modeToggle');
+modeToggle.addEventListener('click',()=>{
     document.body.classList.toggle('dark');
-    initParticles(); // 重建以改变数量/亮度
-  });
-
-  /* ============================
-     三维圣诞树（小窗 + 放大模态）
-     - 我用同一 scene 渲染到两个 renderer（小窗 + 全屏panel）
-     - 小窗默认微旋转且不可交互，点击打开 overlay 后启用交互（OrbitControls）
-     - 星星闪烁、灯和礼盒简单动画
-     ============================ */
-
-  // containers & canvases
-  const treeContainer = document.getElementById('treeContainer');
-  const overlay = document.getElementById('treeOverlay');
-  const overlayCanvas = document.getElementById('treeFullCanvas');
-
-  // small renderer & camera
-  const smallRenderer = new THREE.WebGLRenderer({antialias:true, alpha:true});
-  smallRenderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
-  smallRenderer.setSize(treeContainer.clientWidth, treeContainer.clientHeight);
-  smallRenderer.domElement.id = 'treeSmallCanvas';
-  treeContainer.appendChild(smallRenderer.domElement);
-
-  const smallCamera = new THREE.PerspectiveCamera(50, treeContainer.clientWidth/treeContainer.clientHeight, 0.1, 100);
-  smallCamera.position.set(0,1.2,3.0);
-
-  // full renderer & camera (overlay)
-  const fullRenderer = new THREE.WebGLRenderer({antialias:true, alpha:true, canvas: overlayCanvas});
-  fullRenderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
-  fullRenderer.setSize(overlayCanvas.clientWidth || 800, overlayCanvas.clientHeight || 600);
-
-  const fullCamera = new THREE.PerspectiveCamera(50, 1.6, 0.1, 200);
-  fullCamera.position.set(0,1.6,4.2);
-
-  // shared scene
-  const scene = new THREE.Scene();
-
-  // lights
-  const amb = new THREE.AmbientLight(0xffffff, 0.8);
-  scene.add(amb);
-  const pLight = new THREE.PointLight(0xffffff, 0.9);
-  pLight.position.set(4,6,4);
-  scene.add(pLight);
-
-  // tree group
-  const tree = new THREE.Group();
-  scene.add(tree);
-
-  // layered foliage for better depth (several cones)
-  const greens = [0x056608, 0x0a8d0a, 0x0f9b1f];
-  for(let i=0;i<5;i++){
-    const radius = 0.9 - i*0.14;
-    const height = 0.9 - i*0.12;
-    const geo = new THREE.ConeGeometry(radius, height, 32);
-    const mat = new THREE.MeshStandardMaterial({color: greens[i%greens.length], roughness:0.7, metalness:0.05});
-    const m = new THREE.Mesh(geo, mat);
-    m.position.y = 0.45 + i*0.25;
-    m.rotation.y = (Math.random()-0.5)*0.25;
-    tree.add(m);
-  }
-
-  // trunk
-  const trunk = new THREE.Mesh(new THREE.CylinderGeometry(0.12,0.18,0.45,20), new THREE.MeshStandardMaterial({color:0x7b4f2b}));
-  trunk.position.y = 0.12;
-  tree.add(trunk);
-
-  // star (two-layered for glow)
-  const starMat = new THREE.MeshBasicMaterial({color:0xfff08f});
-  const starGeo = new THREE.OctahedronGeometry(0.12);
-  const star = new THREE.Mesh(starGeo, new THREE.MeshStandardMaterial({color:0xffe27a, emissive:0xfff2a6, emissiveIntensity:1.6}));
-  star.position.y = 1.65;
-  star.rotation.set(Math.PI,0,0);
-  tree.add(star);
-
-  // little decorative lights (spheres with emissive)
-  const lampColors = [0xff3b30, 0xffcc00, 0x00a1ff, 0xff2d95, 0x26de8a];
-  const lamps = [];
-  for(let i=0;i<60;i++){
-    const s = 0.055 + Math.random()*0.05;
-    const geo = new THREE.SphereGeometry(s, 8, 8);
-    const mat = new THREE.MeshStandardMaterial({color: lampColors[i%lampColors.length], emissive: lampColors[i%lampColors.length], emissiveIntensity: 0.9});
-    const mesh = new THREE.Mesh(geo, mat);
-    // distribute on cone layers
-    const layer = Math.floor(Math.random()*5);
-    const theta = Math.random()*Math.PI*2;
-    const r = (0.25 + layer*0.15) * (1 + Math.random()*0.25);
-    mesh.position.set(Math.cos(theta)*r, 0.9 + layer*0.25 + Math.random()*0.05, Math.sin(theta)*r);
-    lamps.push({mesh, phase: Math.random()*10});
-    tree.add(mesh);
-  }
-
-  // gift boxes around base
-  const gifts = [];
-  const giftColors = [0xff6347, 0xffd700, 0x4db6ff, 0xff8c42, 0x6bff9e];
-  for(let i=0;i<8;i++){
-    const size = 0.16 + Math.random()*0.08;
-    const geo = new THREE.BoxGeometry(size, size*0.65, size);
-    const mat = new THREE.MeshStandardMaterial({color: giftColors[i%giftColors.length], roughness:0.6});
-    const box = new THREE.Mesh(geo, mat);
-    const angle = i*(Math.PI*2/8) + Math.random()*0.25;
-    const radius = 0.55 + Math.random()*0.18;
-    box.position.set(Math.cos(angle)*radius, size*0.33, Math.sin(angle)*radius);
-    box.rotation.y = Math.random()*Math.PI;
-    gifts.push({mesh:box, speed: (0.002+Math.random()*0.004)});
-    tree.add(box);
-  }
-
-  // small ground plane for shadow illusion (not physical shadow)
-  const ground = new THREE.Mesh(new THREE.CircleGeometry(1.1, 32), new THREE.MeshBasicMaterial({color:0x000000, opacity:0.06, transparent:true}));
-  ground.rotation.x = -Math.PI/2; ground.position.y = 0.01;
-  scene.add(ground);
-
-  // initial small camera/look settings done above
-
-  // animation state
-  let smallRotation = 0;
-  let overlayOpen = false;
-
-  // small render loop
-  function renderSmall(){
-    smallRenderer.setSize(treeContainer.clientWidth, treeContainer.clientHeight, false);
-    smallRenderer.render(scene, smallCamera);
-  }
-  // small animation
-  function animateSmall(){
-    if(!overlayOpen){
-      smallRotation += 0.002;
-      tree.rotation.y = smallRotation;
-      // subtle lamp twinkle
-      lamps.forEach((l, idx)=> {
-        l.mesh.material.emissiveIntensity = 0.6 + 0.6 * Math.abs(Math.sin((Date.now()*0.002) + l.phase));
-      });
-      gifts.forEach(g => {
-        g.mesh.rotation.y += g.speed;
-      });
-    }
-    renderSmall();
-    requestAnimationFrame(animateSmall);
-  }
-  animateSmall();
-
-  // overlay (full) renderer & controls
-  const overlayRenderer = fullRenderer; // alias
-  function setupOverlay(){
-    // adjust size to panel
-    const panel = document.querySelector('#treeOverlay .panel');
-    const w = panel.clientWidth, h = panel.clientHeight;
-    overlayCanvas.width = w; overlayCanvas.height = h;
-    overlayRenderer.setSize(w, h, false);
-    fullCamera.aspect = w/h; fullCamera.updateProjectionMatrix();
-  }
-  // prepare orbit controls for overlay
-  const overlayControls = new THREE.OrbitControls(fullCamera, overlayCanvas);
-  overlayControls.enablePan = false;
-  overlayControls.enableZoom = true;
-  overlayControls.enableRotate = true;
-  overlayControls.enableDamping = true;
-  overlayControls.dampingFactor = 0.08;
-  overlayControls.autoRotate = false;
-
-  // overlay animation
-  function animateOverlay(){
-    // star subtle pulse
-    const emissiveBase = 1.2 + Math.sin(Date.now()*0.006)*0.6;
-    star.material.emissiveIntensity = emissiveBase;
-    // lamps twinkle faster on overlay
-    lamps.forEach((l)=> {
-      l.mesh.material.emissiveIntensity = 0.6 + 1.0 * Math.abs(Math.sin((Date.now()*0.003) + l.phase));
+    particlesArray.forEach(p=>{
+        p.color=document.body.classList.contains('dark')?'rgba(255,255,255,0.9)':'rgba(255,255,255,0.3)';
     });
-    gifts.forEach(g => { g.mesh.rotation.y += g.speed*1.6; g.mesh.position.y = 0.08 + Math.abs(Math.sin(Date.now()*0.001 + g.speed))*0.06; });
-    overlayRenderer.render(scene, fullCamera);
-    requestAnimationFrame(animateOverlay);
+    initParticles();
+});
+
+// ---------------- 返回顶部 ----------------
+const toTopBtn=document.getElementById('toTopBtn');
+window.addEventListener('scroll',()=>{ toTopBtn.style.display=(window.scrollY>200)?'block':'none'; });
+toTopBtn.addEventListener('click',()=>{ window.scrollTo({top:0, behavior:'smooth'}); });
+
+// ---------------- 粒子动画 ----------------
+const canvas=document.getElementById('particles');
+const ctx=canvas.getContext('2d');
+let particlesArray=[];
+let mouse={x:null,y:null};
+window.addEventListener('mousemove', e=>{ mouse.x=e.x; mouse.y=e.y; });
+function resizeCanvas(){ canvas.width=window.innerWidth; canvas.height=window.innerHeight; }
+window.addEventListener('resize', resizeCanvas);
+resizeCanvas();
+
+class Particle{
+  constructor(){
+    this.originX=Math.random()*canvas.width;
+    this.originY=Math.random()*canvas.height;
+    this.radius=Math.random()*2+1.5;
+    this.angle=Math.random()*Math.PI*2;
+    this.orbit=Math.random()*20+10;
+    this.speed=(Math.random()*0.01)+0.005;
+    this.color=document.body.classList.contains('dark')?'rgba(255,255,255,0.9)':'rgba(255,255,255,0.3)';
+  }
+  update(){
+    this.angle+=this.speed;
+    this.x=this.originX+Math.cos(this.angle)*this.orbit;
+    this.y=this.originY+Math.sin(this.angle)*this.orbit;
+    let dx=mouse.x-this.x, dy=mouse.y-this.y, dist=Math.sqrt(dx*dx+dy*dy);
+    if(dist<100){ this.x+=dx*0.002; this.y+=dy*0.002; }
+    if(this.x>canvas.width)this.originX=0;
+    if(this.x<0)this.originX=canvas.width;
+    if(this.y>canvas.height)this.originY=0;
+    if(this.y<0)this.originY=canvas.height;
+  }
+  draw(){
+    ctx.fillStyle=this.color;
+    ctx.beginPath();
+    ctx.arc(this.x,this.y,this.radius,0,Math.PI*2);
+    ctx.fill();
+  }
+}
+
+function initParticles(){
+  particlesArray=[];
+  let count=document.body.classList.contains('dark')?150:80;
+  for(let i=0;i<count;i++){ particlesArray.push(new Particle()); }
+}
+initParticles();
+function animateParticles(){
+  ctx.clearRect(0,0,canvas.width,canvas.height);
+  particlesArray.forEach(p=>{p.update();p.draw();});
+  requestAnimationFrame(animateParticles);
+}
+animateParticles();
+
+// ---------------- 微信二维码弹窗 ----------------
+const qrImg=document.getElementById('qrImg');
+const qrModal=document.getElementById('qrModal');
+qrImg.addEventListener('click',()=>qrModal.classList.add('show'));
+qrModal.addEventListener('click',()=>qrModal.classList.remove('show'));
+
+// ---------------- 卡片滚动动画 ----------------
+function showOnScroll() {
+    const cards = document.querySelectorAll('.card');
+    cards.forEach(card => {
+        const rect = card.getBoundingClientRect();
+        if (rect.top < window.innerHeight - 50) card.classList.add('show');
+    });
+}
+window.addEventListener('scroll', showOnScroll);
+window.addEventListener('load', showOnScroll);
+
+// ---------------- 导航高亮 ----------------
+const mainNav = document.getElementById('mainNav');
+const navLinks = mainNav.querySelectorAll('a');
+window.addEventListener('scroll', () => {
+    navLinks.forEach(link => {
+        const section = document.querySelector(link.getAttribute('href'));
+        if(section.offsetTop - 70 <= window.scrollY && section.offsetTop + section.offsetHeight > window.scrollY){
+            link.classList.add('active');
+        } else { link.classList.remove('active'); }
+    });
+});
+
+// ---------------- Three.js 圣诞树 ----------------
+let scene, camera, renderer, treeGroup, controls;
+const container = document.getElementById('xmasTreeContainer');
+initXmasTree();
+function initXmasTree(){
+  scene = new THREE.Scene();
+  camera = new THREE.PerspectiveCamera(50, container.clientWidth/container.clientHeight, 0.1, 1000);
+  camera.position.set(0,1.5,5);
+  renderer = new THREE.WebGLRenderer({alpha:true, antialias:true});
+  renderer.setSize(container.clientWidth, container.clientHeight);
+  renderer.setPixelRatio(window.devicePixelRatio);
+  renderer.shadowMap.enabled = true;
+  container.appendChild(renderer.domElement);
+
+  // 灯光
+  const ambient = new THREE.AmbientLight(0xffffff,0.6);
+  scene.add(ambient);
+  const dirLight = new THREE.DirectionalLight(0xffffff,0.8);
+  dirLight.position.set(5,10,5);
+  dirLight.castShadow = true;
+  scene.add(dirLight);
+
+  // 圣诞树组
+  treeGroup = new THREE.Group();
+  scene.add(treeGroup);
+
+  // 树干
+  const trunkGeo = new THREE.CylinderGeometry(0.1,0.15,0.5,16);
+  const trunkMat = new THREE.MeshStandardMaterial({color:0x8B4513});
+  const trunk = new THREE.Mesh(trunkGeo,trunkMat);
+  trunk.position.y=0.25;
+  treeGroup.add(trunk);
+
+  // 树叶
+  const coneMat = new THREE.MeshStandardMaterial({color:0x008000, flatShading:true});
+  for(let i=0;i<3;i++){
+    const coneGeo = new THREE.ConeGeometry(0.5-0.1*i,0.8,16);
+    const cone = new THREE.Mesh(coneGeo, coneMat);
+    cone.position.y = 0.5+0.4*i;
+    treeGroup.add(cone);
   }
 
-  // open overlay
-  const overlayDiv = document.getElementById('treeOverlay');
-  const closeBtn = document.getElementById('treeClose');
-  treeContainer.addEventListener('click', openOverlay);
-  function openOverlay(){
-    if(overlayOpen) return;
-    overlayOpen = true;
-    overlayDiv.classList.add('show');
-    overlayDiv.setAttribute('aria-hidden','false');
-    // make overlay canvas match panel
-    setupOverlay();
-    // position camera slightly farther for full view
-    fullCamera.position.set(0,1.6,4.0);
-    overlayControls.reset();
-    overlayControls.update();
-    // allow nicer lighting when overlay open
-    pLight.intensity = 1.2;
-    amb.intensity = 0.6;
-    animateOverlay();
-  }
-  // close overlay
-  closeBtn.addEventListener('click', closeOverlay);
-  function closeOverlay(){
-    if(!overlayOpen) return;
-    overlayOpen = false;
-    overlayDiv.classList.remove('show');
-    overlayDiv.setAttribute('aria-hidden','true');
-    // reset small camera and light
-    pLight.intensity = 0.9;
-    amb.intensity = 0.8;
+  // 星星
+  const starGeo = new THREE.OctahedronGeometry(0.15);
+  const starMat = new THREE.MeshStandardMaterial({color:0xFFFF00, emissive:0xFFFF00});
+  const star = new THREE.Mesh(starGeo, starMat);
+  star.position.y=1.9;
+  treeGroup.add(star);
+
+  // 礼盒
+  const boxColors=[0xff0000,0x0000ff,0xffff00,0xffa500];
+  for(let i=0;i<4;i++){
+    const boxGeo = new THREE.BoxGeometry(0.3,0.3,0.3);
+    const boxMat = new THREE.MeshStandardMaterial({color:boxColors[i]});
+    const box = new THREE.Mesh(boxGeo,boxMat);
+    const angle = (i/4)*Math.PI*2;
+    box.position.set(Math.cos(angle)*0.7,0.15,Math.sin(angle)*0.7);
+    treeGroup.add(box);
   }
 
-  // resize handling
-  window.addEventListener('resize', ()=>{
-    // small
-    smallRenderer.setSize(treeContainer.clientWidth, treeContainer.clientHeight, false);
-    smallCamera.aspect = treeContainer.clientWidth / treeContainer.clientHeight;
-    smallCamera.updateProjectionMatrix();
-    // overlay panel
-    if(overlayOpen) setupOverlay();
-    // particles
-    resizeParticles();
-  });
+  // 控制
+  controls = new THREE.OrbitControls(camera, renderer.domElement);
+  controls.enableZoom = false;
+  controls.enablePan = false;
+  controls.autoRotate = true;
+  controls.autoRotateSpeed = 0.5;
+  controls.enableDamping = true;
 
-  // ensure overlayCanvas size if panel visible
-  window.addEventListener('orientationchange', ()=> { if(overlayOpen) setupOverlay(); });
+  window.addEventListener('resize', onWindowResize);
+  container.addEventListener('click', toggleTreeScale);
+  animate();
+}
 
-  /* ============ 微优化：点击树小窗也能双击回到overlay关闭 ============ */
-  treeContainer.addEventListener('dblclick', openOverlay);
+let isBig=false;
+function toggleTreeScale(){
+  isBig = !isBig;
+  const targetScale = isBig?2:1;
+  gsap.to(treeGroup.scale,{x:targetScale,y:targetScale,z:targetScale,duration:0.5});
+  gsap.to(controls,{autoRotateSpeed:isBig?2:0.5,duration:0.5});
+}
 
-  /* ============================
-     小补丁：当页面切换夜间时，调整一些材质亮度
-     ============================ */
-  const observer = new MutationObserver(() => {
-    const dark = document.body.classList.contains('dark');
-    // lamp visibility slightly different
-    lamps.forEach(l => { l.mesh.material.emissiveIntensity = dark ? 1.0 : 0.7; });
-  });
-  observer.observe(document.body, {attributes:true, attributeFilter:['class']});
+function onWindowResize(){
+  camera.aspect=container.clientWidth/container.clientHeight;
+  camera.updateProjectionMatrix();
+  renderer.setSize(container.clientWidth, container.clientHeight);
+}
 
-  // initial sizing to avoid black canvas
-  smallRenderer.setSize(treeContainer.clientWidth, treeContainer.clientHeight);
-  overlayRenderer.setSize(Math.min(880, window.innerWidth*0.92), Math.min(720, window.innerHeight*0.84));
-
-  // ensure overlay canvas CSS fits parent
-  (function ensureOverlayCanvasSize(){
-    const panel = document.querySelector('#treeOverlay .panel');
-    if(panel){
-      overlayCanvas.style.width='100%'; overlayCanvas.style.height='100%';
-    }
-  })();
-  </script>
+function animate(){
+  requestAnimationFrame(animate);
+  controls.update();
+  renderer.render(scene,camera);
+}
+</script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.15.1/gsap.min.js"></script>
 </body>
 </html>
