@@ -25,7 +25,7 @@ body.dark { color:#eee; }
 body.dark #bgVideo { filter: brightness(40%) contrast(110%); }
 
 /* 粒子画布 */
-#particles {
+#particles, #giftParticles {
   position:fixed; top:0; left:0;
   width:100%; height:100%;
   pointer-events:none;
@@ -110,6 +110,22 @@ textarea, input[type="date"] {
 }
 .diary-actions button:hover, #addDiaryBtn:hover { background:linear-gradient(135deg,#007aff,#5ac8fa); }
 
+/* 圣诞树 */
+.christmas-tree { text-align:center; margin:40px 0; z-index:2; position:relative; }
+.tree { position:relative; display:inline-block; }
+.star {
+  width:20px; height:20px; background:gold; clip-path: polygon(50% 0%, 61% 35%, 98% 35%, 68% 57%, 79% 91%, 50% 70%, 21% 91%, 32% 57%, 2% 35%, 39% 35%);
+  margin:0 auto; animation: blink 1s infinite alternate;
+}
+.branch { width:0; height:0; border-left:50px solid transparent; border-right:50px solid transparent; border-bottom:40px solid green; margin:-10px auto; position:relative; }
+.b2 { border-left:70px solid transparent; border-right:70px solid transparent; border-bottom:60px solid green; }
+.b3 { border-left:90px solid transparent; border-right:90px solid transparent; border-bottom:80px solid green; }
+.trunk { width:40px; height:50px; background:sienna; margin:-10px auto; border-radius:5px; }
+.decor { width:10px; height:10px; border-radius:50%; position:absolute; background:red; animation: blink 1.5s infinite alternate; }
+.decor2 { background:yellow; }
+.decor3 { background:blue; }
+@keyframes blink { 0%{opacity:1;} 100%{opacity:0.3;} }
+
 /* 响应式 */
 @media(max-width:600px){
   header img{width:100px;height:100px;}
@@ -124,6 +140,7 @@ textarea, input[type="date"] {
   <source src="https://github.com/Happyma-4869/Happyma-4869.github.io/blob/main/Video%20Project%204.mp4?raw=true" type="video/mp4">
 </video>
 <canvas id="particles"></canvas>
+<canvas id="giftParticles"></canvas>
 
 <header>
   <img src="https://github.com/Happyma-4869/Happyma-4869.github.io/blob/main/%E5%BE%AE%E4%BF%A1%E5%9B%BE%E7%89%87_20251207233412_9_79.jpg?raw=true" alt="头像">
@@ -138,6 +155,29 @@ textarea, input[type="date"] {
 
 <div id="modeToggle">🌙 日/夜切换</div>
 <button id="toTopBtn">⬆️ 顶部</button>
+
+<!-- 圣诞树 -->
+<div class="christmas-tree">
+  <div class="tree">
+    <div class="star"></div>
+    <div class="branch b1">
+      <div class="decor" style="top:10px; left:15px;"></div>
+      <div class="decor2" style="top:15px; left:35px;"></div>
+      <div class="decor3" style="top:20px; left:25px;"></div>
+    </div>
+    <div class="branch b2">
+      <div class="decor" style="top:15px; left:20px;"></div>
+      <div class="decor2" style="top:20px; left:45px;"></div>
+      <div class="decor3" style="top:25px; left:35px;"></div>
+    </div>
+    <div class="branch b3">
+      <div class="decor" style="top:20px; left:30px;"></div>
+      <div class="decor2" style="top:25px; left:55px;"></div>
+      <div class="decor3" style="top:30px; left:40px;"></div>
+    </div>
+    <div class="trunk"></div>
+  </div>
+</div>
 
 <section id="about">
   <h2>关于我</h2>
@@ -176,7 +216,7 @@ textarea, input[type="date"] {
 <div id="qrModal"><img src="https://github.com/Happyma-4869/Happyma-4869.github.io/blob/main/%E5%BE%AE%E4%BF%A1%E5%9B%BE%E7%89%87_20251207233522_10_79.jpg?raw=true" alt="微信二维码大图"></div>
 
 <script>
-// ---------------- 日记 ----------------
+// 日记逻辑
 const diaryList=document.getElementById('diaryList');
 const addDiaryBtn=document.getElementById('addDiaryBtn');
 const diaryDate=document.getElementById('diaryDate');
@@ -214,7 +254,7 @@ function editDiary(i){
   renderDiaries();
 }
 
-// ---------------- 日夜模式 ----------------
+// 日夜模式
 const modeToggle=document.getElementById('modeToggle');
 modeToggle.addEventListener('click',()=>{
     document.body.classList.toggle('dark');
@@ -224,17 +264,15 @@ modeToggle.addEventListener('click',()=>{
     initParticles();
 });
 
-// ---------------- 返回顶部 ----------------
+// 返回顶部
 const toTopBtn=document.getElementById('toTopBtn');
 window.addEventListener('scroll',()=>{ toTopBtn.style.display=(window.scrollY>200)?'block':'none'; });
 toTopBtn.addEventListener('click',()=>{ window.scrollTo({top:0, behavior:'smooth'}); });
 
-// ---------------- 粒子动画 ----------------
+// 粒子动画
 const canvas=document.getElementById('particles');
 const ctx=canvas.getContext('2d');
 let particlesArray=[];
-let mouse={x:null,y:null};
-window.addEventListener('mousemove', e=>{ mouse.x=e.x; mouse.y=e.y; });
 function resizeCanvas(){ canvas.width=window.innerWidth; canvas.height=window.innerHeight; }
 window.addEventListener('resize', resizeCanvas);
 resizeCanvas();
@@ -253,12 +291,6 @@ class Particle{
     this.angle+=this.speed;
     this.x=this.originX+Math.cos(this.angle)*this.orbit;
     this.y=this.originY+Math.sin(this.angle)*this.orbit;
-    let dx=mouse.x-this.x, dy=mouse.y-this.y, dist=Math.sqrt(dx*dx+dy*dy);
-    if(dist<100){ this.x+=dx*0.002; this.y+=dy*0.002; }
-    if(this.x>canvas.width)this.originX=0;
-    if(this.x<0)this.originX=canvas.width;
-    if(this.y>canvas.height)this.originY=0;
-    if(this.y<0)this.originY=canvas.height;
   }
   draw(){
     ctx.fillStyle=this.color;
@@ -281,13 +313,37 @@ function animateParticles(){
 }
 animateParticles();
 
-// ---------------- 微信二维码弹窗 ----------------
+// 圣诞树礼物粒子
+const giftCanvas=document.getElementById('giftParticles');
+const gctx=giftCanvas.getContext('2d');
+giftCanvas.width=window.innerWidth; giftCanvas.height=window.innerHeight;
+class GiftParticle{
+  constructor(){
+    this.x=Math.random()*giftCanvas.width;
+    this.y=Math.random()*-giftCanvas.height;
+    this.size=Math.random()*8+4;
+    this.speedY=Math.random()*1+1;
+    this.color=['red','yellow','blue','green','pink'][Math.floor(Math.random()*5)];
+  }
+  update(){ this.y+=this.speedY; if(this.y>giftCanvas.height)this.y=-10; }
+  draw(){ gctx.fillStyle=this.color; gctx.fillRect(this.x,this.y,this.size,this.size); }
+}
+let giftParticles=[];
+for(let i=0;i<30;i++) giftParticles.push(new GiftParticle());
+function animateGifts(){
+  gctx.clearRect(0,0,giftCanvas.width,giftCanvas.height);
+  giftParticles.forEach(p=>{p.update(); p.draw();});
+  requestAnimationFrame(animateGifts);
+}
+animateGifts();
+
+// 微信二维码弹窗
 const qrImg=document.getElementById('qrImg');
 const qrModal=document.getElementById('qrModal');
 qrImg.addEventListener('click',()=>qrModal.classList.add('show'));
 qrModal.addEventListener('click',()=>qrModal.classList.remove('show'));
 
-// ---------------- 卡片滚动动画 ----------------
+// 卡片滚动动画
 function showOnScroll() {
     const cards = document.querySelectorAll('.card');
     cards.forEach(card => {
@@ -298,7 +354,7 @@ function showOnScroll() {
 window.addEventListener('scroll', showOnScroll);
 window.addEventListener('load', showOnScroll);
 
-// ---------------- 导航高亮 ----------------
+// 导航高亮
 const mainNav = document.getElementById('mainNav');
 const navLinks = mainNav.querySelectorAll('a');
 window.addEventListener('scroll', () => {
