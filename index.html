@@ -5,144 +5,81 @@
 <title>Happy 的个人主页</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
+body, html {margin:0; padding:0; font-family:'Roboto', sans-serif; overflow-x:hidden;}
 /* 视频背景 */
 #bgVideo {
-  position: fixed;
-  top:0; left:0;
-  width:100%; height:100%;
-  object-fit: cover;
-  z-index:-1;
+    position: fixed; top:0; left:0; width:100%; height:100%; object-fit:cover; z-index:0;
 }
+#particles {position:fixed; top:0; left:0; width:100%; height:100%; pointer-events:none; z-index:0;}
 
-/* 粒子背景 */
-#particles {
-    position: fixed;
-    top:0; left:0;
-    width:100%; height:100%;
-    pointer-events:none;
-    z-index:0;
-}
-
-/* 基本样式 */
-body {
-    margin: 0;
-    font-family: 'Roboto', sans-serif;
-    color: #333;
-    scroll-behavior: smooth;
-    overflow-x: hidden;
-    transition: background 0.5s, color 0.5s;
-}
-body.dark { color: #eee; }
-
-/* 头部 */
-header {
-    text-align: center;
-    padding: 60px 20px 20px;
-    position: relative;
-    z-index: 2;
-    color: white;
-}
-header img {
-    width: 140px; height: 140px;
-    border-radius: 50%;
-    border: 4px solid white;
-    margin-bottom: 20px;
-    transition: transform 0.3s ease;
-}
-header img:hover { transform: scale(1.1); }
-header h1 { margin:10px 0; font-size:36px; }
-header p { font-size:18px; margin:5px 0; }
-
-/* 导航 */
-nav {
-    margin-top: 20px;
-    background: rgba(0,0,0,0.2);
-    padding: 10px 0;
-    position: sticky;
-    top:0;
-    z-index:5;
-    border-radius:10px;
-    transition: background 0.3s, box-shadow 0.3s;
-}
-nav.scrolled { background: rgba(0,0,0,0.7); box-shadow:0 4px 10px rgba(0,0,0,0.3); }
-nav a { margin:0 15px; text-decoration:none; color:white; font-weight:bold; transition:0.3s; }
-nav a.active { color:#ffeb3b; }
-nav a:hover { color:#ffeb3b; }
-
-/* 日/夜切换按钮 */
-#modeToggle {
-    position: fixed; top:20px; right:20px;
-    padding:8px 15px;
-    background: linear-gradient(45deg,#2196F3,#21CBF3);
-    color:white; border-radius:20px; cursor:pointer; z-index:10;
-    transition: background 0.3s;
-}
-#modeToggle:hover { background: linear-gradient(45deg,#1976d2,#1aa8c7); }
-
-/* 返回顶部 */
-#toTopBtn {
-    position: fixed; bottom:30px; right:30px;
-    background: linear-gradient(45deg,#4caf50,#81c784);
-    color:white; border:none; padding:12px 18px; border-radius:50px;
-    cursor:pointer; font-size:16px; z-index:10; display:none;
-    transition:0.3s;
-}
-#toTopBtn:hover { background: linear-gradient(45deg,#388e3c,#66bb6a); }
-
-/* 分区 */
-section { padding:60px 20px; text-align:center; position:relative; z-index:2; }
-section h2 { font-size:28px; color:#4CAF50; margin-bottom:30px; }
+/* 夜间模式 */
+body.dark { color:#eee; }
+body.dark .card { background:rgba(50,50,50,0.9); color:#eee; }
+body.dark header, body.dark nav { color:white; }
 
 /* 卡片 */
-.card {
-    background: rgba(255,255,255,0.95);
-    color: #333;
-    padding:30px 20px;
-    border-radius:15px;
-    width: 320px;
-    margin:0 auto 40px;
-    box-shadow:0 6px 20px rgba(0,0,0,0.1);
-    transition: transform 0.3s ease, box-shadow 0.3s ease, opacity 0.8s ease, background 0.5s, color 0.5s;
-    opacity:0;
-    transform: translateY(30px) scale(0.95);
-}
-.card.show { opacity:1; transform:translateY(0) scale(1); }
-.card:hover { transform: scale(1.05); box-shadow:0 12px 30px rgba(0,0,0,0.3); }
-body.dark .card { background: rgba(50,50,50,0.9); color:#eee; }
+.card { background:rgba(255,255,255,0.95); color:#333; padding:20px; border-radius:15px; width:320px; margin:20px auto; box-shadow:0 6px 20px rgba(0,0,0,0.1); transition:0.5s; }
+.card.show { opacity:1; transform:translateY(0) scale(1);}
+.card .tags { margin-top:10px;}
+.card .tag { display:inline-block; background:linear-gradient(45deg,#ff6b6b,#ffcc33); color:white; padding:5px 10px; margin:3px; border-radius:15px; font-size:12px; transition:0.2s;}
+.card .tag:hover { transform:scale(1.1); }
+
+/* header */
+header { text-align:center; padding:60px 20px 20px; position:relative; z-index:1; color:white;}
+header img { width:140px; height:140px; border-radius:50%; border:4px solid white; margin-bottom:20px; transition:transform 0.3s;}
+header img:hover {transform:scale(1.1);}
+header h1{margin:10px 0; font-size:36px;}
+header p{font-size:18px; margin:5px 0;}
+
+/* nav */
+nav { margin-top:20px; background:rgba(0,0,0,0.2); padding:10px 0; position:sticky; top:0; z-index:5; border-radius:10px; transition:0.3s;}
+nav.scrolled { background:rgba(0,0,0,0.7); box-shadow:0 4px 10px rgba(0,0,0,0.3);}
+nav a { margin:0 15px; text-decoration:none; color:white; font-weight:bold; transition:0.3s;}
+nav a.active { color:#ffeb3b;}
+nav a:hover { color:#ffeb3b;}
+
+/* 日夜切换按钮 */
+#modeToggle { position:fixed; top:20px; right:20px; padding:8px 15px; background:linear-gradient(45deg,#2196F3,#21CBF3); color:white; border-radius:20px; cursor:pointer; z-index:10; transition:0.3s;}
+#modeToggle:hover { background:linear-gradient(45deg,#1976d2,#1aa8c7); }
+
+/* 返回顶部按钮 */
+#toTopBtn { position:fixed; bottom:30px; right:30px; background:linear-gradient(45deg,#4caf50,#81c784); color:white; border:none; padding:12px 18px; border-radius:50px; cursor:pointer; font-size:16px; z-index:10; display:none; transition:0.3s;}
+#toTopBtn:hover { background:linear-gradient(45deg,#388e3c,#66bb6a); }
 
 /* 联系我 */
 .contact .qr { display:flex; justify-content:center; margin-top:20px; }
-.contact .qr img { width:140px; height:140px; border-radius:15px; border:2px solid #ccc; cursor:pointer; transition: transform 0.3s ease; }
-.contact .qr img:hover { transform: scale(1.1); }
+.contact .qr img { width:140px; height:140px; border-radius:15px; border:2px solid #ccc; cursor:pointer; transition:0.3s;}
+.contact .qr img:hover { transform:scale(1.1); }
 
-/* 弹窗 */
 #qrModal { display:none; position:fixed; z-index:10; left:0; top:0; width:100%; height:100%; background:rgba(0,0,0,0.6); justify-content:center; align-items:center; }
-#qrModal img { max-width:300px; border-radius:15px; border:3px solid #fff; }
+#qrModal img { max-width:300px; border-radius:15px; border:3px solid #fff;}
 #qrModal.show { display:flex; }
+
+/* section */
+section { padding:60px 20px; text-align:center; position:relative; z-index:1; }
+section h2 { font-size:28px; color:#4CAF50; margin-bottom:30px; }
 
 @media(max-width:600px){ header img{width:100px;height:100px;} .card{width:90%;} nav a{margin:0 8px; font-size:14px;} }
 </style>
 </head>
 <body>
 
-<!-- 视频背景 -->
 <video id="bgVideo" autoplay muted loop>
-    <source src="https://github.com/Happyma-4869/Happyma-4869.github.io/blob/main/Video%20Project%204.mp4?raw=true" type="video/mp4">
+  <source src="https://github.com/Happyma-4869/Happyma-4869.github.io/blob/main/Video%20Project%204.mp4?raw=true" type="video/mp4">
 </video>
-
 <canvas id="particles"></canvas>
 
 <header>
-    <img src="https://github.com/Happyma-4869/Happyma-4869.github.io/blob/main/%E5%BE%AE%E4%BF%A1%E5%9B%BE%E7%89%87_20251207233412_9_79.jpg?raw=true" alt="头像">
-    <h1>欢迎来到 Happy 的主页</h1>
-    <p>记录我的日常和点滴 😊</p>
-    <nav id="mainNav">
-        <a href="#about">关于我</a>
-        <a href="#diary">日记</a>
-        <a href="#contact">联系我</a>
-    </nav>
+  <img src="https://github.com/Happyma-4869/Happyma-4869.github.io/blob/main/%E5%BE%AE%E4%BF%A1%E5%9B%BE%E7%89%87_20251207233412_9_79.jpg?raw=true" alt="头像">
+  <h1>欢迎来到 Happy 的主页</h1>
+  <p>记录我的日常和点滴 😊</p>
+  <nav id="mainNav">
+      <a href="#about">关于我</a>
+      <a href="#diary">日记</a>
+      <a href="#contact">联系我</a>
+  </nav>
 </header>
 
 <div id="modeToggle">🌙 日/夜切换</div>
@@ -150,44 +87,42 @@ body.dark .card { background: rgba(50,50,50,0.9); color:#eee; }
 
 <!-- 关于我 -->
 <section id="about">
-    <h2>关于我</h2>
-    <div class="card show">
-        <p>Hi 我是happy  我来自河南郑州市  目前是郑州市西亚斯大一学生  在此我想分享我的生活</p>
+  <h2>关于我</h2>
+  <div class="card show">
+    <p>Hi 我是happy  我来自河南郑州市  目前是郑州市西亚斯大一学生  在此我想分享我的生活</p>
+    <div class="tags">
+      <span class="tag">学习</span>
+      <span class="tag">游戏</span>
+      <span class="tag">音乐</span>
+      <span class="tag">编程</span>
     </div>
+  </div>
 </section>
 
-<!-- 日记区 -->
+<!-- 日记 -->
 <section id="diary">
-    <h2>我的日记 📖</h2>
-
-    <!-- 日记表单 -->
-    <div class="card">
-        <input type="date" id="diaryDate" style="padding:5px;margin-bottom:5px;width:95%;" />
-        <input type="password" id="diaryPwd" placeholder="密码(可选)" style="padding:5px;margin-bottom:5px;width:95%;" />
-        <textarea id="diaryContent" placeholder="写下今天的日记..." rows="3" style="padding:5px;width:95%;">2025年12月8日  今天是我初次创建我的个人网站  目前还在测试中  以后我会逐步完善耶✌</textarea>
-        <button id="addDiaryBtn" style="margin-top:5px;padding:5px 10px;cursor:pointer;">添加日记</button>
-    </div>
-
-    <!-- 日记列表 -->
-    <div id="diaryList"></div>
+  <h2>我的日记 📖</h2>
+  <div class="card">
+    <input type="date" id="diaryDate" />
+    <textarea id="diaryContent" placeholder="写下今天的日记..." rows="3"></textarea>
+    <button id="addDiaryBtn">添加日记</button>
+  </div>
+  <div id="diaryList"></div>
 </section>
 
 <!-- 联系我 -->
 <section id="contact">
-    <h2>联系我</h2>
-    <p>微信：<strong>H4ppy_ma</strong></p>
-    <div class="contact">
-        <div class="qr">
-            <img id="qrImg" src="https://github.com/Happyma-4869/Happyma-4869.github.io/blob/main/%E5%BE%AE%E4%BF%A1%E5%9B%BE%E7%89%87_20251207233522_10_79.jpg?raw=true" alt="微信二维码">
-        </div>
-    </div>
+  <h2>联系我</h2>
+  <p>微信：<strong>H4ppy_ma</strong></p>
+  <div class="contact">
+      <div class="qr">
+          <img id="qrImg" src="https://github.com/Happyma-4869/Happyma-4869.github.io/blob/main/%E5%BE%AE%E4%BF%A1%E5%9B%BE%E7%89%87_20251207233522_10_79.jpg?raw=true" alt="微信二维码">
+      </div>
+  </div>
 </section>
 
 <footer>&copy; 2025 Happyma.top</footer>
-
-<div id="qrModal">
-    <img src="https://github.com/Happyma-4869/Happyma-4869.github.io/blob/main/%E5%BE%AE%E4%BF%A1%E5%9B%BE%E7%89%87_20251207233522_10_79.jpg?raw=true" alt="微信二维码大图">
-</div>
+<div id="qrModal"><img src="https://github.com/Happyma-4869/Happyma-4869.github.io/blob/main/%E5%BE%AE%E4%BF%A1%E5%9B%BE%E7%89%87_20251207233522_10_79.jpg?raw=true" alt="微信二维码大图"></div>
 
 <script>
 // Supabase 初始化
@@ -195,110 +130,96 @@ const supabaseUrl = 'https://ydpqboowpfijppwgrals.supabase.co';
 const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InlkcHFib293cGZpanBwd2dyYWxzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjUxNDI0NjAsImV4cCI6MjA4MDcxODQ2MH0.6uF8nCdjVzaevZroBoA7isiVWAZ6k5LXlAwQrbuYWYM';
 const supabase = supabase.createClient(supabaseUrl, supabaseKey);
 
-// 显示卡片滚动动画
-function showOnScroll() {
-    const cards = document.querySelectorAll('.card');
-    cards.forEach(card => {
-        const rect = card.getBoundingClientRect();
-        if (rect.top < window.innerHeight - 50) card.classList.add('show');
-    });
-}
-window.addEventListener('scroll', showOnScroll);
-window.addEventListener('load', () => { showOnScroll(); fetchDiaries(); });
+// 元素
+const diaryList = document.getElementById('diaryList');
+const addDiaryBtn = document.getElementById('addDiaryBtn');
+const diaryDate = document.getElementById('diaryDate');
+const diaryContent = document.getElementById('diaryContent');
 
-// 粒子效果
-const canvas = document.getElementById('particles');
-const ctx = canvas.getContext('2d');
-let particlesArray = [];
-let mouse = {x:null, y:null};
-canvas.width = window.innerWidth;
-canvas.height = window.innerHeight;
+// 加载日记
+async function fetchDiaries(){
+  const { data, error } = await supabase.from('diaries').select('*').order('id',{ascending:false});
+  if(error){ console.log(error); return; }
+  diaryList.innerHTML='';
+  data.forEach(d => addDiaryCard(d));
+}
+
+// 渲染卡片
+function addDiaryCard(d){
+  const card=document.createElement('div');
+  card.className='card show';
+  card.innerHTML=`<p><strong>${d.date}</strong></p><p>${d.content}</p>
+    <div style="margin-top:5px;">
+      <button onclick="editDiary(${d.id})">编辑</button>
+      <button onclick="deleteDiary(${d.id})">删除</button>
+    </div>`;
+  diaryList.appendChild(card);
+}
+
+// 添加日记
+addDiaryBtn.addEventListener('click', async()=>{
+  const dateVal=diaryDate.value||new Date().toISOString().split('T')[0];
+  const contentVal=diaryContent.value.trim();
+  if(!contentVal){ alert('请填写内容'); return; }
+  const { data, error } = await supabase.from('diaries').insert([{date:dateVal,content:contentVal}]);
+  if(error){ alert(error.message); return; }
+  diaryDate.value=''; diaryContent.value='';
+  fetchDiaries();
+});
+
+// 删除日记
+async function deleteDiary(id){
+  if(!confirm('确认删除吗？')) return;
+  const { error } = await supabase.from('diaries').delete().eq('id',id);
+  if(error){ alert(error.message); return; }
+  fetchDiaries();
+}
+
+// 编辑日记
+async function editDiary(id){
+  const newContent = prompt('请输入新的日记内容：');
+  if(newContent===null) return;
+  const { error } = await supabase.from('diaries').update({content:newContent}).eq('id',id);
+  if(error){ alert(error.message); return; }
+  fetchDiaries();
+}
+
+// 页面加载时获取日记
+window.addEventListener('load', fetchDiaries);
+
+// 日夜模式切换
+const modeToggle=document.getElementById('modeToggle');
+modeToggle.addEventListener('click',()=>{ document.body.classList.toggle('dark'); });
+
+// 返回顶部
+const toTopBtn=document.getElementById('toTopBtn');
+window.addEventListener('scroll',()=>{
+  if(window.scrollY>200) toTopBtn.style.display='block'; else toTopBtn.style.display='none';
+});
+toTopBtn.addEventListener('click',()=>{ window.scrollTo({top:0, behavior:'smooth'}); });
+
+// 粒子动画
+const canvas=document.getElementById('particles');
+const ctx=canvas.getContext('2d');
+let particlesArray=[], mouse={x:null,y:null};
+canvas.width=window.innerWidth; canvas.height=window.innerHeight;
 window.addEventListener('resize',()=>{ canvas.width=window.innerWidth; canvas.height=window.innerHeight; initParticles(); });
-window.addEventListener('mousemove',e=>{ mouse.x=e.x; mouse.y=e.y; });
-class Particle{constructor(){this.x=Math.random()*canvas.width;this.y=Math.random()*canvas.height;this.size=Math.random()*3+1;this.speedX=Math.random()*2-1;this.speedY=Math.random()*2-1;}update(){this.x+=this.speedX+(mouse.x?(mouse.x-this.x)*0.001:0);this.y+=this.speedY+(mouse.y?(mouse.y-this.y)*0.001:0);if(this.x>canvas.width)this.x=0;if(this.x<0)this.x=canvas.width;if(this.y>canvas.height)this.y=0;if(this.y<0)this.y=canvas.height;}draw(){ctx.fillStyle='rgba(255,255,255,0.7)';ctx.beginPath();ctx.arc(this.x,this.y,this.size,0,Math.PI*2);ctx.fill();}}
-function initParticles(){particlesArray=[];for(let i=0;i<200;i++){particlesArray.push(new Particle());}}
-function animateParticles(){ctx.clearRect(0,0,canvas.width,canvas.height);particlesArray.forEach(p=>{p.update();p.draw();});requestAnimationFrame(animateParticles);}
-initParticles();
-animateParticles();
+window.addEventListener('mousemove', e=>{ mouse.x=e.x; mouse.y=e.y; });
+class Particle{
+  constructor(){ this.x=Math.random()*canvas.width; this.y=Math.random()*canvas.height; this.size=Math.random()*3+1; this.speedX=Math.random()*1-0.5; this.speedY=Math.random()*1-0.5; }
+  update(){ this.x+=this.speedX+(mouse.x?(mouse.x-this.x)*0.0005:0); this.y+=this.speedY+(mouse.y?(mouse.y-this.y)*0.0005:0); if(this.x>canvas.width)this.x=0; if(this.x<0)this.x=canvas.width; if(this.y>canvas.height)this.y=0; if(this.y<0)this.y=canvas.height; }
+  draw(){ ctx.fillStyle='rgba(255,255,255,0.7)'; ctx.beginPath(); ctx.arc(this.x,this.y,this.size,0,Math.PI*2); ctx.fill(); }
+}
+function initParticles(){ particlesArray=[]; for(let i=0;i<150;i++){ particlesArray.push(new Particle()); } }
+function animateParticles(){ ctx.clearRect(0,0,canvas.width,canvas.height); particlesArray.forEach(p=>{p.update();p.draw();}); requestAnimationFrame(animateParticles);}
+initParticles(); animateParticles();
 
 // 微信二维码弹窗
 const qrImg=document.getElementById('qrImg');
 const qrModal=document.getElementById('qrModal');
 qrImg.addEventListener('click',()=>qrModal.classList.add('show'));
 qrModal.addEventListener('click',()=>qrModal.classList.remove('show'));
-
-// 日夜模式切换
-const modeToggle=document.getElementById('modeToggle');
-modeToggle.addEventListener('click',()=>{document.body.classList.toggle('dark');});
-
-// 导航高亮 + 返回顶部
-const mainNav=document.getElementById('mainNav');
-const navLinks=mainNav.querySelectorAll('a');
-const toTopBtn=document.getElementById('toTopBtn');
-window.addEventListener('scroll',()=>{
-    if(window.scrollY>50) mainNav.classList.add('scrolled'); else mainNav.classList.remove('scrolled');
-    navLinks.forEach(link=>{
-        const section=document.querySelector(link.getAttribute('href'));
-        if(section.offsetTop-70<=window.scrollY && section.offsetTop+section.offsetHeight>window.scrollY) link.classList.add('active'); else link.classList.remove('active');
-    });
-    if(window.scrollY>200) toTopBtn.style.display='block'; else toTopBtn.style.display='none';
-});
-toTopBtn.addEventListener('click',()=>{window.scrollTo({top:0,behavior:'smooth'});});
-
-// Supabase 日记功能
-const diaryList=document.getElementById('diaryList');
-const addDiaryBtn=document.getElementById('addDiaryBtn');
-const diaryDate=document.getElementById('diaryDate');
-const diaryContent=document.getElementById('diaryContent');
-const diaryPwd=document.getElementById('diaryPwd');
-
-async function fetchDiaries(){
-    const { data, error } = await supabase.from('diaries').select('*').order('id',{ascending:false});
-    if(error){console.log(error); return;}
-    diaryList.innerHTML='';
-    data.forEach(d=>{ addDiaryCard(d); });
-}
-
-function addDiaryCard(d){
-    const card=document.createElement('div');
-    card.className='card show';
-    card.innerHTML=`
-        <p><strong>${d.date}</strong></p>
-        <p>${d.content}</p>
-        ${d.password ? '<small>🔒已加密</small>' : ''}
-        <div style="margin-top:5px;">
-            <button onclick="editDiary(${d.id})">编辑</button>
-            <button onclick="deleteDiary(${d.id})">删除</button>
-        </div>
-    `;
-    diaryList.appendChild(card);
-}
-
-addDiaryBtn.addEventListener('click', async ()=>{
-    const dateVal = diaryDate.value || new Date().toISOString().split('T')[0];
-    const contentVal = diaryContent.value.trim();
-    const pwdVal = diaryPwd.value.trim();
-    if(!contentVal){ alert('请填写日记内容'); return; }
-    const { data, error } = await supabase.from('diaries').insert([{date:dateVal, content:contentVal, password:pwdVal}]);
-    if(error){ alert(error.message); return; }
-    diaryDate.value=''; diaryContent.value=''; diaryPwd.value='';
-    fetchDiaries();
-});
-
-async function deleteDiary(id){
-    if(!confirm('确认删除吗？')) return;
-    const { error } = await supabase.from('diaries').delete().eq('id',id);
-    if(error){ alert(error.message); return; }
-    fetchDiaries();
-}
-
-async function editDiary(id){
-    const newContent = prompt('请输入新的日记内容：');
-    if(newContent===null) return;
-    const { error } = await supabase.from('diaries').update({content:newContent}).eq('id',id);
-    if(error){ alert(error.message); return; }
-    fetchDiaries();
-}
 </script>
+
 </body>
 </html>
