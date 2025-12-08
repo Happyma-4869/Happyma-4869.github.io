@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width,initial-scale=1" />
-<title>Happy 的个人主页 — 圣诞升级版（最终修复）</title>
+<title>Happy 的个人主页 — 圣诞升级版（修复版）</title>
 <style>
 :root{--card-w:320px}
 *{box-sizing:border-box}
@@ -11,24 +11,21 @@ html,body{height:100%;margin:0;font-family:-apple-system,BlinkMacSystemFont,"Seg
 body.dark{background:#0b0b0d;color:#eee}
 
 /* 背景视频 & 粒子 */
-/* 修复：明确 z-index 确保在底层 */
 #bgVideo{position:fixed;left:0;top:0;width:100%;height:100%;object-fit:cover;z-index:0;transition:filter .4s}
 body.dark #bgVideo{filter:brightness(.38) contrast(1.05)}
 #particles{position:fixed;left:0;top:0;width:100%;height:100%;pointer-events:none;z-index:1}
 
-/* 左侧圣诞树卡片 */
-/* 修复：将 z-index 提高到 50，防止被 .mainContent(z-index:2) 或其他元素遮挡 */
+/* 左侧圣诞树卡片（优先级在粒子之上，且可交互） */
 #treeCard{
   position:fixed; left:20px; top:50%; transform:translateY(-50%);
   width:400px; height:600px; border-radius:24px;
   background:rgba(255,255,255,0.04); box-shadow:0 12px 40px rgba(2,6,23,0.6);
-  backdrop-filter:blur(8px); overflow:hidden; 
-  z-index:50; /* 关键修改：提高层级 */
-  cursor:pointer;
+  backdrop-filter:blur(8px); overflow:hidden; z-index:5; cursor:pointer;
   display:flex; align-items:center; justify-content:center;
   pointer-events:auto;
 }
-#treeCard canvas{width:100%;height:100%;display:block}
+/* 关键修复：确保 canvas 可见并在卡片内正确堆叠与接收交互 */
+#treeCard canvas{width:100%;height:100%;display:block;position:relative;z-index:10;pointer-events:auto}
 
 /* 页面主体右移以避开树（桌面） */
 .mainContent{position:relative;z-index:2;margin-left:460px;padding-bottom:60px;min-height:100vh}
@@ -75,15 +72,18 @@ input[type="date"],textarea{width:80%;padding:8px;border-radius:12px;border:none
 </head>
 <body>
 
+<!-- 背景 视频 与 全局粒子 -->
 <video id="bgVideo" autoplay muted loop playsinline>
   <source src="https://github.com/Happyma-4869/Happyma-4869.github.io/blob/main/Video%20Project%204.mp4?raw=true" type="video/mp4">
 </video>
 <canvas id="particles"></canvas>
 
+<!-- 左侧 3D 圣诞树卡片（fixed） -->
 <div id="treeCard" title="点击树体放大或点亮装饰">
   <canvas id="treeCanvas"></canvas>
 </div>
 
+<!-- 页面主内容（右移以避开树） -->
 <div class="mainContent">
   <header>
     <img src="https://github.com/Happyma-4869/Happyma-4869.github.io/blob/main/%E5%BE%AE%E4%BF%A1%E5%9B%BE%E7%89%87_20251207233412_9_79.jpg?raw=true" alt="头像">
@@ -133,18 +133,20 @@ input[type="date"],textarea{width:80%;padding:8px;border-radius:12px;border:none
 
   <footer style="text-align:center;padding:18px;color:rgba(255,255,255,0.45)">&copy; 2025 Happyma.top</footer>
 
+  <!-- QR modal -->
   <div id="qrModal">
     <img src="https://github.com/Happyma-4869/Happyma-4869.github.io/blob/main/%E5%BE%AE%E4%BF%A1%E5%9B%BE%E7%89%87_20251207233522_10_79.jpg?raw=true" alt="二维码大图">
   </div>
 </div>
 
+<!-- three.js -->
 <script src="https://cdn.jsdelivr.net/npm/three@0.158.0/build/three.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/three@0.158.0/examples/js/controls/OrbitControls.js"></script>
 
 <script>
 /* ===========================
    日记 / UI / 背景粒子
-   =========================== */
+   ============================ */
 const diaryList = document.getElementById('diaryList');
 const addDiaryBtn = document.getElementById('addDiaryBtn');
 const diaryDate = document.getElementById('diaryDate');
@@ -162,11 +164,11 @@ function renderDiaries(){
     const entry = document.createElement('div');
     entry.className = 'card diary-entry';
     entry.innerHTML = `<p><strong>${d.date}</strong></p>
-                       <p style="white-space:pre-wrap">${d.content}</p>
-                       <div class="diary-actions">
-                         <button onclick="editDiary(${i})">编辑</button>
-                         <button onclick="deleteDiary(${i})">删除</button>
-                       </div>`;
+                      <p style="white-space:pre-wrap">${d.content}</p>
+                      <div class="diary-actions">
+                        <button onclick="editDiary(${i})">编辑</button>
+                        <button onclick="deleteDiary(${i})">删除</button>
+                      </div>`;
     diaryList.appendChild(entry);
   });
   localStorage.setItem('diaries', JSON.stringify(diaries));
@@ -268,7 +270,10 @@ animateParticles();
 
 /* ===========================
    three.js 3D 圣诞树（左侧卡片）
-   =========================== */
+   - Canvas 在 #treeCanvas（不会 append 到 body）
+   - 点击装饰会闪烁
+   - 滚动时树微动
+   ============================ */
 const treeCanvas = document.getElementById('treeCanvas');
 const treeCard = document.getElementById('treeCard');
 
@@ -420,14 +425,10 @@ function animateTree(){
   renderer.render(scene, camera);
 }
 
-// 关键修复：防止页面不可滚动时计算出的 NaN 导致树消失
 window.addEventListener('scroll', ()=>{
   const maxShift = 10;
-  // 如果页面高度不足以滚动，除法可能为 Infinity 或 NaN，这里做安全检查
-  let scrollPct = window.scrollY / (document.body.scrollHeight - window.innerHeight);
-  if(!Number.isFinite(scrollPct)) scrollPct = 0; // 修复：若无法计算则视为 0
-  
-  if(treeGroup) treeGroup.position.y = (scrollPct - 0.4) * maxShift;
+  const scrollFactor = window.scrollY / (document.body.scrollHeight - window.innerHeight);
+  if(treeGroup) treeGroup.position.y = (scrollFactor - 0.4) * maxShift;
 });
 
 /* 初始化三维树 */
