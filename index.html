@@ -5,26 +5,29 @@
 <title>Happy 的个人主页</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <style>
+/* ---------------- 基础 ---------------- */
 body, html {
   margin:0; padding:0;
   font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",sans-serif;
   color:#333;
   overflow-x:hidden;
-  transition: color 0.5s;
+  transition: color 0.5s, background 0.5s;
+  scroll-behavior: smooth;
 }
 body.dark { color:#eee; }
 
-/* 背景视频 */
-#bgVideo {
-  position:fixed; top:0; left:0;
-  width:100%; height:100%;
-  object-fit:cover;
-  z-index:0;
-  transition: filter 0.5s;
+/* ---------------- 背景 ---------------- */
+body {
+  background: url('https://github.com/Happyma-4869/Happyma-4869.github.io/blob/main/preview.jpg?raw=true') no-repeat center center fixed;
+  background-size: cover;
+  position: relative;
 }
-body.dark #bgVideo { filter: brightness(40%) contrast(110%); }
+body.dark {
+  background-color: rgba(0,0,0,0.5);
+  background-blend-mode: overlay;
+}
 
-/* 粒子画布 */
+/* ---------------- 粒子画布 ---------------- */
 #particles {
   position:fixed; top:0; left:0;
   width:100%; height:100%;
@@ -32,7 +35,7 @@ body.dark #bgVideo { filter: brightness(40%) contrast(110%); }
   z-index:0;
 }
 
-/* 苹果风格卡片 */
+/* ---------------- 苹果风格卡片 ---------------- */
 .card {
   background: rgba(255,255,255,0.6);
   backdrop-filter: blur(20px);
@@ -45,9 +48,12 @@ body.dark #bgVideo { filter: brightness(40%) contrast(110%); }
   transition: transform 0.3s ease, box-shadow 0.3s ease, background 0.5s;
   width:320px;
   margin:0 auto 40px;
+  opacity:0;
+  transform: translateY(20px);
 }
+.card.show { opacity:1; transform: translateY(0); transition: opacity 0.6s ease, transform 0.6s ease;}
 .card:hover { transform: translateY(-5px); box-shadow: 0 12px 35px rgba(0,0,0,0.15);}
-body.dark .card { background: rgba(40,40,40,0.7); color:#eee; }
+body.dark .card { background: rgba(40,40,40,0.7); color:#eee; box-shadow:0 8px 30px rgba(255,255,255,0.1); }
 
 .card .tags { margin-top:10px; text-align:center; }
 .card .tag {
@@ -62,7 +68,7 @@ body.dark .card { background: rgba(40,40,40,0.7); color:#eee; }
 }
 .card .tag:hover { transform:scale(1.1); }
 
-/* 头部 */
+/* ---------------- 头部 ---------------- */
 header { text-align:center; padding:60px 20px 20px; position:relative; z-index:1;}
 header img { width:140px; height:140px; border-radius:50%; border:4px solid rgba(255,255,255,0.8); margin-bottom:20px; transition:transform 0.3s;}
 header img:hover {transform:scale(1.1);}
@@ -70,32 +76,32 @@ header h1, header p { color: inherit; margin:0;}
 header h1{margin:10px 0; font-size:36px;}
 header p{font-size:18px; margin:5px 0;}
 
-/* 导航 */
+/* ---------------- 导航 ---------------- */
 nav { margin-top:20px; background:rgba(255,255,255,0.2); padding:10px 0; position:sticky; top:0; z-index:5; border-radius:20px; transition:0.3s;}
 nav.scrolled { background:rgba(0,0,0,0.5); box-shadow:0 4px 10px rgba(0,0,0,0.3);}
 nav a { margin:0 15px; text-decoration:none; font-weight:bold; transition:0.3s;}
 nav a.active { color:#ffeb3b;}
 nav a:hover { color:#ffeb3b; }
 
-/* 日夜切换按钮 */
-#modeToggle { position:fixed; top:20px; right:20px; padding:8px 15px; background:linear-gradient(135deg,#5ac8fa,#007aff); color:white; border-radius:25px; cursor:pointer; z-index:10; transition:0.3s;}
-#modeToggle:hover { background:linear-gradient(135deg,#007aff,#5ac8fa); }
+/* ---------------- 日夜切换按钮 ---------------- */
+#modeToggle { position:fixed; top:20px; right:20px; padding:8px 15px; background:linear-gradient(135deg,#5ac8fa,#007aff); color:white; border-radius:25px; cursor:pointer; z-index:10; transition:0.3s, transform 0.2s;}
+#modeToggle:hover { background:linear-gradient(135deg,#007aff,#5ac8fa); transform: scale(1.05); }
 
-/* 返回顶部 */
-#toTopBtn { position:fixed; bottom:30px; right:30px; background:linear-gradient(135deg,#5ac8fa,#007aff); color:white; border:none; padding:12px 18px; border-radius:25px; cursor:pointer; font-size:16px; z-index:10; display:none; transition:0.3s;}
-#toTopBtn:hover { background:linear-gradient(135deg,#007aff,#5ac8fa); }
+/* ---------------- 返回顶部 ---------------- */
+#toTopBtn { position:fixed; bottom:30px; right:30px; background:linear-gradient(135deg,#5ac8fa,#007aff); color:white; border:none; padding:12px 18px; border-radius:25px; cursor:pointer; font-size:16px; z-index:10; display:none; transition:0.3s, transform 0.2s;}
+#toTopBtn:hover { background:linear-gradient(135deg,#007aff,#5ac8fa); transform:scale(1.05); }
 
-/* 联系我 */
+/* ---------------- 联系我 ---------------- */
 .contact .qr { display:flex; justify-content:center; margin-top:20px; }
-.contact .qr img { width:140px; height:140px; border-radius:25px; border:2px solid #ccc; cursor:pointer; transition:0.3s;}
-.contact .qr img:hover { transform:scale(1.1); }
+.contact .qr img { width:140px; height:140px; border-radius:25px; border:2px solid #ccc; cursor:pointer; transition:0.3s, transform 0.2s, box-shadow 0.3s;}
+.contact .qr img:hover { transform:scale(1.1); box-shadow:0 8px 20px rgba(0,0,0,0.3); }
 
-/* 弹窗 */
+/* ---------------- 弹窗 ---------------- */
 #qrModal { display:none; position:fixed; z-index:10; left:0; top:0; width:100%; height:100%; background:rgba(255,255,255,0.3); backdrop-filter:blur(15px); justify-content:center; align-items:center; border-radius:25px;}
 #qrModal img { max-width:300px; border-radius:25px; border:3px solid #fff;}
 #qrModal.show { display:flex; }
 
-/* 分区 */
+/* ---------------- 分区 ---------------- */
 section { padding:60px 20px; text-align:center; position:relative; z-index:1; }
 section h2 { font-size:28px; color:#007aff; margin-bottom:30px; }
 
@@ -106,11 +112,11 @@ textarea, input[type="date"] {
 .diary-actions { display:flex; justify-content:center; gap:10px; margin-top:10px; }
 .diary-actions button, #addDiaryBtn {
   padding:8px 12px; cursor:pointer; border:none; border-radius:25px;
-  background:linear-gradient(135deg,#5ac8fa,#007aff); color:white; font-weight:bold; transition:0.3s;
+  background:linear-gradient(135deg,#5ac8fa,#007aff); color:white; font-weight:bold; transition:0.3s, transform 0.2s, box-shadow 0.3s;
 }
-.diary-actions button:hover, #addDiaryBtn:hover { background:linear-gradient(135deg,#007aff,#5ac8fa); }
+.diary-actions button:hover, #addDiaryBtn:hover { background:linear-gradient(135deg,#007aff,#5ac8fa); transform:scale(1.05); box-shadow:0 8px 20px rgba(0,0,0,0.3); }
 
-/* 响应式 */
+/* ---------------- 响应式 ---------------- */
 @media(max-width:600px){
   header img{width:100px;height:100px;}
   .card{width:90%;}
@@ -120,9 +126,6 @@ textarea, input[type="date"] {
 </head>
 <body>
 
-<video id="bgVideo" autoplay muted loop>
-  <source src="https://github.com/Happyma-4869/Happyma-4869.github.io/blob/main/Video%20Project%204.mp4?raw=true" type="video/mp4">
-</video>
 <canvas id="particles"></canvas>
 
 <header>
@@ -165,6 +168,8 @@ textarea, input[type="date"] {
 <section id="contact">
   <h2>联系我</h2>
   <p>微信：<strong>H4ppy_ma</strong></p>
+  <p>QQ邮箱：<strong>1348790438@qq.com</strong></p>
+  <p>GitHub：<strong>Happyma-4869</strong></p>
   <div class="contact">
       <div class="qr">
           <img id="qrImg" src="https://github.com/Happyma-4869/Happyma-4869.github.io/blob/main/%E5%BE%AE%E4%BF%A1%E5%9B%BE%E7%89%87_20251207233522_10_79.jpg?raw=true" alt="微信二维码">
