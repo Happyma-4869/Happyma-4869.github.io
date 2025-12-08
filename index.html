@@ -7,7 +7,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
 <style>
 /* 基本设置 */
-body, html {margin:0; padding:0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", sans-serif; overflow-x:hidden; color:#333; transition: color 0.5s;}
+body, html {margin:0; padding:0; font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",sans-serif; overflow-x:hidden; color:#333; transition: color 0.5s;}
 body.dark { color:#eee; }
 #bgVideo {position:fixed; top:0; left:0; width:100%; height:100%; object-fit:cover; z-index:0; transition: filter 0.5s;}
 body.dark #bgVideo { filter: brightness(40%) contrast(110%); }
@@ -15,25 +15,25 @@ body.dark #bgVideo { filter: brightness(40%) contrast(110%); }
 /* 粒子 */
 #particles {position:fixed; top:0; left:0; width:100%; height:100%; pointer-events:none; z-index:0;}
 
-/* 卡片苹果风格 */
+/* 苹果风格卡片 */
 .card {
-    background: rgba(255, 255, 255, 0.6);
-    backdrop-filter: blur(20px);
-    border-radius: 20px;
-    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.1);
-    padding: 25px 20px;
-    display: flex;
-    flex-direction: column;
-    gap: 12px;
-    transition: transform 0.3s ease, box-shadow 0.3s ease, background 0.5s;
-    width: 320px;
-    margin: 0 auto 40px;
+  background: rgba(255,255,255,0.6);
+  backdrop-filter: blur(20px);
+  border-radius: 20px;
+  box-shadow: 0 8px 30px rgba(0,0,0,0.1);
+  padding:25px 20px;
+  display:flex;
+  flex-direction:column;
+  gap:12px;
+  transition: transform 0.3s ease, box-shadow 0.3s ease, background 0.5s;
+  width:320px;
+  margin:0 auto 40px;
 }
-.card:hover { transform: translateY(-5px); box-shadow: 0 12px 35px rgba(0,0,0,0.15); }
+.card:hover { transform: translateY(-5px); box-shadow: 0 12px 35px rgba(0,0,0,0.15);}
 body.dark .card { background: rgba(40,40,40,0.7); color:#eee; }
 
 .card .tags { margin-top:10px; text-align:center; }
-.card .tag { display:inline-block; background:linear-gradient(45deg,#5ac8fa,#007aff); color:white; padding:5px 10px; margin:3px; border-radius:15px; font-size:12px; transition:0.2s; }
+.card .tag { display:inline-block; background:linear-gradient(45deg,#5ac8fa,#007aff); color:white; padding:5px 10px; margin:3px; border-radius:15px; font-size:12px; transition:0.2s;}
 .card .tag:hover { transform:scale(1.1); }
 
 /* 头部 */
@@ -45,7 +45,7 @@ header h1{margin:10px 0; font-size:36px;}
 header p{font-size:18px; margin:5px 0;}
 
 /* 导航 */
-nav { margin-top:20px; background:rgba(255,255,255,0.2); padding:10px 0; position:sticky; top:0; z-index:5; border-radius:10px; transition:0.3s; }
+nav { margin-top:20px; background:rgba(255,255,255,0.2); padding:10px 0; position:sticky; top:0; z-index:5; border-radius:10px; transition:0.3s;}
 nav.scrolled { background:rgba(0,0,0,0.5); box-shadow:0 4px 10px rgba(0,0,0,0.3);}
 nav a { margin:0 15px; text-decoration:none; font-weight:bold; transition:0.3s;}
 nav a.active { color:#ffeb3b;}
@@ -55,7 +55,7 @@ nav a:hover { color:#ffeb3b; }
 #modeToggle { position:fixed; top:20px; right:20px; padding:8px 15px; background:linear-gradient(135deg,#5ac8fa,#007aff); color:white; border-radius:20px; cursor:pointer; z-index:10; transition:0.3s;}
 #modeToggle:hover { background:linear-gradient(135deg,#007aff,#5ac8fa); }
 
-/* 返回顶部按钮 */
+/* 返回顶部 */
 #toTopBtn { position:fixed; bottom:30px; right:30px; background:linear-gradient(135deg,#5ac8fa,#007aff); color:white; border:none; padding:12px 18px; border-radius:50px; cursor:pointer; font-size:16px; z-index:10; display:none; transition:0.3s;}
 #toTopBtn:hover { background:linear-gradient(135deg,#007aff,#5ac8fa); }
 
@@ -188,6 +188,9 @@ function editDiary(i){
 const modeToggle=document.getElementById('modeToggle');
 modeToggle.addEventListener('click',()=>{
     document.body.classList.toggle('dark');
+    particlesArray.forEach(p=>{
+        p.color=document.body.classList.contains('dark') ? 'rgba(255,255,255,0.9)' : 'rgba(255,255,255,0.3)';
+    });
 });
 
 // ---------------- 返回顶部 ----------------
@@ -199,12 +202,10 @@ toTopBtn.addEventListener('click',()=>{ window.scrollTo({top:0, behavior:'smooth
 const canvas = document.getElementById('particles');
 const ctx = canvas.getContext('2d');
 let particlesArray = [];
-let mouse = {x:null, y:null};
 
 function resizeCanvas() { canvas.width = window.innerWidth; canvas.height = window.innerHeight; }
 window.addEventListener('resize', resizeCanvas);
 resizeCanvas();
-window.addEventListener('mousemove', e => { mouse.x = e.x; mouse.y = e.y; });
 
 class Particle {
     constructor(){
@@ -218,17 +219,11 @@ class Particle {
     update(){
         this.x += this.speedX;
         this.y += this.speedY;
-
-        if(mouse.x && mouse.y){
-            let dx = mouse.x - this.x;
-            let dy = mouse.y - this.y;
-            let dist = Math.sqrt(dx*dx + dy*dy);
-            if(dist < 100){
-                this.x += dx*0.0015;
-                this.y += dy*0.0015;
-            }
-        }
-
+        // 靠近鼠标趋势
+        let dx = mouse.x - this.x;
+        let dy = mouse.y - this.y;
+        let dist = Math.sqrt(dx*dx + dy*dy);
+        if(dist < 100){ this.x += dx*0.0015; this.y += dy*0.0015; }
         if(this.y>canvas.height)this.y=0;
         if(this.x>canvas.width)this.x=0;
         if(this.x<0)this.x=canvas.width;
@@ -242,11 +237,13 @@ class Particle {
     }
 }
 
+let mouse = {x:null, y:null};
+window.addEventListener('mousemove', e=>{ mouse.x=e.x; mouse.y=e.y; });
+
 function initParticles(){
     particlesArray=[];
-    for(let i=0;i<120;i++){
-        particlesArray.push(new Particle());
-    }
+    let count = document.body.classList.contains('dark') ? 150 : 80;
+    for(let i=0;i<count;i++){ particlesArray.push(new Particle()); }
 }
 initParticles();
 function animateParticles(){
@@ -256,12 +253,8 @@ function animateParticles(){
 }
 animateParticles();
 
-// 更新粒子颜色随日夜切换
-modeToggle.addEventListener('click',()=>{
-    particlesArray.forEach(p=>{
-        p.color = document.body.classList.contains('dark') ? 'rgba(255,255,255,0.9)' : 'rgba(255,255,255,0.3)';
-    });
-});
+// 切换模式更新粒子数量
+modeToggle.addEventListener('click', initParticles);
 
 // ---------------- 微信二维码弹窗 ----------------
 const qrImg=document.getElementById('qrImg');
