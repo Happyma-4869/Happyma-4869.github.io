@@ -53,19 +53,7 @@ body.dark #bgVideo { filter: brightness(40%) contrast(110%); }
   position:relative;
 }
 .card.show { opacity:1; transform: translateY(0); }
-.card:hover { transform: translateY(-5px); }
 body.dark .card { background: rgba(40,40,40,0.7); color:#eee; }
-
-/* 光晕容器 */
-.card::before {
-  content:"";
-  position:absolute;
-  top:-10px; left:-10px; right:-10px; bottom:-10px;
-  border-radius:30px;
-  pointer-events:none;
-  box-shadow:0 0 50px rgba(0,0,0,0.05);
-  transition: box-shadow 0.3s;
-}
 
 /* ---------------- 标签 ---------------- */
 .card .tags { margin-top:10px; text-align:center; }
@@ -322,23 +310,30 @@ const qrModal=document.getElementById('qrModal');
 qrImg.addEventListener('click',()=>qrModal.classList.add('show'));
 qrModal.addEventListener('click',()=>qrModal.classList.remove('show'));
 
-// ---------------- 卡片滚动动画 + 背景视差 + 阴影光晕 ----------------
+// ---------------- 卡片滚动动画 + 背景视差 + 光晕动态 ----------------
 const bgVideo=document.getElementById('bgVideo');
+window.addEventListener('mousemove', e=>{ mouse.x=e.clientX; mouse.y=e.clientY; });
 function showOnScroll() {
     const cards = document.querySelectorAll('.card');
     const scrollY = window.scrollY;
+    const centerX = window.innerWidth/2;
+    const centerY = window.innerHeight/2;
     cards.forEach(card => {
         const rect = card.getBoundingClientRect();
         if(rect.top < window.innerHeight - 50) card.classList.add('show');
-        // 光晕增强
-        const centerDist = Math.abs((rect.top + rect.height/2) - window.innerHeight/2);
+        // 中心光晕强度
+        const centerDist = Math.abs((rect.top + rect.height/2) - centerY);
         const intensity = Math.max(0, 1 - centerDist/window.innerHeight);
+        // 鼠标偏移光晕
+        const dx = (mouse.x - (rect.left + rect.width/2)) / window.innerWidth;
+        const dy = (mouse.y - (rect.top + rect.height/2)) / window.innerHeight;
         const glow = intensity * (document.body.classList.contains('dark')? 0.6 : 0.3);
-        card.style.boxShadow = `0 8px 30px rgba(0,0,0,${0.1 + glow}) , 0 0 20px rgba(0, 122, 255, ${glow})`;
+        const offsetX = dx*20;
+        const offsetY = dy*20;
+        card.style.boxShadow = `0 8px 30px rgba(0,0,0,${0.1 + glow}), ${offsetX}px ${offsetY}px 25px rgba(0,122,255,${glow})`;
     });
     // 背景视差
-    const scroll = window.scrollY;
-    bgVideo.style.transform = `translateY(${scroll*0.25}px)`;
+    bgVideo.style.transform = `translateY(${scrollY*0.25}px)`;
 }
 window.addEventListener('scroll', showOnScroll);
 window.addEventListener('load', showOnScroll);
