@@ -2,39 +2,87 @@
 <html lang="zh-CN">
 <head>
 <meta charset="UTF-8">
-<title>Happy 的个人主页 & Merry Christmas 3D Tree</title>
+<title>Happy 的个人主页</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <style>
-body, html { margin:0; padding:0; font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",sans-serif; color:#333; overflow-x:hidden; transition: color 0.5s; }
+body, html {
+  margin:0; padding:0;
+  font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",sans-serif;
+  color:#333;
+  overflow-x:hidden;
+  transition: color 0.5s;
+  background:#111;
+}
 body.dark { color:#eee; }
 
 /* 背景视频 */
-#bgVideo { position:fixed; top:0; left:0; width:100%; height:100%; object-fit:cover; z-index:0; transition: filter 0.5s; }
+#bgVideo {
+  position:fixed; top:0; left:0;
+  width:100%; height:100%;
+  object-fit:cover;
+  z-index:0;
+  transition: filter 0.5s;
+}
 body.dark #bgVideo { filter: brightness(40%) contrast(110%); }
 
 /* 粒子画布 */
-#particles { position:fixed; top:0; left:0; width:100%; height:100%; pointer-events:none; z-index:0; }
+#particles {
+  position:fixed; top:0; left:0;
+  width:100%; height:100%;
+  pointer-events:none;
+  z-index:0;
+}
+
+/* 3D 树容器 */
+#tree3DContainer {
+  position:fixed; top:0; left:0;
+  width:100%; height:100%;
+  pointer-events:none;
+  z-index:0;
+}
 
 /* 苹果风格卡片 */
-.card { background: rgba(255,255,255,0.6); backdrop-filter: blur(20px); border-radius: 25px; box-shadow: 0 8px 30px rgba(0,0,0,0.1); padding:25px 20px; display:flex; flex-direction:column; gap:12px; transition: transform 0.3s ease, box-shadow 0.3s ease, background 0.5s; width:320px; margin:0 auto 40px; }
+.card {
+  background: rgba(255,255,255,0.6);
+  backdrop-filter: blur(20px);
+  border-radius: 25px;
+  box-shadow: 0 8px 30px rgba(0,0,0,0.1);
+  padding:20px 15px;
+  display:flex;
+  flex-direction:column;
+  gap:10px;
+  transition: transform 0.3s ease, box-shadow 0.3s ease, background 0.5s;
+  width:300px;
+  margin:0 auto 30px;
+}
 .card:hover { transform: translateY(-5px); box-shadow: 0 12px 35px rgba(0,0,0,0.15);}
 body.dark .card { background: rgba(40,40,40,0.7); color:#eee; }
-.card .tags { margin-top:10px; text-align:center; }
-.card .tag { display:inline-block; background:linear-gradient(45deg,#5ac8fa,#007aff); color:white; padding:5px 10px; margin:3px; border-radius:15px; font-size:12px; transition:0.2s; }
+
+.card .tags { margin-top:8px; text-align:center; }
+.card .tag {
+  display:inline-block;
+  background:linear-gradient(45deg,#5ac8fa,#007aff);
+  color:white;
+  padding:4px 8px;
+  margin:2px;
+  border-radius:12px;
+  font-size:12px;
+  transition:0.2s;
+}
 .card .tag:hover { transform:scale(1.1); }
 
 /* 头部 */
-header { text-align:center; padding:60px 20px 20px; position:relative; z-index:1;}
-header img { width:140px; height:140px; border-radius:50%; border:4px solid rgba(255,255,255,0.8); margin-bottom:20px; transition:transform 0.3s;}
+header { text-align:center; padding:50px 20px 20px; position:relative; z-index:1;}
+header img { width:120px; height:120px; border-radius:50%; border:4px solid rgba(255,255,255,0.8); margin-bottom:15px; transition:transform 0.3s;}
 header img:hover {transform:scale(1.1);}
 header h1, header p { color: inherit; margin:0;}
-header h1{margin:10px 0; font-size:36px;}
-header p{font-size:18px; margin:5px 0;}
+header h1{margin:10px 0; font-size:32px;}
+header p{font-size:16px; margin:5px 0;}
 
 /* 导航 */
-nav { margin-top:20px; background:rgba(255,255,255,0.2); padding:10px 0; position:sticky; top:0; z-index:5; border-radius:20px; transition:0.3s;}
+nav { margin-top:15px; background:rgba(255,255,255,0.2); padding:8px 0; position:sticky; top:0; z-index:5; border-radius:20px; transition:0.3s;}
 nav.scrolled { background:rgba(0,0,0,0.5); box-shadow:0 4px 10px rgba(0,0,0,0.3);}
-nav a { margin:0 15px; text-decoration:none; font-weight:bold; transition:0.3s;}
+nav a { margin:0 12px; text-decoration:none; font-weight:bold; transition:0.3s;}
 nav a.active { color:#ffeb3b;}
 nav a:hover { color:#ffeb3b; }
 
@@ -60,16 +108,25 @@ nav a:hover { color:#ffeb3b; }
 section { padding:60px 20px; text-align:center; position:relative; z-index:1; }
 section h2 { font-size:28px; color:#007aff; margin-bottom:30px; }
 
+/* 日记小巧输入框居中 */
+textarea, input[type="date"] {
+  width:80%; padding:8px; border-radius:15px; border:none; box-shadow: inset 0 2px 5px rgba(0,0,0,0.1);
+  resize:none; margin:0 auto; display:block; text-align:left; font-size:14px;
+}
+.diary-actions { display:flex; justify-content:center; gap:10px; margin-top:8px; }
+.diary-actions button, #addDiaryBtn {
+  padding:6px 10px; cursor:pointer; border:none; border-radius:20px;
+  background:linear-gradient(135deg,#5ac8fa,#007aff); color:white; font-weight:bold; font-size:14px; transition:0.3s;
+}
+.diary-actions button:hover, #addDiaryBtn:hover { background:linear-gradient(135deg,#007aff,#5ac8fa); }
+
 /* 响应式 */
 @media(max-width:600px){
   header img{width:100px;height:100px;}
   .card{width:90%;}
   nav a{margin:0 8px; font-size:14px;}
+  textarea, input[type="date"]{width:90%; font-size:13px;}
 }
-
-/* 3D 圣诞树 */
-#tree3DContainer { position:fixed; top:0; right:0; width:40%; height:100%; z-index:1; pointer-events:auto; }
-#treeTitle { position:absolute; top:20px; width:100%; text-align:center; color:#FFD700; font-size:48px; font-weight:bold; text-shadow:0 0 10px #FFD700; z-index:10; }
 </style>
 </head>
 <body>
@@ -78,6 +135,7 @@ section h2 { font-size:28px; color:#007aff; margin-bottom:30px; }
   <source src="https://github.com/Happyma-4869/Happyma-4869.github.io/blob/main/Video%20Project%204.mp4?raw=true" type="video/mp4">
 </video>
 <canvas id="particles"></canvas>
+<div id="tree3DContainer"></div>
 
 <header>
   <img src="https://github.com/Happyma-4869/Happyma-4869.github.io/blob/main/%E5%BE%AE%E4%BF%A1%E5%9B%BE%E7%89%87_20251207233412_9_79.jpg?raw=true" alt="头像">
@@ -92,12 +150,6 @@ section h2 { font-size:28px; color:#007aff; margin-bottom:30px; }
 
 <div id="modeToggle">🌙 日/夜切换</div>
 <button id="toTopBtn">⬆️ 顶部</button>
-
-<!-- 3D 树容器 -->
-<div id="tree3DContainer">
-  <div id="treeTitle">MERRY CHRISTMAS</div>
-</div>
-<audio id="bgMusic" src="https://www.bensound.com/bensound-music/bensound-snow.mp3" loop autoplay></audio>
 
 <section id="about">
   <h2>关于我</h2>
@@ -135,16 +187,16 @@ section h2 { font-size:28px; color:#007aff; margin-bottom:30px; }
 <footer>&copy; 2025 Happyma.top</footer>
 <div id="qrModal"><img src="https://github.com/Happyma-4869/Happyma-4869.github.io/blob/main/%E5%BE%AE%E4%BF%A1%E5%9B%BE%E7%89%87_20251207233522_10_79.jpg?raw=true" alt="微信二维码大图"></div>
 
-<!-- Three.js -->
 <script src="https://cdn.jsdelivr.net/npm/three@0.158.0/build/three.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/three@0.158.0/examples/js/controls/OrbitControls.js"></script>
+
 <script>
 // ---------------- 日记 ----------------
 const diaryList=document.getElementById('diaryList');
 const addDiaryBtn=document.getElementById('addDiaryBtn');
 const diaryDate=document.getElementById('diaryDate');
 const diaryContent=document.getElementById('diaryContent');
-let diaries=JSON.parse(localStorage.getItem('diaries'))||[{date:'2025-12-08', content:'今天是我初次创建我的个人网站  目前还在测试中  以后我会逐步完善耶✌'}];
+let diaries=JSON.parse(localStorage.getItem('diaries'))||[{date:'2025-12-08', content:'今天是我初次创建我的个人网站，目前还在测试中，以后我会逐步完善✌'}];
 function renderDiaries(){
   diaryList.innerHTML='';
   diaries.forEach((d,i)=>{
@@ -201,6 +253,7 @@ window.addEventListener('mousemove', e=>{ mouse.x=e.x; mouse.y=e.y; });
 function resizeCanvas(){ canvas.width=window.innerWidth; canvas.height=window.innerHeight; }
 window.addEventListener('resize', resizeCanvas);
 resizeCanvas();
+
 class Particle{
   constructor(){
     this.originX=Math.random()*canvas.width;
@@ -222,11 +275,25 @@ class Particle{
     if(this.y>canvas.height)this.originY=0;
     if(this.y<0)this.originY=canvas.height;
   }
-  draw(){ ctx.fillStyle=this.color; ctx.beginPath(); ctx.arc(this.x,this.y,this.radius,0,Math.PI*2); ctx.fill(); }
+  draw(){
+    ctx.fillStyle=this.color;
+    ctx.beginPath();
+    ctx.arc(this.x,this.y,this.radius,0,Math.PI*2);
+    ctx.fill();
+  }
 }
-function initParticles(){ particlesArray=[]; let count=document.body.classList.contains('dark')?150:80; for(let i=0;i<count;i++){ particlesArray.push(new Particle()); } }
+
+function initParticles(){
+  particlesArray=[];
+  let count=document.body.classList.contains('dark')?150:80;
+  for(let i=0;i<count;i++){ particlesArray.push(new Particle()); }
+}
 initParticles();
-function animateParticles(){ ctx.clearRect(0,0,canvas.width,canvas.height); particlesArray.forEach(p=>{p.update();p.draw();}); requestAnimationFrame(animateParticles); }
+function animateParticles(){
+  ctx.clearRect(0,0,canvas.width,canvas.height);
+  particlesArray.forEach(p=>{p.update();p.draw();});
+  requestAnimationFrame(animateParticles);
+}
 animateParticles();
 
 // ---------------- 微信二维码弹窗 ----------------
@@ -263,6 +330,7 @@ let scene, camera, renderer, controls, treeGroup;
 let sphereMesh, cubeMesh, starMesh;
 let treeInstancedCount = 500;
 let clock = new THREE.Clock();
+let dummy = new THREE.Object3D();
 
 init3DTree();
 animate3DTree();
@@ -278,14 +346,11 @@ function init3DTree(){
     controls = new THREE.OrbitControls(camera, renderer.domElement);
     controls.enableDamping = true;
 
-    // Lights
-    const ambient = new THREE.AmbientLight(0xffffff, 0.4); scene.add(ambient);
+    const ambient = new THREE.AmbientLight(0xffffff, 0.5); scene.add(ambient);
     const directional = new THREE.DirectionalLight(0xffffff, 1); directional.position.set(50,100,50); scene.add(directional);
 
-    // Tree Group
     treeGroup = new THREE.Group(); scene.add(treeGroup);
 
-    // Materials & Geometry
     const sphereMaterialGold = new THREE.MeshStandardMaterial({color:0xFFD700, metalness:0.8, roughness:0.2});
     const cubeMaterialGreen = new THREE.MeshStandardMaterial({color:0x006400, metalness:0.6, roughness:0.4});
     const sphereGeo = new THREE.SphereGeometry(1.5,16,16);
@@ -295,7 +360,6 @@ function init3DTree(){
     cubeMesh = new THREE.InstancedMesh(cubeGeo, cubeMaterialGreen, treeInstancedCount);
     treeGroup.add(sphereMesh); treeGroup.add(cubeMesh);
 
-    const dummy = new THREE.Object3D();
     for(let i=0;i<treeInstancedCount;i++){
         const layer = Math.floor(Math.random()*15);
         const radius = 2 + layer*1.5 + Math.random()*1;
@@ -308,27 +372,64 @@ function init3DTree(){
     }
     sphereMesh.instanceMatrix.needsUpdate = true; cubeMesh.instanceMatrix.needsUpdate = true;
 
-    // Star
     const starGeo = new THREE.OctahedronGeometry(3);
     const starMat = new THREE.MeshStandardMaterial({color:0xFFFF00, metalness:1, roughness:0.2});
     starMesh = new THREE.Mesh(starGeo, starMat);
     starMesh.position.set(0,25,0);
     treeGroup.add(starMesh);
 
-    // Handle resizing
+    // 树粒子
+    addTreeParticles();
+
     window.addEventListener('resize', ()=>{
         camera.aspect = container.clientWidth/container.clientHeight;
         camera.updateProjectionMatrix();
         renderer.setSize(container.clientWidth, container.clientHeight);
     });
+
+    window.addEventListener('mousemove', onMouseMove);
+    window.addEventListener('scroll', onScrollMove);
+}
+
+let mouse3D = new THREE.Vector2();
+function onMouseMove(event){
+    mouse3D.x = (event.clientX / window.innerWidth) * 2 - 1;
+    mouse3D.y = -(event.clientY / window.innerHeight) * 2 + 1;
+}
+
+// 树周围轻微飘落光点
+let treeParticles = [];
+function addTreeParticles(){
+    const particleGeo = new THREE.SphereGeometry(0.3,8,8);
+    const particleMat = new THREE.MeshStandardMaterial({color:0xFFFFFF, emissive:0xFFFFFF});
+    for(let i=0;i<50;i++){
+        let p = new THREE.Mesh(particleGeo, particleMat.clone());
+        p.position.set((Math.random()-0.5)*20, Math.random()*25, (Math.random()-0.5)*20);
+        p.userData.speed = 0.02 + Math.random()*0.02;
+        scene.add(p); treeParticles.push(p);
+    }
 }
 
 function animate3DTree(){
     requestAnimationFrame(animate3DTree);
     const delta = clock.getDelta();
+
     treeGroup.rotation.y += delta*0.2;
+
+    // 树粒子上下飘动
+    treeParticles.forEach(p=>{
+        p.position.y -= p.userData.speed;
+        if(p.position.y <0) p.position.y = 25;
+    });
+
     controls.update();
     renderer.render(scene, camera);
+}
+
+// 页面滚动时微动
+function onScrollMove(){
+    let scrollY = window.scrollY / window.innerHeight;
+    treeGroup.position.y = scrollY * 5; // 向下滚动，树轻微上移
 }
 </script>
 </body>
