@@ -5,38 +5,15 @@
 <title>Happy 的个人主页</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <style>
-body, html {
-  margin:0; padding:0;
-  font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",sans-serif;
-  color:#333;
-  overflow-x:hidden;
-  transition: color 0.5s;
-}
-body.dark { color:#eee; }
-
-/* 背景视频 */
-#bgVideo {
-  position:fixed; top:0; left:0;
-  width:100%; height:100%;
-  object-fit:cover;
-  z-index:0;
-  transition: filter 0.5s;
-}
-body.dark #bgVideo { filter: brightness(40%) contrast(110%); }
-
-/* 粒子画布 */
-#particles, #giftParticles {
-  position:fixed; top:0; left:0;
-  width:100%; height:100%;
-  pointer-events:none;
-  z-index:0;
-}
+body, html { margin:0; padding:0; font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",sans-serif; color:#333; overflow-x:hidden; transition: color 0.5s; background:#f0f0f0;}
+body.dark { color:#eee; background:#1a1a1a;}
+#treeCanvas { position:fixed; top:0; left:0; width:100%; height:100%; z-index:0; }
 
 /* 苹果风格卡片 */
 .card {
   background: rgba(255,255,255,0.6);
   backdrop-filter: blur(20px);
-  border-radius: 25px;
+  border-radius:25px;
   box-shadow: 0 8px 30px rgba(0,0,0,0.1);
   padding:25px 20px;
   display:flex;
@@ -48,7 +25,6 @@ body.dark #bgVideo { filter: brightness(40%) contrast(110%); }
 }
 .card:hover { transform: translateY(-5px); box-shadow: 0 12px 35px rgba(0,0,0,0.15);}
 body.dark .card { background: rgba(40,40,40,0.7); color:#eee; }
-
 .card .tags { margin-top:10px; text-align:center; }
 .card .tag {
   display:inline-block;
@@ -62,85 +38,41 @@ body.dark .card { background: rgba(40,40,40,0.7); color:#eee; }
 }
 .card .tag:hover { transform:scale(1.1); }
 
-/* 头部 */
-header { text-align:center; padding:60px 20px 20px; position:relative; z-index:1;}
+header { text-align:center; padding:60px 20px 20px; position:relative; z-index:2;}
 header img { width:140px; height:140px; border-radius:50%; border:4px solid rgba(255,255,255,0.8); margin-bottom:20px; transition:transform 0.3s;}
 header img:hover {transform:scale(1.1);}
 header h1, header p { color: inherit; margin:0;}
 header h1{margin:10px 0; font-size:36px;}
 header p{font-size:18px; margin:5px 0;}
 
-/* 导航 */
 nav { margin-top:20px; background:rgba(255,255,255,0.2); padding:10px 0; position:sticky; top:0; z-index:5; border-radius:20px; transition:0.3s;}
 nav.scrolled { background:rgba(0,0,0,0.5); box-shadow:0 4px 10px rgba(0,0,0,0.3);}
 nav a { margin:0 15px; text-decoration:none; font-weight:bold; transition:0.3s;}
 nav a.active { color:#ffeb3b;}
 nav a:hover { color:#ffeb3b; }
 
-/* 日夜切换按钮 */
 #modeToggle { position:fixed; top:20px; right:20px; padding:8px 15px; background:linear-gradient(135deg,#5ac8fa,#007aff); color:white; border-radius:25px; cursor:pointer; z-index:10; transition:0.3s;}
 #modeToggle:hover { background:linear-gradient(135deg,#007aff,#5ac8fa); }
 
-/* 返回顶部 */
 #toTopBtn { position:fixed; bottom:30px; right:30px; background:linear-gradient(135deg,#5ac8fa,#007aff); color:white; border:none; padding:12px 18px; border-radius:25px; cursor:pointer; font-size:16px; z-index:10; display:none; transition:0.3s;}
 #toTopBtn:hover { background:linear-gradient(135deg,#007aff,#5ac8fa); }
 
-/* 联系我 */
-.contact .qr { display:flex; justify-content:center; margin-top:20px; }
-.contact .qr img { width:140px; height:140px; border-radius:25px; border:2px solid #ccc; cursor:pointer; transition:0.3s;}
-.contact .qr img:hover { transform:scale(1.1); }
-
-/* 弹窗 */
-#qrModal { display:none; position:fixed; z-index:10; left:0; top:0; width:100%; height:100%; background:rgba(255,255,255,0.3); backdrop-filter:blur(15px); justify-content:center; align-items:center; border-radius:25px;}
-#qrModal img { max-width:300px; border-radius:25px; border:3px solid #fff;}
-#qrModal.show { display:flex; }
-
-/* 分区 */
-section { padding:60px 20px; text-align:center; position:relative; z-index:1; }
+section { padding:60px 20px; text-align:center; position:relative; z-index:2; }
 section h2 { font-size:28px; color:#007aff; margin-bottom:30px; }
 
 textarea, input[type="date"] {
   width:90%; padding:10px; border-radius:20px; border:none; box-shadow: inset 0 2px 5px rgba(0,0,0,0.1);
   resize:none; margin:0 auto; display:block; text-align:left;
 }
-.diary-actions { display:flex; justify-content:center; gap:10px; margin-top:10px; }
-.diary-actions button, #addDiaryBtn {
-  padding:8px 12px; cursor:pointer; border:none; border-radius:25px;
-  background:linear-gradient(135deg,#5ac8fa,#007aff); color:white; font-weight:bold; transition:0.3s;
-}
-.diary-actions button:hover, #addDiaryBtn:hover { background:linear-gradient(135deg,#007aff,#5ac8fa); }
+#addDiaryBtn { margin-top:10px; padding:8px 12px; cursor:pointer; border:none; border-radius:25px; background:linear-gradient(135deg,#5ac8fa,#007aff); color:white; font-weight:bold; transition:0.3s;}
+#addDiaryBtn:hover { background:linear-gradient(135deg,#007aff,#5ac8fa); }
 
-/* 圣诞树 */
-.christmas-tree { text-align:center; margin:40px 0; z-index:2; position:relative; }
-.tree { position:relative; display:inline-block; }
-.star {
-  width:20px; height:20px; background:gold; clip-path: polygon(50% 0%, 61% 35%, 98% 35%, 68% 57%, 79% 91%, 50% 70%, 21% 91%, 32% 57%, 2% 35%, 39% 35%);
-  margin:0 auto; animation: blink 1s infinite alternate;
-}
-.branch { width:0; height:0; border-left:50px solid transparent; border-right:50px solid transparent; border-bottom:40px solid green; margin:-10px auto; position:relative; }
-.b2 { border-left:70px solid transparent; border-right:70px solid transparent; border-bottom:60px solid green; }
-.b3 { border-left:90px solid transparent; border-right:90px solid transparent; border-bottom:80px solid green; }
-.trunk { width:40px; height:50px; background:sienna; margin:-10px auto; border-radius:5px; }
-.decor { width:10px; height:10px; border-radius:50%; position:absolute; background:red; animation: blink 1.5s infinite alternate; }
-.decor2 { background:yellow; }
-.decor3 { background:blue; }
-@keyframes blink { 0%{opacity:1;} 100%{opacity:0.3;} }
-
-/* 响应式 */
-@media(max-width:600px){
-  header img{width:100px;height:100px;}
-  .card{width:90%;}
-  nav a{margin:0 8px; font-size:14px;}
-}
+.card.show { opacity:1; transform:translateY(0);}
 </style>
 </head>
 <body>
 
-<video id="bgVideo" autoplay muted loop>
-  <source src="https://github.com/Happyma-4869/Happyma-4869.github.io/blob/main/Video%20Project%204.mp4?raw=true" type="video/mp4">
-</video>
-<canvas id="particles"></canvas>
-<canvas id="giftParticles"></canvas>
+<canvas id="treeCanvas"></canvas>
 
 <header>
   <img src="https://github.com/Happyma-4869/Happyma-4869.github.io/blob/main/%E5%BE%AE%E4%BF%A1%E5%9B%BE%E7%89%87_20251207233412_9_79.jpg?raw=true" alt="头像">
@@ -155,29 +87,6 @@ textarea, input[type="date"] {
 
 <div id="modeToggle">🌙 日/夜切换</div>
 <button id="toTopBtn">⬆️ 顶部</button>
-
-<!-- 圣诞树 -->
-<div class="christmas-tree">
-  <div class="tree">
-    <div class="star"></div>
-    <div class="branch b1">
-      <div class="decor" style="top:10px; left:15px;"></div>
-      <div class="decor2" style="top:15px; left:35px;"></div>
-      <div class="decor3" style="top:20px; left:25px;"></div>
-    </div>
-    <div class="branch b2">
-      <div class="decor" style="top:15px; left:20px;"></div>
-      <div class="decor2" style="top:20px; left:45px;"></div>
-      <div class="decor3" style="top:25px; left:35px;"></div>
-    </div>
-    <div class="branch b3">
-      <div class="decor" style="top:20px; left:30px;"></div>
-      <div class="decor2" style="top:25px; left:55px;"></div>
-      <div class="decor3" style="top:30px; left:40px;"></div>
-    </div>
-    <div class="trunk"></div>
-  </div>
-</div>
 
 <section id="about">
   <h2>关于我</h2>
@@ -205,165 +114,135 @@ textarea, input[type="date"] {
 <section id="contact">
   <h2>联系我</h2>
   <p>微信：<strong>H4ppy_ma</strong></p>
-  <div class="contact">
-      <div class="qr">
-          <img id="qrImg" src="https://github.com/Happyma-4869/Happyma-4869.github.io/blob/main/%E5%BE%AE%E4%BF%A1%E5%9B%BE%E7%89%87_20251207233522_10_79.jpg?raw=true" alt="微信二维码">
-      </div>
-  </div>
 </section>
 
-<footer>&copy; 2025 Happyma.top</footer>
-<div id="qrModal"><img src="https://github.com/Happyma-4869/Happyma-4869.github.io/blob/main/%E5%BE%AE%E4%BF%A1%E5%9B%BE%E7%89%87_20251207233522_10_79.jpg?raw=true" alt="微信二维码大图"></div>
-
+<script src="https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.160.0/examples/js/controls/OrbitControls.js"></script>
 <script>
-// 日记逻辑
-const diaryList=document.getElementById('diaryList');
+// Three.js 场景
+const scene = new THREE.Scene();
+const camera = new THREE.PerspectiveCamera(45, window.innerWidth/window.innerHeight,0.1,1000);
+camera.position.set(0,5,10);
+
+const renderer = new THREE.WebGLRenderer({canvas:document.getElementById('treeCanvas'), alpha:true, antialias:true});
+renderer.setSize(window.innerWidth,window.innerHeight);
+renderer.setPixelRatio(window.devicePixelRatio);
+
+const ambient = new THREE.AmbientLight(0xffffff,0.7);
+scene.add(ambient);
+const pointLight = new THREE.PointLight(0xffffff,1);
+pointLight.position.set(5,10,5);
+scene.add(pointLight);
+
+// 圣诞树
+const tree = new THREE.Group();
+const coneMaterial = new THREE.MeshStandardMaterial({color:0x008000});
+for(let i=0;i<5;i++){
+  const cone = new THREE.Mesh(new THREE.ConeGeometry(2.5 - i*0.4,1.5,32), coneMaterial);
+  cone.position.y = i*1.2;
+  tree.add(cone);
+}
+const trunk = new THREE.Mesh(new THREE.CylinderGeometry(0.4,0.4,1,32), new THREE.MeshStandardMaterial({color:0x8B4513}));
+trunk.position.y = -0.5;
+tree.add(trunk);
+scene.add(tree);
+
+// 树顶星星
+const starGeometry = new THREE.OctahedronGeometry(0.3);
+const starMaterial = new THREE.MeshStandardMaterial({color:0xffff00, emissive:0xffff00, emissiveIntensity:1});
+const star = new THREE.Mesh(starGeometry,starMaterial);
+star.position.y = 5;
+scene.add(star);
+
+// 彩灯粒子
+const lightColors = [0xff0000,0xffff00,0x0000ff,0xff00ff,0x00ffff];
+const lights = [];
+for(let i=0;i<80;i++){
+  const sphere = new THREE.Mesh(new THREE.SphereGeometry(0.08,8,8), new THREE.MeshStandardMaterial({color:lightColors[i%5], emissive:lightColors[i%5]}));
+  sphere.position.set((Math.random()-0.5)*2, Math.random()*4, (Math.random()-0.5)*2);
+  tree.add(sphere);
+  lights.push({mesh:sphere, offset:Math.random()*100});
+}
+
+// 飘落旋转礼物
+const gifts = [];
+for(let i=0;i<50;i++){
+  const gift = new THREE.Mesh(new THREE.BoxGeometry(0.2,0.2,0.2), new THREE.MeshStandardMaterial({color:lightColors[i%5], emissive:lightColors[i%5]}));
+  gift.position.set((Math.random()-0.5)*3, Math.random()*5+1, (Math.random()-0.5)*3);
+  gift.rotationSpeed = Math.random()*0.02+0.01;
+  gifts.push(gift);
+  scene.add(gift);
+}
+
+const controls = new THREE.OrbitControls(camera,renderer.domElement);
+controls.enablePan=false;
+controls.enableZoom=false;
+controls.minPolarAngle = 0;
+controls.maxPolarAngle = Math.PI/2;
+
+function animate(){
+  requestAnimationFrame(animate);
+  star.rotation.y +=0.02;
+  lights.forEach((l,i)=>{
+    l.mesh.material.emissiveIntensity = 0.5+0.5*Math.sin(Date.now()*0.005 + l.offset);
+    l.mesh.position.y += 0.001*Math.sin(Date.now()*0.002 + l.offset);
+  });
+  gifts.forEach(g=>{
+    g.position.y -=0.01;
+    g.position.x += 0.002*Math.sin(Date.now()*0.003 + g.position.y);
+    g.rotation.y += g.rotationSpeed;
+    if(g.position.y<0) g.position.y=5;
+  });
+  renderer.render(scene,camera);
+}
+animate();
+
+window.addEventListener('resize',()=>{
+  camera.aspect = window.innerWidth/window.innerHeight;
+  camera.updateProjectionMatrix();
+  renderer.setSize(window.innerWidth,window.innerHeight);
+});
+
+// 日夜模式
+const modeToggle = document.getElementById('modeToggle');
+modeToggle.addEventListener('click',()=>{document.body.classList.toggle('dark');});
+
+// 返回顶部
+const toTopBtn = document.getElementById('toTopBtn');
+window.addEventListener('scroll',()=>{
+  if(window.scrollY>200) toTopBtn.style.display='block';
+  else toTopBtn.style.display='none';
+});
+toTopBtn.addEventListener('click',()=>{window.scrollTo({top:0,behavior:'smooth'});});
+
+// 导航高亮
+const mainNav=document.getElementById('mainNav');
+const navLinks = mainNav.querySelectorAll('a');
+window.addEventListener('scroll',()=>{
+  navLinks.forEach(link=>{
+    const section = document.querySelector(link.getAttribute('href'));
+    if(section.offsetTop - 70 <= window.scrollY && section.offsetTop + section.offsetHeight > window.scrollY){
+      link.classList.add('active');
+    } else { link.classList.remove('active'); }
+  });
+});
+
+// 日记添加
 const addDiaryBtn=document.getElementById('addDiaryBtn');
 const diaryDate=document.getElementById('diaryDate');
 const diaryContent=document.getElementById('diaryContent');
-let diaries=JSON.parse(localStorage.getItem('diaries'))||[{date:'2025-12-08', content:'今天是我初次创建我的个人网站  目前还在测试中  以后我会逐步完善耶✌'}];
-function renderDiaries(){
-  diaryList.innerHTML='';
-  diaries.forEach((d,i)=>{
-    const card=document.createElement('div');
-    card.className='card show';
-    card.innerHTML=`<p><strong>${d.date}</strong></p>
-                    <p>${d.content}</p>
-                    <div class="diary-actions">
-                      <button onclick="editDiary(${i})">编辑</button>
-                      <button onclick="deleteDiary(${i})">删除</button>
-                    </div>`;
-    diaryList.appendChild(card);
-  });
-  localStorage.setItem('diaries', JSON.stringify(diaries));
-}
-renderDiaries();
+const diaryList=document.getElementById('diaryList');
+
 addDiaryBtn.addEventListener('click',()=>{
-  const dateVal=diaryDate.value||new Date().toISOString().split('T')[0];
+  const dateVal=diaryDate.value;
   const contentVal=diaryContent.value.trim();
-  if(!contentVal){ alert('请填写内容'); return; }
-  diaries.unshift({date:dateVal, content:contentVal});
-  diaryDate.value=''; diaryContent.value='';
-  renderDiaries();
-});
-function deleteDiary(i){ diaries.splice(i,1); renderDiaries(); }
-function editDiary(i){
-  const newContent=prompt('请输入新的日记内容：', diaries[i].content);
-  if(newContent===null) return;
-  diaries[i].content=newContent;
-  renderDiaries();
-}
-
-// 日夜模式
-const modeToggle=document.getElementById('modeToggle');
-modeToggle.addEventListener('click',()=>{
-    document.body.classList.toggle('dark');
-    particlesArray.forEach(p=>{
-        p.color=document.body.classList.contains('dark')?'rgba(255,255,255,0.9)':'rgba(255,255,255,0.3)';
-    });
-    initParticles();
-});
-
-// 返回顶部
-const toTopBtn=document.getElementById('toTopBtn');
-window.addEventListener('scroll',()=>{ toTopBtn.style.display=(window.scrollY>200)?'block':'none'; });
-toTopBtn.addEventListener('click',()=>{ window.scrollTo({top:0, behavior:'smooth'}); });
-
-// 粒子动画
-const canvas=document.getElementById('particles');
-const ctx=canvas.getContext('2d');
-let particlesArray=[];
-function resizeCanvas(){ canvas.width=window.innerWidth; canvas.height=window.innerHeight; }
-window.addEventListener('resize', resizeCanvas);
-resizeCanvas();
-
-class Particle{
-  constructor(){
-    this.originX=Math.random()*canvas.width;
-    this.originY=Math.random()*canvas.height;
-    this.radius=Math.random()*2+1.5;
-    this.angle=Math.random()*Math.PI*2;
-    this.orbit=Math.random()*20+10;
-    this.speed=(Math.random()*0.01)+0.005;
-    this.color=document.body.classList.contains('dark')?'rgba(255,255,255,0.9)':'rgba(255,255,255,0.3)';
-  }
-  update(){
-    this.angle+=this.speed;
-    this.x=this.originX+Math.cos(this.angle)*this.orbit;
-    this.y=this.originY+Math.sin(this.angle)*this.orbit;
-  }
-  draw(){
-    ctx.fillStyle=this.color;
-    ctx.beginPath();
-    ctx.arc(this.x,this.y,this.radius,0,Math.PI*2);
-    ctx.fill();
-  }
-}
-
-function initParticles(){
-  particlesArray=[];
-  let count=document.body.classList.contains('dark')?150:80;
-  for(let i=0;i<count;i++){ particlesArray.push(new Particle()); }
-}
-initParticles();
-function animateParticles(){
-  ctx.clearRect(0,0,canvas.width,canvas.height);
-  particlesArray.forEach(p=>{p.update();p.draw();});
-  requestAnimationFrame(animateParticles);
-}
-animateParticles();
-
-// 圣诞树礼物粒子
-const giftCanvas=document.getElementById('giftParticles');
-const gctx=giftCanvas.getContext('2d');
-giftCanvas.width=window.innerWidth; giftCanvas.height=window.innerHeight;
-class GiftParticle{
-  constructor(){
-    this.x=Math.random()*giftCanvas.width;
-    this.y=Math.random()*-giftCanvas.height;
-    this.size=Math.random()*8+4;
-    this.speedY=Math.random()*1+1;
-    this.color=['red','yellow','blue','green','pink'][Math.floor(Math.random()*5)];
-  }
-  update(){ this.y+=this.speedY; if(this.y>giftCanvas.height)this.y=-10; }
-  draw(){ gctx.fillStyle=this.color; gctx.fillRect(this.x,this.y,this.size,this.size); }
-}
-let giftParticles=[];
-for(let i=0;i<30;i++) giftParticles.push(new GiftParticle());
-function animateGifts(){
-  gctx.clearRect(0,0,giftCanvas.width,giftCanvas.height);
-  giftParticles.forEach(p=>{p.update(); p.draw();});
-  requestAnimationFrame(animateGifts);
-}
-animateGifts();
-
-// 微信二维码弹窗
-const qrImg=document.getElementById('qrImg');
-const qrModal=document.getElementById('qrModal');
-qrImg.addEventListener('click',()=>qrModal.classList.add('show'));
-qrModal.addEventListener('click',()=>qrModal.classList.remove('show'));
-
-// 卡片滚动动画
-function showOnScroll() {
-    const cards = document.querySelectorAll('.card');
-    cards.forEach(card => {
-        const rect = card.getBoundingClientRect();
-        if (rect.top < window.innerHeight - 50) card.classList.add('show');
-    });
-}
-window.addEventListener('scroll', showOnScroll);
-window.addEventListener('load', showOnScroll);
-
-// 导航高亮
-const mainNav = document.getElementById('mainNav');
-const navLinks = mainNav.querySelectorAll('a');
-window.addEventListener('scroll', () => {
-    navLinks.forEach(link => {
-        const section = document.querySelector(link.getAttribute('href'));
-        if(section.offsetTop - 70 <= window.scrollY && section.offsetTop + section.offsetHeight > window.scrollY){
-            link.classList.add('active');
-        } else { link.classList.remove('active'); }
-    });
+  if(!dateVal||!contentVal){ alert('请填写日期和内容'); return; }
+  const newCard=document.createElement('div');
+  newCard.className='card show';
+  newCard.innerHTML=`<p><strong>${dateVal}</strong></p><p>${contentVal}</p>`;
+  diaryList.prepend(newCard);
+  diaryDate.value='';
+  diaryContent.value='';
 });
 </script>
 </body>
