@@ -3,106 +3,81 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width,initial-scale=1" />
-<title>Happy 的个人主页 — 圣诞特别版</title>
+<title>Happy 的个人主页 — 圣诞升级版（最终修复）</title>
 <style>
-/* --- 全局样式 --- */
 :root{--card-w:320px}
 *{box-sizing:border-box}
-html,body{height:100%;margin:0;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",sans-serif;background:#0f1720;color:#222;transition:color .3s; overflow-x: hidden;}
+html,body{height:100%;margin:0;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",sans-serif;background:#0f1720;color:#222;transition:color .3s}
 body.dark{background:#0b0b0d;color:#eee}
 
-/* --- 背景层 (视频 & 2D粒子) --- */
-#bgVideo{position:fixed;left:0;top:0;width:100%;height:100%;object-fit:cover;z-index:-2;transition:filter .4s}
+/* 背景视频 & 粒子 */
+/* 修复：明确 z-index 确保在底层 */
+#bgVideo{position:fixed;left:0;top:0;width:100%;height:100%;object-fit:cover;z-index:0;transition:filter .4s}
 body.dark #bgVideo{filter:brightness(.38) contrast(1.05)}
-#particles{position:fixed;left:0;top:0;width:100%;height:100%;pointer-events:none;z-index:-1;}
+#particles{position:fixed;left:0;top:0;width:100%;height:100%;pointer-events:none;z-index:1}
 
-/* --- 左侧 3D 圣诞树卡片 (Fixed 定位) --- */
-/* 修复：提高 z-index 确保树能被点到，且背景模糊可见 */
+/* 左侧圣诞树卡片 */
+/* 修复：将 z-index 提高到 50，防止被 .mainContent(z-index:2) 或其他元素遮挡 */
 #treeCard{
-  position:fixed; 
-  left:40px; /* 稍微往右一点，避免贴边 */
-  top:50%; 
-  transform:translateY(-50%);
-  width:400px; 
-  height:600px; 
-  border-radius:24px;
-  background:rgba(255,255,255,0.02); /* 极淡背景 */
-  box-shadow:0 12px 40px rgba(0,0,0,0.4);
-  backdrop-filter:blur(4px); 
-  overflow:hidden; 
-  z-index:10; /* 保证在背景之上 */
+  position:fixed; left:20px; top:50%; transform:translateY(-50%);
+  width:400px; height:600px; border-radius:24px;
+  background:rgba(255,255,255,0.04); box-shadow:0 12px 40px rgba(2,6,23,0.6);
+  backdrop-filter:blur(8px); overflow:hidden; 
+  z-index:50; /* 关键修改：提高层级 */
   cursor:pointer;
-  transition: transform 0.3s ease;
+  display:flex; align-items:center; justify-content:center;
+  pointer-events:auto;
 }
-#treeCard canvas{width:100%;height:100%;display:block;outline:none;}
+#treeCard canvas{width:100%;height:100%;display:block}
 
-/* --- 页面右侧主内容 --- */
-/* 修复：在大屏时左边距留白给树，小屏时取消 */
-.mainContent{position:relative;z-index:5;margin-left:480px;padding-bottom:60px;min-height:100vh; transition: margin-left 0.3s;}
+/* 页面主体右移以避开树（桌面） */
+.mainContent{position:relative;z-index:2;margin-left:460px;padding-bottom:60px;min-height:100vh}
+/* 小屏隐藏树并恢复布局 */
+@media(max-width:900px){ #treeCard{display:none} .mainContent{margin-left:0} }
 
-/* --- 响应式布局：屏幕变窄时隐藏树，内容居中 --- */
-@media(max-width:1100px){ 
-  #treeCard{display:none} 
-  .mainContent{margin-left:0} 
-}
-
-/* --- 头部与导航 --- */
+/* 头部与导航 */
 header{text-align:center;padding:44px 20px 8px}
 header img{width:120px;height:120px;border-radius:50%;border:3px solid rgba(255,255,255,.08);display:block;margin:0 auto 12px;object-fit:cover}
-h1{margin:6px 0;font-size:28px; color: #fff; text-shadow: 0 2px 10px rgba(0,0,0,0.5);}
-p.lead{margin:6px 0;color:rgba(255,255,255,.8);font-size:14px}
-nav{position:sticky;top:12px;margin:14px auto 0;background:rgba(255,255,255,.1);backdrop-filter:blur(10px);padding:8px;border-radius:14px;width:fit-content;z-index:20; box-shadow: 0 4px 15px rgba(0,0,0,0.2);}
-nav a{margin:0 12px;color:#fff;text-decoration:none;font-weight:600}
+h1{margin:6px 0;font-size:28px}
+p.lead{margin:6px 0;color:rgba(255,255,255,.7);font-size:14px}
+nav{position:sticky;top:12px;margin:14px auto 0;background:rgba(255,255,255,.02);padding:8px;border-radius:14px;width:fit-content;z-index:20}
+nav a{margin:0 12px;color:inherit;text-decoration:none;font-weight:600}
 
-/* --- 功能按钮 --- */
-#modeToggle{position:fixed;right:20px;top:20px;z-index:21;padding:8px 14px;border-radius:20px;background:linear-gradient(135deg,#5ac8fa,#007aff);color:white;cursor:pointer;font-size:14px;box-shadow: 0 4px 10px rgba(0,122,255,0.3);}
-#toTopBtn{position:fixed;right:20px;bottom:22px;z-index:21;padding:10px 14px;border-radius:24px;background:linear-gradient(135deg,#5ac8fa,#007aff);color:#fff;border:none;cursor:pointer;display:none;box-shadow: 0 4px 10px rgba(0,122,255,0.3);}
+/* 日夜切换 & 返回顶部 */
+#modeToggle{position:fixed;right:20px;top:20px;z-index:21;padding:8px 14px;border-radius:20px;background:linear-gradient(135deg,#5ac8fa,#007aff);color:white;cursor:pointer}
+#toTopBtn{position:fixed;right:20px;bottom:22px;z-index:21;padding:10px 14px;border-radius:24px;background:linear-gradient(135deg,#5ac8fa,#007aff);color:#fff;border:none;cursor:pointer;display:none}
 
-/* --- 卡片通用样式 --- */
+/* 卡片样式 */
 section{padding:56px 18px;text-align:center}
-.card{
-  width:var(--card-w);
-  margin:0 auto 22px;
-  padding:18px;
-  border-radius:18px;
-  /* 优化卡片背景，增加一点质感 */
-  background:linear-gradient(180deg, rgba(255,255,255,0.1), rgba(255,255,255,0.05));
-  backdrop-filter:blur(12px);
-  border: 1px solid rgba(255,255,255,0.1);
-  box-shadow:0 10px 30px rgba(0,0,0,0.3);
-  color: #fff;
-}
-body:not(.dark) .card { color: #fff; text-shadow: 0 1px 2px rgba(0,0,0,0.5); } /* 即使在浅色模式，卡片文字也保留白色以便阅读 */
-
+.card{width:var(--card-w);margin:0 auto 22px;padding:18px;border-radius:18px;background:linear-gradient(180deg, rgba(255,255,255,0.06), rgba(255,255,255,0.03));backdrop-filter:blur(10px);box-shadow:0 10px 30px rgba(2,6,23,0.6);color:inherit}
 .card .tags{margin-top:8px}
 .tag{display:inline-block;padding:6px 10px;border-radius:12px;margin:4px;background:linear-gradient(45deg,#5ac8fa,#007aff);color:#fff;font-size:13px}
 
-/* --- 日记模块 --- */
-#diary .card{width:360px;padding:14px; max-width: 90%;}
-input[type="date"],textarea{width:90%;padding:10px;border-radius:12px;border:1px solid rgba(255,255,255,0.2);margin:6px auto;display:block;background:rgba(0,0,0,0.3);color:#fff; font-family: inherit;}
-#addDiaryBtn{display:inline-block;padding:10px 24px;border-radius:22px;background:linear-gradient(135deg,#32d74b,#0a84ff);color:#fff;border:none;font-weight:700;font-size:16px;cursor:pointer; margin-top: 10px;}
-.diary-actions button{padding:6px 12px;border-radius:16px;background:rgba(255,255,255,0.1);border:none;color:#fff;cursor:pointer;margin-left:6px;font-size:12px}
+/* 日记：输入小巧并居中 */
+#diary .card{width:360px;padding:14px}
+input[type="date"],textarea{width:80%;padding:8px;border-radius:12px;border:none;margin:6px auto;display:block;background:rgba(0,0,0,0.25);color:inherit}
+#addDiaryBtn{display:inline-block;padding:12px 18px;border-radius:22px;background:linear-gradient(135deg,#3db0ff,#006ee6);color:#fff;border:none;font-weight:800;font-size:16px;cursor:pointer}
+.diary-actions button{padding:6px 10px;border-radius:16px;background:rgba(255,255,255,0.06);border:none;color:inherit;cursor:pointer;margin-left:6px;font-size:13px}
 
-/* --- 二维码 --- */
-.contact .qr img{width:140px;height:140px;border-radius:18px;cursor:pointer; transition: transform 0.2s;}
-.contact .qr img:hover{transform: scale(1.05);}
+/* 联系：二维码 */
+.contact .qr img{width:140px;height:140px;border-radius:18px;cursor:pointer}
 
-/* --- 模态框 --- */
-#qrModal{position:fixed;left:0;top:0;width:100%;height:100%;z-index:100;display:none;align-items:center;justify-content:center;background:rgba(0,0,0,0.8);backdrop-filter: blur(5px);}
-#qrModal img{max-width:320px;border-radius:16px;border:4px solid rgba(255,255,255,0.12);box-shadow: 0 0 30px rgba(0,0,0,0.5);}
+/* QR modal（默认隐藏） */
+#qrModal{position:fixed;left:0;top:0;width:100%;height:100%;z-index:60;display:none;align-items:center;justify-content:center;background:rgba(0,0,0,0.6)}
+#qrModal img{max-width:320px;border-radius:16px;border:4px solid rgba(255,255,255,0.12)}
 
-/* --- 响应式小屏调整 --- */
+/* 响应式小屏 */
 @media(max-width:480px){
   #addDiaryBtn{padding:10px 14px;font-size:15px}
   .card{width:92%}
-  nav a { margin: 0 8px; font-size: 14px; }
 }
 </style>
 </head>
-<body class="dark"> <video id="bgVideo" autoplay muted loop playsinline>
+<body>
+
+<video id="bgVideo" autoplay muted loop playsinline>
   <source src="https://github.com/Happyma-4869/Happyma-4869.github.io/blob/main/Video%20Project%204.mp4?raw=true" type="video/mp4">
 </video>
-
 <canvas id="particles"></canvas>
 
 <div id="treeCard" title="点击树体放大或点亮装饰">
@@ -113,7 +88,7 @@ input[type="date"],textarea{width:90%;padding:10px;border-radius:12px;border:1px
   <header>
     <img src="https://github.com/Happyma-4869/Happyma-4869.github.io/blob/main/%E5%BE%AE%E4%BF%A1%E5%9B%BE%E7%89%87_20251207233412_9_79.jpg?raw=true" alt="头像">
     <h1>欢迎来到 Happy 的主页</h1>
-    <p class="lead">记录我的日常和点滴 🎄 Merry Christmas!</p>
+    <p class="lead">记录我的日常和点滴 😊</p>
     <nav id="mainNav">
       <a href="#about">关于我</a>
       <a href="#diary">日记</a>
@@ -127,12 +102,9 @@ input[type="date"],textarea{width:90%;padding:10px;border-radius:12px;border:1px
   <section id="about">
     <h2>关于我</h2>
     <div class="card">
-      <p>Hi 我是 Happy，来自河南郑州。<br>目前是郑州西亚斯学院的大一学生。<br>在此分享我的大学生活与兴趣。</p>
+      <p>Hi 我是happy  我来自河南郑州市  目前是郑州市西亚斯大一学生  在此我想分享我的生活</p>
       <div class="tags">
-        <span class="tag">📚 学习</span>
-        <span class="tag">🎮 游戏</span>
-        <span class="tag">🎵 音乐</span>
-        <span class="tag">💻 编程</span>
+        <span class="tag">学习</span><span class="tag">游戏</span><span class="tag">音乐</span><span class="tag">编程</span>
       </div>
     </div>
   </section>
@@ -142,7 +114,7 @@ input[type="date"],textarea{width:90%;padding:10px;border-radius:12px;border:1px
     <div class="card">
       <input id="diaryDate" type="date" />
       <textarea id="diaryContent" rows="3" placeholder="写下今天的日记..."></textarea>
-      <div style="text-align:center;">
+      <div style="text-align:center;margin-top:6px">
         <button id="addDiaryBtn">添加日记</button>
       </div>
     </div>
@@ -159,9 +131,7 @@ input[type="date"],textarea{width:90%;padding:10px;border-radius:12px;border:1px
     </div>
   </section>
 
-  <footer style="text-align:center;padding:18px;color:rgba(255,255,255,0.45)">
-    &copy; 2025 Happyma.top <br> Best Wishes for You
-  </footer>
+  <footer style="text-align:center;padding:18px;color:rgba(255,255,255,0.45)">&copy; 2025 Happyma.top</footer>
 
   <div id="qrModal">
     <img src="https://github.com/Happyma-4869/Happyma-4869.github.io/blob/main/%E5%BE%AE%E4%BF%A1%E5%9B%BE%E7%89%87_20251207233522_10_79.jpg?raw=true" alt="二维码大图">
@@ -172,40 +142,31 @@ input[type="date"],textarea{width:90%;padding:10px;border-radius:12px;border:1px
 <script src="https://cdn.jsdelivr.net/npm/three@0.158.0/examples/js/controls/OrbitControls.js"></script>
 
 <script>
-/* =========================================
-   PART 1: 个人主页逻辑 (日记、交互、背景粒子)
-   ========================================= */
-
-// --- 日记功能 ---
+/* ===========================
+   日记 / UI / 背景粒子
+   =========================== */
 const diaryList = document.getElementById('diaryList');
 const addDiaryBtn = document.getElementById('addDiaryBtn');
 const diaryDate = document.getElementById('diaryDate');
 const diaryContent = document.getElementById('diaryContent');
+const qrImg = document.getElementById('qrImg');
+const qrModal = document.getElementById('qrModal');
 
-// 修复：添加 localStorage 错误处理，防止首次访问报错
-let diaries = [];
-try {
-    diaries = JSON.parse(localStorage.getItem('diaries')) || [
-      {date:'2025-12-08', content:'今天是我初次创建我的个人网站，目前还在测试中。圣诞节快到了！🎄'}
-    ];
-} catch(e) { diaries = []; }
+let diaries = JSON.parse(localStorage.getItem('diaries')) || [
+  {date:'2025-12-08', content:'今天是我初次创建我的个人网站  目前还在测试中  以后我会逐步完善耶✌'}
+];
 
 function renderDiaries(){
   diaryList.innerHTML = '';
   diaries.forEach((d,i)=>{
     const entry = document.createElement('div');
     entry.className = 'card diary-entry';
-    entry.style.textAlign = 'left'; // 日记内容左对齐更好阅读
-    entry.innerHTML = `
-      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;border-bottom:1px solid rgba(255,255,255,0.1);padding-bottom:4px;">
-        <strong style="color:#5ac8fa">${d.date}</strong>
-        <div class="diary-actions">
-           <button onclick="editDiary(${i})">✏️</button>
-           <button onclick="deleteDiary(${i})">🗑️</button>
-        </div>
-      </div>
-      <p style="white-space:pre-wrap;margin:0;line-height:1.6;">${d.content}</p>
-    `;
+    entry.innerHTML = `<p><strong>${d.date}</strong></p>
+                       <p style="white-space:pre-wrap">${d.content}</p>
+                       <div class="diary-actions">
+                         <button onclick="editDiary(${i})">编辑</button>
+                         <button onclick="deleteDiary(${i})">删除</button>
+                       </div>`;
     diaryList.appendChild(entry);
   });
   localStorage.setItem('diaries', JSON.stringify(diaries));
@@ -215,310 +176,263 @@ renderDiaries();
 addDiaryBtn.addEventListener('click', ()=>{
   const dateVal = diaryDate.value || new Date().toISOString().split('T')[0];
   const contentVal = diaryContent.value.trim();
-  if(!contentVal){ alert('请填写日记内容'); return; }
+  if(!contentVal){ alert('请填写内容'); return; }
   diaries.unshift({date:dateVal, content:contentVal});
-  diaryContent.value='';
+  diaryDate.value=''; diaryContent.value='';
   renderDiaries();
 });
-
 window.editDiary = function(i){
   const newText = prompt('编辑日记：', diaries[i].content);
-  if(newText !== null){ diaries[i].content = newText; renderDiaries(); }
+  if(newText === null) return;
+  diaries[i].content = newText;
+  renderDiaries();
 };
 window.deleteDiary = function(i){
-  if(confirm('确认删除这条日记吗？')){ diaries.splice(i,1); renderDiaries(); }
+  if(!confirm('确认删除这条日记？')) return;
+  diaries.splice(i,1);
+  renderDiaries();
 };
 
-// --- 二维码弹窗 ---
-const qrImg = document.getElementById('qrImg');
-const qrModal = document.getElementById('qrModal');
-qrImg.addEventListener('click', (e)=>{ e.stopPropagation(); qrModal.style.display = 'flex'; });
+// QR modal
+qrImg.addEventListener('click', ()=>{ qrModal.style.display = 'flex'; });
 qrModal.addEventListener('click', ()=>{ qrModal.style.display = 'none'; });
 
-// --- 日夜切换 ---
+// 日夜切换
 const modeToggle = document.getElementById('modeToggle');
 modeToggle.addEventListener('click', ()=>{
   document.body.classList.toggle('dark');
-  initBgParticles(); // 重新生成背景粒子以适配颜色
+  initParticles(); // 重刷粒子数量/颜色
 });
 
-// --- 返回顶部 & 导航高亮 ---
+// 返回顶部 & 导航高亮
 const toTopBtn = document.getElementById('toTopBtn');
 window.addEventListener('scroll', ()=>{
-  toTopBtn.style.display = (window.scrollY > 300) ? 'block' : 'none';
-  // 简单的高亮逻辑
-  const scrollPos = window.scrollY + 100;
-  document.querySelectorAll('#mainNav a').forEach(link=>{
-    const section = document.querySelector(link.getAttribute('href'));
-    if(section && section.offsetTop <= scrollPos && (section.offsetTop + section.offsetHeight) > scrollPos){
+  toTopBtn.style.display = (window.scrollY > 200) ? 'block' : 'none';
+  // nav highlight
+  const navLinks = document.querySelectorAll('#mainNav a');
+  navLinks.forEach(link=>{
+    const s = document.querySelector(link.getAttribute('href'));
+    if(!s) return;
+    if(window.scrollY >= s.offsetTop - 80 && window.scrollY < s.offsetTop + s.offsetHeight){
       link.style.color = '#ffeb3b';
-    } else {
-      link.style.color = '#fff';
-    }
+    } else link.style.color = '';
   });
 });
 toTopBtn.addEventListener('click', ()=> window.scrollTo({top:0,behavior:'smooth'}) );
 
-
-/* --- 背景 2D 粒子系统 (Canvas #particles) --- */
-const bgCanvas = document.getElementById('particles');
-const bgCtx = bgCanvas.getContext('2d');
-let bgParticlesArray = [];
+/* ---------- 背景粒子画布 ---------- */
+const canvas = document.getElementById('particles');
+const ctx = canvas.getContext('2d');
+let particlesArray = [];
 let mouse = {x:null,y:null};
-
-function resizeBgCanvas(){ 
-    bgCanvas.width = window.innerWidth; 
-    bgCanvas.height = window.innerHeight; 
-}
-window.addEventListener('resize', resizeBgCanvas);
-resizeBgCanvas();
+function resizeCanvas(){ canvas.width = window.innerWidth; canvas.height = window.innerHeight; }
+window.addEventListener('resize', resizeCanvas);
+resizeCanvas();
 window.addEventListener('mousemove', e => { mouse.x = e.clientX; mouse.y = e.clientY; });
 
 class BGParticle {
   constructor(){ this.reset(); }
   reset(){
-    this.x = Math.random()*bgCanvas.width;
-    this.y = Math.random()*bgCanvas.height;
+    this.x = Math.random()*canvas.width;
+    this.y = Math.random()*canvas.height;
     this.r = Math.random()*2+1;
-    this.speedX = (Math.random()-0.5)*0.5;
-    this.speedY = (Math.random()-0.5)*0.5;
-    this.color = document.body.classList.contains('dark') ? 'rgba(255,255,255,0.8)' : 'rgba(255,255,255,0.4)';
+    this.angle = Math.random()*Math.PI*2;
+    this.orbit = Math.random()*20+6;
+    this.speed = 0.004 + Math.random()*0.008;
+    this.color = document.body.classList.contains('dark') ? 'rgba(255,255,255,0.9)' : 'rgba(255,255,255,0.28)';
   }
   update(){
-    this.x += this.speedX; this.y += this.speedY;
-    // 鼠标互动
-    if(mouse.x != null){
-        let dx = mouse.x - this.x;
-        let dy = mouse.y - this.y;
-        let distance = Math.sqrt(dx*dx + dy*dy);
-        if(distance < 100){
-            this.x -= dx/20;
-            this.y -= dy/20;
-        }
+    this.angle += this.speed;
+    this.x += Math.cos(this.angle)*0.2;
+    this.y += Math.sin(this.angle)*0.2;
+    if(mouse.x && mouse.y){
+      const dx = mouse.x - this.x, dy = mouse.y - this.y;
+      const dist = Math.sqrt(dx*dx+dy*dy);
+      if(dist < 120){
+        this.x += dx*0.01; this.y += dy*0.01;
+      }
     }
-    if(this.x<0 || this.x>bgCanvas.width || this.y<0 || this.y>bgCanvas.height) this.reset();
+    if(this.x<0||this.x>canvas.width||this.y<0||this.y>canvas.height) this.reset();
   }
-  draw(){ 
-      bgCtx.fillStyle = this.color; 
-      bgCtx.beginPath(); 
-      bgCtx.arc(this.x,this.y,this.r,0,Math.PI*2); 
-      bgCtx.fill(); 
+  draw(){ ctx.fillStyle = this.color; ctx.beginPath(); ctx.arc(this.x,this.y,this.r,0,Math.PI*2); ctx.fill(); }
+}
+
+function initParticles(){
+  particlesArray = [];
+  const count = document.body.classList.contains('dark') ? 150 : 80;
+  for(let i=0;i<count;i++) particlesArray.push(new BGParticle());
+}
+initParticles();
+function animateParticles(){ ctx.clearRect(0,0,canvas.width,canvas.height); particlesArray.forEach(p=>{ p.update(); p.draw(); }); requestAnimationFrame(animateParticles); }
+animateParticles();
+
+/* ===========================
+   three.js 3D 圣诞树（左侧卡片）
+   =========================== */
+const treeCanvas = document.getElementById('treeCanvas');
+const treeCard = document.getElementById('treeCard');
+
+let renderer, scene, camera, controls, treeGroup;
+let sphereMesh, cubeMesh, starMesh;
+let instanceCount = 450;
+let dummy = new THREE.Object3D();
+let clock = new THREE.Clock();
+let raycaster = new THREE.Raycaster();
+let mouseN = new THREE.Vector2();
+let ornamentColors = {}; // 保存原色
+
+function initTree3D(){
+  const w = treeCard.clientWidth, h = treeCard.clientHeight;
+  renderer = new THREE.WebGLRenderer({canvas: treeCanvas, alpha:true, antialias:true});
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio,2));
+  renderer.setSize(w,h);
+  renderer.setClearColor(0x000000,0);
+
+  scene = new THREE.Scene();
+  camera = new THREE.PerspectiveCamera(50, w/h, 0.1, 2000);
+  camera.position.set(0,24,80);
+
+  controls = new THREE.OrbitControls(camera, renderer.domElement);
+  controls.enableZoom = false; controls.enablePan = false; controls.enableRotate = false;
+
+  // lights
+  const amb = new THREE.AmbientLight(0xffffff,0.6); scene.add(amb);
+  const dir = new THREE.DirectionalLight(0xffffff,0.8); dir.position.set(30,80,40); scene.add(dir);
+
+  treeGroup = new THREE.Group(); scene.add(treeGroup);
+
+  const sphereGeo = new THREE.SphereGeometry(1.6,12,12);
+  const cubeGeo = new THREE.BoxGeometry(2.2,2.2,2.2);
+  const goldMat = new THREE.MeshStandardMaterial({color:0xFFD700,metalness:0.8,roughness:0.2});
+  const greenMat = new THREE.MeshStandardMaterial({color:0x0b6a2d,metalness:0.4,roughness:0.6});
+
+  sphereMesh = new THREE.InstancedMesh(sphereGeo, goldMat, instanceCount);
+  cubeMesh = new THREE.InstancedMesh(cubeGeo, greenMat, instanceCount);
+  sphereMesh.instanceMatrix.setUsage(THREE.DynamicDrawUsage);
+  cubeMesh.instanceMatrix.setUsage(THREE.DynamicDrawUsage);
+
+  treeGroup.add(sphereMesh); treeGroup.add(cubeMesh);
+
+  for(let i=0;i<instanceCount;i++){
+    const layer = Math.floor(Math.random()*18);
+    const y = layer*1.6 - 10;
+    const radius = 1 + (18 - layer)*1.2 + Math.random()*0.6;
+    const angle = Math.random()*Math.PI*2;
+    const x = Math.cos(angle)*radius;
+    const z = Math.sin(angle)*radius*0.8;
+    dummy.position.set(x,y,z);
+    dummy.rotation.set(Math.random()*Math.PI,Math.random()*Math.PI,Math.random()*Math.PI);
+    dummy.scale.setScalar(0.8 + Math.random()*0.9);
+    dummy.updateMatrix();
+    if(i%2===0){
+      sphereMesh.setMatrixAt(i,dummy.matrix);
+      if(Math.random()>0.6){ sphereMesh.setColorAt(i,new THREE.Color(0xFF2B2B)); ornamentColors['s_'+i]=new THREE.Color(0xFF2B2B); }
+      else { sphereMesh.setColorAt(i,new THREE.Color(0xFFD700)); ornamentColors['s_'+i]=new THREE.Color(0xFFD700); }
+    } else {
+      cubeMesh.setMatrixAt(i,dummy.matrix);
+      if(Math.random()>0.6){ cubeMesh.setColorAt(i,new THREE.Color(0xFFD700)); ornamentColors['c_'+i]=new THREE.Color(0xFFD700); }
+      else { cubeMesh.setColorAt(i,new THREE.Color(0x00A86B)); ornamentColors['c_'+i]=new THREE.Color(0x00A86B); }
+    }
+  }
+  sphereMesh.instanceMatrix.needsUpdate=true; cubeMesh.instanceMatrix.needsUpdate=true;
+  if(sphereMesh.instanceColor) sphereMesh.instanceColor.needsUpdate=true;
+  if(cubeMesh.instanceColor) cubeMesh.instanceColor.needsUpdate=true;
+
+  // star
+  const starGeo = new THREE.OctahedronGeometry(3.4);
+  const starMat = new THREE.MeshStandardMaterial({color:0xFFF176,emissive:0xFFEE88,metalness:1,roughness:0.2});
+  starMesh = new THREE.Mesh(starGeo, starMat); starMesh.position.set(0,20,0);
+  treeGroup.add(starMesh);
+
+  addTreeParticles();
+
+  window.addEventListener('resize', ()=>{ const ww=treeCard.clientWidth, hh=treeCard.clientHeight; renderer.setSize(ww,hh); camera.aspect=ww/hh; camera.updateProjectionMatrix(); });
+
+  renderer.domElement.addEventListener('pointermove', onPointerMove);
+  renderer.domElement.addEventListener('pointerdown', onPointerDown);
+}
+
+let treeParticles = [];
+function addTreeParticles(){
+  const geo = new THREE.SphereGeometry(0.18,6,6);
+  for(let i=0;i<60;i++){
+    const mat = new THREE.MeshStandardMaterial({color:0xffffff,emissive:0xffffff,emissiveIntensity:0.8,transparent:true,opacity:0.9});
+    const m = new THREE.Mesh(geo, mat);
+    m.position.set((Math.random()-0.5)*16, Math.random()*24-2, (Math.random()-0.5)*12);
+    m.userData = { speed: 0.02 + Math.random()*0.02, baseY: m.position.y, phase: Math.random()*Math.PI*2 };
+    treeParticles.push(m); scene.add(m);
   }
 }
 
-function initBgParticles(){
-  bgParticlesArray = [];
-  const count = document.body.classList.contains('dark') ? 100 : 50;
-  for(let i=0;i<count;i++) bgParticlesArray.push(new BGParticle());
+function onPointerMove(evt){
+  const rect = renderer.domElement.getBoundingClientRect();
+  mouseN.x = ((evt.clientX - rect.left) / rect.width) * 2 - 1;
+  mouseN.y = -((evt.clientY - rect.top) / rect.height) * 2 + 1;
 }
-initBgParticles();
 
-function animateBgParticles(){ 
-    bgCtx.clearRect(0,0,bgCanvas.width,bgCanvas.height); 
-    bgParticlesArray.forEach(p=>{ p.update(); p.draw(); }); 
-    requestAnimationFrame(animateBgParticles); 
+function onPointerDown(evt){
+  const rect = renderer.domElement.getBoundingClientRect();
+  const x = ((evt.clientX - rect.left)/rect.width)*2 -1;
+  const y = -((evt.clientY - rect.top)/rect.height)*2 +1;
+  raycaster.setFromCamera(new THREE.Vector2(x,y), camera);
+  let intersects = raycaster.intersectObject(sphereMesh);
+  if(intersects.length>0){
+    const instId = intersects[0].instanceId;
+    if(instId !== undefined){ toggleOrnamentColor('s', instId); return; }
+  }
+  intersects = raycaster.intersectObject(cubeMesh);
+  if(intersects.length>0){
+    const instId = intersects[0].instanceId;
+    if(instId !== undefined){ toggleOrnamentColor('c', instId); return; }
+  }
+  toggleTreeScale();
 }
-animateBgParticles();
 
+let isTreeScaled = false;
+function toggleTreeScale(){
+  if(!isTreeScaled){ treeCard.style.transform='translateY(-50%) scale(1.12)'; isTreeScaled=true; }
+  else { treeCard.style.transform='translateY(-50%) scale(1)'; isTreeScaled=false; }
+}
 
-/* =========================================
-   PART 2: THREE.JS 3D 圣诞树逻辑
-   (单独封装，防止变量污染)
-   ========================================= */
-(function(){
-    const treeCanvas = document.getElementById('treeCanvas');
-    const treeCard = document.getElementById('treeCard');
+function toggleOrnamentColor(type, id){
+  const key = (type==='s'?'s_':'c_') + id;
+  const inst = (type==='s')? sphereMesh : cubeMesh;
+  const orig = ornamentColors[key];
+  if(!orig) return;
+  if(!inst.userData) inst.userData = {};
+  if(inst.userData[id] === 'lit'){
+    inst.setColorAt(id, orig); inst.userData[id] = null;
+  } else {
+    inst.setColorAt(id, new THREE.Color(0xFFFFFF)); inst.userData[id] = 'lit';
+    setTimeout(()=>{ if(inst.userData && inst.userData[id] === 'lit'){ inst.setColorAt(id, orig); inst.userData[id] = null; if(inst.instanceColor) inst.instanceColor.needsUpdate=true; inst.instanceMatrix.needsUpdate=true; } }, 900);
+  }
+  if(inst.instanceColor) inst.instanceColor.needsUpdate=true;
+  inst.instanceMatrix.needsUpdate=true;
+}
 
-    let renderer, scene, camera, controls, treeGroup;
-    let sphereMesh, cubeMesh, starMesh;
-    let clock = new THREE.Clock();
-    let raycaster = new THREE.Raycaster();
-    // 粒子
-    let treeSnowParticles = [];
+function animateTree(){
+  requestAnimationFrame(animateTree);
+  const dt = clock.getDelta();
+  treeGroup.rotation.y += dt * 0.12;
+  treeParticles.forEach(p=>{ p.position.y = p.userData.baseY + Math.sin(clock.elapsedTime*1.2 + p.userData.phase) * 0.6; });
+  if(starMesh) starMesh.scale.setScalar(1 + Math.sin(clock.elapsedTime*6)*0.06);
+  controls.update();
+  renderer.render(scene, camera);
+}
 
-    // 初始化 3D 场景
-    function initTree(){
-        if(!treeCanvas || !treeCard) return;
-        
-        const w = treeCard.clientWidth;
-        const h = treeCard.clientHeight;
+// 关键修复：防止页面不可滚动时计算出的 NaN 导致树消失
+window.addEventListener('scroll', ()=>{
+  const maxShift = 10;
+  // 如果页面高度不足以滚动，除法可能为 Infinity 或 NaN，这里做安全检查
+  let scrollPct = window.scrollY / (document.body.scrollHeight - window.innerHeight);
+  if(!Number.isFinite(scrollPct)) scrollPct = 0; // 修复：若无法计算则视为 0
+  
+  if(treeGroup) treeGroup.position.y = (scrollPct - 0.4) * maxShift;
+});
 
-        renderer = new THREE.WebGLRenderer({canvas: treeCanvas, alpha:true, antialias:true});
-        renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
-        renderer.setSize(w, h);
-        renderer.setClearColor(0x000000, 0); // 透明背景
-
-        scene = new THREE.Scene();
-        // 调整相机位置，确保树在视图中心
-        camera = new THREE.PerspectiveCamera(45, w/h, 0.1, 1000);
-        camera.position.set(0, 10, 70); 
-
-        controls = new THREE.OrbitControls(camera, renderer.domElement);
-        controls.enableZoom = false; 
-        controls.enablePan = false; 
-        controls.autoRotate = true;
-        controls.autoRotateSpeed = 2.0; // 自动旋转速度
-
-        // 灯光
-        const ambientLight = new THREE.AmbientLight(0xffffff, 0.6);
-        scene.add(ambientLight);
-        const dirLight = new THREE.DirectionalLight(0xffffff, 1.2);
-        dirLight.position.set(20, 50, 20);
-        scene.add(dirLight);
-
-        // 创建树组
-        treeGroup = new THREE.Group();
-        scene.add(treeGroup);
-
-        // --- 构建树体 (使用 InstancedMesh 提升性能) ---
-        const layers = 12; // 层数
-        const countPerLayer = 15;
-        const totalInstances = layers * countPerLayer;
-
-        const sphereGeo = new THREE.SphereGeometry(1.2, 16, 16);
-        const goldMat = new THREE.MeshStandardMaterial({color: 0xffd700, roughness: 0.3, metalness: 0.6});
-        const greenMat = new THREE.MeshStandardMaterial({color: 0x0f6b36, roughness: 0.8});
-        
-        // 我们混合使用球体（装饰）和方块（树叶感）
-        sphereMesh = new THREE.InstancedMesh(sphereGeo, goldMat, totalInstances);
-        cubeMesh = new THREE.InstancedMesh(new THREE.BoxGeometry(2,2,2), greenMat, totalInstances * 2);
-        
-        treeGroup.add(sphereMesh);
-        treeGroup.add(cubeMesh);
-
-        const dummy = new THREE.Object3D();
-        const color = new THREE.Color();
-        let idxSphere = 0;
-        let idxCube = 0;
-
-        for(let l=0; l<layers; l++){
-            // 层级越高，半径越小，Y轴越高
-            const y = (l * 3.5) - 20; 
-            const radius = (layers - l) * 1.8 + 2;
-
-            // 每一层的物体
-            for(let i=0; i<countPerLayer * 2; i++){
-                const angle = (i / (countPerLayer*2)) * Math.PI * 2 + (l*0.5);
-                const x = Math.cos(angle) * radius;
-                const z = Math.sin(angle) * radius;
-                
-                dummy.position.set(x, y, z);
-                dummy.lookAt(0, y, 0); // 面向中心
-                dummy.scale.setScalar(0.8 + Math.random()*0.5);
-                dummy.updateMatrix();
-
-                // 随机决定是绿叶还是金球
-                if(Math.random() > 0.8 && idxSphere < totalInstances){
-                    // 金球装饰
-                    sphereMesh.setMatrixAt(idxSphere, dummy.matrix);
-                    // 随机颜色：金、红、银
-                    const rand = Math.random();
-                    if(rand>0.6) color.setHex(0xffd700); // 金
-                    else if(rand>0.3) color.setHex(0xff3333); // 红
-                    else color.setHex(0xffffff); // 银
-                    sphereMesh.setColorAt(idxSphere, color);
-                    idxSphere++;
-                } else if (idxCube < totalInstances * 2) {
-                    // 绿叶
-                    cubeMesh.setMatrixAt(idxCube, dummy.matrix);
-                    // 绿色微调
-                    color.setHSL(0.35, 0.8, 0.2 + Math.random()*0.2); 
-                    cubeMesh.setColorAt(idxCube, color);
-                    idxCube++;
-                }
-            }
-        }
-        
-        // 树顶星星
-        const starGeo = new THREE.OctahedronGeometry(3, 0);
-        const starMat = new THREE.MeshStandardMaterial({color:0xffff00, emissive:0xffaa00, emissiveIntensity:0.5});
-        starMesh = new THREE.Mesh(starGeo, starMat);
-        starMesh.position.set(0, (layers * 3.5) - 18, 0);
-        treeGroup.add(starMesh);
-
-        // 树附近的局部雪花
-        const snowGeo = new THREE.BufferGeometry();
-        const snowCount = 200;
-        const posArray = new Float32Array(snowCount * 3);
-        const velArray = []; // 速度
-        for(let i=0; i<snowCount; i++){
-            posArray[i*3] = (Math.random()-0.5) * 40;
-            posArray[i*3+1] = (Math.random()-0.5) * 50;
-            posArray[i*3+2] = (Math.random()-0.5) * 40;
-            velArray.push({y: -0.05 - Math.random()*0.1, x: (Math.random()-0.5)*0.02});
-        }
-        snowGeo.setAttribute('position', new THREE.BufferAttribute(posArray, 3));
-        const snowMat = new THREE.PointsMaterial({
-            color: 0xffffff, 
-            size: 0.8, 
-            transparent: true, 
-            opacity: 0.8
-        });
-        const snowSystem = new THREE.Points(snowGeo, snowMat);
-        snowSystem.userData = { vels: velArray };
-        scene.add(snowSystem);
-        treeSnowParticles = snowSystem;
-
-        // 点击交互
-        treeCanvas.addEventListener('pointerdown', onTreeClick);
-    }
-
-    // 树被点击时的效果
-    function onTreeClick(){
-        // 简单交互：放大一下卡片
-        if(treeCard.style.transform.includes('scale')){
-             treeCard.style.transform = 'translateY(-50%) scale(1)';
-        } else {
-             treeCard.style.transform = 'translateY(-50%) scale(1.05)';
-        }
-    }
-
-    // 动画循环
-    function animate(){
-        requestAnimationFrame(animate);
-        const dt = clock.getDelta();
-        
-        controls.update(); // 自动旋转
-
-        // 星星闪烁
-        if(starMesh){
-            starMesh.rotation.y += dt;
-            const s = 1 + Math.sin(clock.elapsedTime * 3) * 0.1;
-            starMesh.scale.set(s,s,s);
-        }
-
-        // 局部雪花下落
-        if(treeSnowParticles){
-            const positions = treeSnowParticles.geometry.attributes.position.array;
-            const vels = treeSnowParticles.userData.vels;
-            for(let i=0; i<vels.length; i++){
-                positions[i*3+1] += vels[i].y; // Y轴下降
-                positions[i*3] += vels[i].x;   // X轴微动
-                // 循环复位
-                if(positions[i*3+1] < -25){
-                    positions[i*3+1] = 25;
-                }
-            }
-            treeSnowParticles.geometry.attributes.position.needsUpdate = true;
-        }
-
-        renderer.render(scene, camera);
-    }
-
-    // 窗口大小适配
-    window.addEventListener('resize', ()=>{
-        if(!treeCard || !camera || !renderer) return;
-        const w = treeCard.clientWidth;
-        const h = treeCard.clientHeight;
-        camera.aspect = w/h;
-        camera.updateProjectionMatrix();
-        renderer.setSize(w, h);
-    });
-
-    // 启动
-    initTree();
-    animate();
-})();
+/* 初始化三维树 */
+initTree3D();
+animateTree();
 </script>
 
 </body>
