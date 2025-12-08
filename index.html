@@ -1,439 +1,271 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
-<meta charset="utf-8" />
-<meta name="viewport" content="width=device-width,initial-scale=1" />
-<title>Happy 的个人主页 — 圣诞升级版（修复版）</title>
-<style>
-:root{--card-w:320px}
-*{box-sizing:border-box}
-html,body{height:100%;margin:0;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",sans-serif;background:#0f1720;color:#222;transition:color .3s}
-body.dark{background:#0b0b0d;color:#eee}
+  <meta charset="UTF-8" />
+  <title>Happy 的个人空间</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
-/* 背景视频 & 粒子 */
-#bgVideo{position:fixed;left:0;top:0;width:100%;height:100%;object-fit:cover;z-index:0;transition:filter .4s}
-body.dark #bgVideo{filter:brightness(.38) contrast(1.05)}
-#particles{position:fixed;left:0;top:0;width:100%;height:100%;pointer-events:none;z-index:1}
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: "Microsoft YaHei", sans-serif;
+    }
 
-/* 左侧圣诞树卡片（优先级在粒子之上，且可交互） */
-#treeCard{
-  position:fixed; left:20px; top:50%; transform:translateY(-50%);
-  width:400px; height:600px; border-radius:24px;
-  background:rgba(255,255,255,0.04); box-shadow:0 12px 40px rgba(2,6,23,0.6);
-  backdrop-filter:blur(8px); overflow:hidden; z-index:5; cursor:pointer;
-  display:flex; align-items:center; justify-content:center;
-  pointer-events:auto;
-}
-/* 关键修复：确保 canvas 可见并在卡片内正确堆叠与接收交互 */
-#treeCard canvas{width:100%;height:100%;display:block;position:relative;z-index:10;pointer-events:auto}
+    body {
+      min-height: 100vh;
+      background: radial-gradient(circle at top, #0b1d2a, #020409);
+      color: #fff;
+      overflow-x: hidden;
+    }
 
-/* 页面主体右移以避开树（桌面） */
-.mainContent{position:relative;z-index:2;margin-left:460px;padding-bottom:60px;min-height:100vh}
-/* 小屏隐藏树并恢复布局 */
-@media(max-width:900px){ #treeCard{display:none} .mainContent{margin-left:0} }
+    .main {
+      display: flex;
+      max-width: 1200px;
+      margin: 80px auto;
+      gap: 30px;
+      align-items: flex-start;
+      padding: 0 20px;
+    }
 
-/* 头部与导航 */
-header{text-align:center;padding:44px 20px 8px}
-header img{width:120px;height:120px;border-radius:50%;border:3px solid rgba(255,255,255,.08);display:block;margin:0 auto 12px;object-fit:cover}
-h1{margin:6px 0;font-size:28px}
-p.lead{margin:6px 0;color:rgba(255,255,255,.7);font-size:14px}
-nav{position:sticky;top:12px;margin:14px auto 0;background:rgba(255,255,255,.02);padding:8px;border-radius:14px;width:fit-content;z-index:20}
-nav a{margin:0 12px;color:inherit;text-decoration:none;font-weight:600}
+    /* ===== 左侧圣诞树卡片 ===== */
+    #treeCard {
+      width: 320px;
+      height: 420px;
+      background: rgba(255,255,255,0.08);
+      border-radius: 25px;
+      backdrop-filter: blur(12px);
+      box-shadow: 0 0 25px rgba(0,255,200,0.25);
+      overflow: hidden;
+      position: relative;
+      z-index: 3;
+      flex-shrink: 0;
+    }
 
-/* 日夜切换 & 返回顶部 */
-#modeToggle{position:fixed;right:20px;top:20px;z-index:21;padding:8px 14px;border-radius:20px;background:linear-gradient(135deg,#5ac8fa,#007aff);color:white;cursor:pointer}
-#toTopBtn{position:fixed;right:20px;bottom:22px;z-index:21;padding:10px 14px;border-radius:24px;background:linear-gradient(135deg,#5ac8fa,#007aff);color:#fff;border:none;cursor:pointer;display:none}
+    #treeCanvas {
+      width: 100%;
+      height: 100%;
+      display: block;
+    }
 
-/* 卡片样式 */
-section{padding:56px 18px;text-align:center}
-.card{width:var(--card-w);margin:0 auto 22px;padding:18px;border-radius:18px;background:linear-gradient(180deg, rgba(255,255,255,0.06), rgba(255,255,255,0.03));backdrop-filter:blur(10px);box-shadow:0 10px 30px rgba(2,6,23,0.6);color:inherit}
-.card .tags{margin-top:8px}
-.tag{display:inline-block;padding:6px 10px;border-radius:12px;margin:4px;background:linear-gradient(45deg,#5ac8fa,#007aff);color:#fff;font-size:13px}
+    /* ===== 右侧日记区 ===== */
+    .diary {
+      flex: 1;
+      background: rgba(255,255,255,0.06);
+      border-radius: 25px;
+      padding: 25px;
+      backdrop-filter: blur(12px);
+      box-shadow: 0 0 25px rgba(0,0,0,0.4);
+    }
 
-/* 日记：输入小巧并居中 */
-#diary .card{width:360px;padding:14px}
-input[type="date"],textarea{width:80%;padding:8px;border-radius:12px;border:none;margin:6px auto;display:block;background:rgba(0,0,0,0.25);color:inherit}
-#addDiaryBtn{display:inline-block;padding:12px 18px;border-radius:22px;background:linear-gradient(135deg,#3db0ff,#006ee6);color:#fff;border:none;font-weight:800;font-size:16px;cursor:pointer}
-.diary-actions button{padding:6px 10px;border-radius:16px;background:rgba(255,255,255,0.06);border:none;color:inherit;cursor:pointer;margin-left:6px;font-size:13px}
+    .diary h2 {
+      margin-bottom: 15px;
+      font-size: 22px;
+    }
 
-/* 联系：二维码 */
-.contact .qr img{width:140px;height:140px;border-radius:18px;cursor:pointer}
+    .diary textarea {
+      width: 100%;
+      height: 100px;
+      border-radius: 12px;
+      border: none;
+      padding: 10px;
+      font-size: 14px;
+      outline: none;
+      resize: none;
+    }
 
-/* QR modal（默认隐藏） */
-#qrModal{position:fixed;left:0;top:0;width:100%;height:100%;z-index:60;display:none;align-items:center;justify-content:center;background:rgba(0,0,0,0.6)}
-#qrModal img{max-width:320px;border-radius:16px;border:4px solid rgba(255,255,255,0.12)}
+    /* ✅ 新增按钮更大 */
+    .add-btn {
+      margin-top: 12px;
+      padding: 14px;
+      width: 100%;
+      border-radius: 14px;
+      border: none;
+      cursor: pointer;
+      font-size: 16px;
+      background: linear-gradient(135deg, #00ffd5, #00aaff);
+      color: #000;
+      font-weight: bold;
+    }
 
-/* 响应式小屏 */
-@media(max-width:480px){
-  #addDiaryBtn{padding:10px 14px;font-size:15px}
-  .card{width:92%}
-}
-</style>
+    .entry {
+      margin-top: 15px;
+      padding: 12px;
+      border-radius: 14px;
+      background: rgba(0,0,0,0.4);
+    }
+
+    .entry button {
+      margin-top: 8px;
+      margin-right: 6px;
+      padding: 6px 14px;
+      border-radius: 10px;
+      border: none;
+      cursor: pointer;
+    }
+
+    .edit {
+      background: #ffaa00;
+    }
+
+    .delete {
+      background: #ff4444;
+    }
+
+    /* ===== 二维码 ===== */
+    .qr {
+      margin-top: 20px;
+      text-align: center;
+    }
+
+    .qr img {
+      width: 140px;
+      border-radius: 10px;
+    }
+  </style>
 </head>
 <body>
 
-<!-- 背景 视频 与 全局粒子 -->
-<video id="bgVideo" autoplay muted loop playsinline>
-  <source src="https://github.com/Happyma-4869/Happyma-4869.github.io/blob/main/Video%20Project%204.mp4?raw=true" type="video/mp4">
-</video>
-<canvas id="particles"></canvas>
+<div class="main">
 
-<!-- 左侧 3D 圣诞树卡片（fixed） -->
-<div id="treeCard" title="点击树体放大或点亮装饰">
-  <canvas id="treeCanvas"></canvas>
-</div>
-
-<!-- 页面主内容（右移以避开树） -->
-<div class="mainContent">
-  <header>
-    <img src="https://github.com/Happyma-4869/Happyma-4869.github.io/blob/main/%E5%BE%AE%E4%BF%A1%E5%9B%BE%E7%89%87_20251207233412_9_79.jpg?raw=true" alt="头像">
-    <h1>欢迎来到 Happy 的主页</h1>
-    <p class="lead">记录我的日常和点滴 😊</p>
-    <nav id="mainNav">
-      <a href="#about">关于我</a>
-      <a href="#diary">日记</a>
-      <a href="#contact">联系我</a>
-    </nav>
-  </header>
-
-  <div id="modeToggle">🌙 日/夜切换</div>
-  <button id="toTopBtn">⬆️ 顶部</button>
-
-  <section id="about">
-    <h2>关于我</h2>
-    <div class="card">
-      <p>Hi 我是happy  我来自河南郑州市  目前是郑州市西亚斯大一学生  在此我想分享我的生活</p>
-      <div class="tags">
-        <span class="tag">学习</span><span class="tag">游戏</span><span class="tag">音乐</span><span class="tag">编程</span>
-      </div>
-    </div>
-  </section>
-
-  <section id="diary">
-    <h2>我的日记 📖</h2>
-    <div class="card">
-      <input id="diaryDate" type="date" />
-      <textarea id="diaryContent" rows="3" placeholder="写下今天的日记..."></textarea>
-      <div style="text-align:center;margin-top:6px">
-        <button id="addDiaryBtn">添加日记</button>
-      </div>
-    </div>
-    <div id="diaryList"></div>
-  </section>
-
-  <section id="contact">
-    <h2>联系我</h2>
-    <p>微信：<strong>H4ppy_ma</strong></p>
-    <div class="card contact">
-      <div class="qr">
-        <img id="qrImg" src="https://github.com/Happyma-4869/Happyma-4869.github.io/blob/main/%E5%BE%AE%E4%BF%A1%E5%9B%BE%E7%89%87_20251207233522_10_79.jpg?raw=true" alt="微信二维码">
-      </div>
-    </div>
-  </section>
-
-  <footer style="text-align:center;padding:18px;color:rgba(255,255,255,0.45)">&copy; 2025 Happyma.top</footer>
-
-  <!-- QR modal -->
-  <div id="qrModal">
-    <img src="https://github.com/Happyma-4869/Happyma-4869.github.io/blob/main/%E5%BE%AE%E4%BF%A1%E5%9B%BE%E7%89%87_20251207233522_10_79.jpg?raw=true" alt="二维码大图">
+  <!-- 左侧 3D 圣诞树 -->
+  <div id="treeCard">
+    <canvas id="treeCanvas"></canvas>
   </div>
+
+  <!-- 右侧 日记 -->
+  <div class="diary">
+    <h2>我的日记</h2>
+    <textarea id="diaryInput" placeholder="今天发生了什么？"></textarea>
+    <button class="add-btn" onclick="addEntry()">添加日记</button>
+
+    <div id="entries"></div>
+
+    <div class="qr">
+      <p>联系我</p>
+      <img src="https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=Happy" />
+    </div>
+  </div>
+
 </div>
 
-<!-- three.js -->
-<script src="https://cdn.jsdelivr.net/npm/three@0.158.0/build/three.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/three@0.158.0/examples/js/controls/OrbitControls.js"></script>
-
+<!-- ===== 普通 JS：日记功能 ===== -->
 <script>
-/* ===========================
-   日记 / UI / 背景粒子
-   ============================ */
-const diaryList = document.getElementById('diaryList');
-const addDiaryBtn = document.getElementById('addDiaryBtn');
-const diaryDate = document.getElementById('diaryDate');
-const diaryContent = document.getElementById('diaryContent');
-const qrImg = document.getElementById('qrImg');
-const qrModal = document.getElementById('qrModal');
+  function addEntry() {
+    const text = diaryInput.value.trim();
+    if (!text) return;
 
-let diaries = JSON.parse(localStorage.getItem('diaries')) || [
-  {date:'2025-12-08', content:'今天是我初次创建我的个人网站  目前还在测试中  以后我会逐步完善耶✌'}
-];
-
-function renderDiaries(){
-  diaryList.innerHTML = '';
-  diaries.forEach((d,i)=>{
-    const entry = document.createElement('div');
-    entry.className = 'card diary-entry';
-    entry.innerHTML = `<p><strong>${d.date}</strong></p>
-                      <p style="white-space:pre-wrap">${d.content}</p>
-                      <div class="diary-actions">
-                        <button onclick="editDiary(${i})">编辑</button>
-                        <button onclick="deleteDiary(${i})">删除</button>
-                      </div>`;
-    diaryList.appendChild(entry);
-  });
-  localStorage.setItem('diaries', JSON.stringify(diaries));
-}
-renderDiaries();
-
-addDiaryBtn.addEventListener('click', ()=>{
-  const dateVal = diaryDate.value || new Date().toISOString().split('T')[0];
-  const contentVal = diaryContent.value.trim();
-  if(!contentVal){ alert('请填写内容'); return; }
-  diaries.unshift({date:dateVal, content:contentVal});
-  diaryDate.value=''; diaryContent.value='';
-  renderDiaries();
-});
-window.editDiary = function(i){
-  const newText = prompt('编辑日记：', diaries[i].content);
-  if(newText === null) return;
-  diaries[i].content = newText;
-  renderDiaries();
-};
-window.deleteDiary = function(i){
-  if(!confirm('确认删除这条日记？')) return;
-  diaries.splice(i,1);
-  renderDiaries();
-};
-
-// QR modal
-qrImg.addEventListener('click', ()=>{ qrModal.style.display = 'flex'; });
-qrModal.addEventListener('click', ()=>{ qrModal.style.display = 'none'; });
-
-// 日夜切换
-const modeToggle = document.getElementById('modeToggle');
-modeToggle.addEventListener('click', ()=>{
-  document.body.classList.toggle('dark');
-  initParticles(); // 重刷粒子数量/颜色
-});
-
-// 返回顶部 & 导航高亮
-const toTopBtn = document.getElementById('toTopBtn');
-window.addEventListener('scroll', ()=>{
-  toTopBtn.style.display = (window.scrollY > 200) ? 'block' : 'none';
-  // nav highlight
-  const navLinks = document.querySelectorAll('#mainNav a');
-  navLinks.forEach(link=>{
-    const s = document.querySelector(link.getAttribute('href'));
-    if(!s) return;
-    if(window.scrollY >= s.offsetTop - 80 && window.scrollY < s.offsetTop + s.offsetHeight){
-      link.style.color = '#ffeb3b';
-    } else link.style.color = '';
-  });
-});
-toTopBtn.addEventListener('click', ()=> window.scrollTo({top:0,behavior:'smooth'}) );
-
-/* ---------- 背景粒子画布 ---------- */
-const canvas = document.getElementById('particles');
-const ctx = canvas.getContext('2d');
-let particlesArray = [];
-let mouse = {x:null,y:null};
-function resizeCanvas(){ canvas.width = window.innerWidth; canvas.height = window.innerHeight; }
-window.addEventListener('resize', resizeCanvas);
-resizeCanvas();
-window.addEventListener('mousemove', e => { mouse.x = e.clientX; mouse.y = e.clientY; });
-
-class BGParticle {
-  constructor(){ this.reset(); }
-  reset(){
-    this.x = Math.random()*canvas.width;
-    this.y = Math.random()*canvas.height;
-    this.r = Math.random()*2+1;
-    this.angle = Math.random()*Math.PI*2;
-    this.orbit = Math.random()*20+6;
-    this.speed = 0.004 + Math.random()*0.008;
-    this.color = document.body.classList.contains('dark') ? 'rgba(255,255,255,0.9)' : 'rgba(255,255,255,0.28)';
+    const div = document.createElement("div");
+    div.className = "entry";
+    div.innerHTML = `
+      <p>${text}</p>
+      <button class="edit" onclick="editEntry(this)">编辑</button>
+      <button class="delete" onclick="deleteEntry(this)">删除</button>
+    `;
+    entries.prepend(div);
+    diaryInput.value = "";
   }
-  update(){
-    this.angle += this.speed;
-    this.x += Math.cos(this.angle)*0.2;
-    this.y += Math.sin(this.angle)*0.2;
-    if(mouse.x && mouse.y){
-      const dx = mouse.x - this.x, dy = mouse.y - this.y;
-      const dist = Math.sqrt(dx*dx+dy*dy);
-      if(dist < 120){
-        this.x += dx*0.01; this.y += dy*0.01;
-      }
-    }
-    if(this.x<0||this.x>canvas.width||this.y<0||this.y>canvas.height) this.reset();
+
+  function deleteEntry(btn) {
+    btn.parentElement.remove();
   }
-  draw(){ ctx.fillStyle = this.color; ctx.beginPath(); ctx.arc(this.x,this.y,this.r,0,Math.PI*2); ctx.fill(); }
-}
 
-function initParticles(){
-  particlesArray = [];
-  const count = document.body.classList.contains('dark') ? 150 : 80;
-  for(let i=0;i<count;i++) particlesArray.push(new BGParticle());
-}
-initParticles();
-function animateParticles(){ ctx.clearRect(0,0,canvas.width,canvas.height); particlesArray.forEach(p=>{ p.update(); p.draw(); }); requestAnimationFrame(animateParticles); }
-animateParticles();
+  function editEntry(btn) {
+    const p = btn.parentElement.querySelector("p");
+    const newText = prompt("修改内容：", p.innerText);
+    if (newText !== null) p.innerText = newText;
+  }
+</script>
 
-/* ===========================
-   three.js 3D 圣诞树（左侧卡片）
-   - Canvas 在 #treeCanvas（不会 append 到 body）
-   - 点击装饰会闪烁
-   - 滚动时树微动
-   ============================ */
-const treeCanvas = document.getElementById('treeCanvas');
-const treeCard = document.getElementById('treeCard');
+<!-- ===== Three.js 模块化 3D 圣诞树 ===== -->
+<script type="module">
+import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.158.0/build/three.module.js';
+import { OrbitControls } from 'https://cdn.jsdelivr.net/npm/three@0.158.0/examples/jsm/controls/OrbitControls.js';
 
-let renderer, scene, camera, controls, treeGroup;
-let sphereMesh, cubeMesh, starMesh;
-let instanceCount = 450;
-let dummy = new THREE.Object3D();
-let clock = new THREE.Clock();
-let raycaster = new THREE.Raycaster();
-let mouseN = new THREE.Vector2();
-let ornamentColors = {}; // 保存原色
+let scene, camera, renderer, controls;
 
-function initTree3D(){
-  const w = treeCard.clientWidth, h = treeCard.clientHeight;
-  renderer = new THREE.WebGLRenderer({canvas: treeCanvas, alpha:true, antialias:true});
-  renderer.setPixelRatio(Math.min(window.devicePixelRatio,2));
-  renderer.setSize(w,h);
-  renderer.setClearColor(0x000000,0);
+init();
+animate();
+
+function init() {
+  const canvas = document.getElementById("treeCanvas");
 
   scene = new THREE.Scene();
-  camera = new THREE.PerspectiveCamera(50, w/h, 0.1, 2000);
-  camera.position.set(0,24,80);
 
-  controls = new THREE.OrbitControls(camera, renderer.domElement);
-  controls.enableZoom = false; controls.enablePan = false; controls.enableRotate = false;
+  camera = new THREE.PerspectiveCamera(45, 320 / 420, 0.1, 1000);
+  camera.position.set(0, 6, 14);
 
-  // lights
-  const amb = new THREE.AmbientLight(0xffffff,0.6); scene.add(amb);
-  const dir = new THREE.DirectionalLight(0xffffff,0.8); dir.position.set(30,80,40); scene.add(dir);
+  renderer = new THREE.WebGLRenderer({
+    canvas: canvas,
+    alpha: true,
+    antialias: true
+  });
+  renderer.setSize(320, 420);
+  renderer.setPixelRatio(window.devicePixelRatio);
 
-  treeGroup = new THREE.Group(); scene.add(treeGroup);
+  controls = new OrbitControls(camera, renderer.domElement);
+  controls.enableDamping = true;
 
-  const sphereGeo = new THREE.SphereGeometry(1.6,12,12);
-  const cubeGeo = new THREE.BoxGeometry(2.2,2.2,2.2);
-  const goldMat = new THREE.MeshStandardMaterial({color:0xFFD700,metalness:0.8,roughness:0.2});
-  const greenMat = new THREE.MeshStandardMaterial({color:0x0b6a2d,metalness:0.4,roughness:0.6});
+  const ambientLight = new THREE.AmbientLight(0xffffff, 0.6);
+  scene.add(ambientLight);
 
-  sphereMesh = new THREE.InstancedMesh(sphereGeo, goldMat, instanceCount);
-  cubeMesh = new THREE.InstancedMesh(cubeGeo, greenMat, instanceCount);
-  sphereMesh.instanceMatrix.setUsage(THREE.DynamicDrawUsage);
-  cubeMesh.instanceMatrix.setUsage(THREE.DynamicDrawUsage);
+  const dirLight = new THREE.DirectionalLight(0xffffff, 0.8);
+  dirLight.position.set(5, 10, 5);
+  scene.add(dirLight);
 
-  treeGroup.add(sphereMesh); treeGroup.add(cubeMesh);
+  createTree();
+}
 
-  for(let i=0;i<instanceCount;i++){
-    const layer = Math.floor(Math.random()*18);
-    const y = layer*1.6 - 10;
-    const radius = 1 + (18 - layer)*1.2 + Math.random()*0.6;
-    const angle = Math.random()*Math.PI*2;
-    const x = Math.cos(angle)*radius;
-    const z = Math.sin(angle)*radius*0.8;
-    dummy.position.set(x,y,z);
-    dummy.rotation.set(Math.random()*Math.PI,Math.random()*Math.PI,Math.random()*Math.PI);
-    dummy.scale.setScalar(0.8 + Math.random()*0.9);
-    dummy.updateMatrix();
-    if(i%2===0){
-      sphereMesh.setMatrixAt(i,dummy.matrix);
-      if(Math.random()>0.6){ sphereMesh.setColorAt(i,new THREE.Color(0xFF2B2B)); ornamentColors['s_'+i]=new THREE.Color(0xFF2B2B); }
-      else { sphereMesh.setColorAt(i,new THREE.Color(0xFFD700)); ornamentColors['s_'+i]=new THREE.Color(0xFFD700); }
-    } else {
-      cubeMesh.setMatrixAt(i,dummy.matrix);
-      if(Math.random()>0.6){ cubeMesh.setColorAt(i,new THREE.Color(0xFFD700)); ornamentColors['c_'+i]=new THREE.Color(0xFFD700); }
-      else { cubeMesh.setColorAt(i,new THREE.Color(0x00A86B)); ornamentColors['c_'+i]=new THREE.Color(0x00A86B); }
-    }
+function createTree() {
+  const group = new THREE.Group();
+
+  const trunkGeo = new THREE.CylinderGeometry(0.5, 0.6, 2, 12);
+  const trunkMat = new THREE.MeshStandardMaterial({ color: 0x7a4a2e });
+  const trunk = new THREE.Mesh(trunkGeo, trunkMat);
+  trunk.position.y = 1;
+  group.add(trunk);
+
+  for (let i = 0; i < 80; i++) {
+    const size = Math.random() * 0.5 + 0.2;
+    const geo = Math.random() > 0.5
+      ? new THREE.SphereGeometry(size, 16, 16)
+      : new THREE.BoxGeometry(size, size, size);
+
+    const mat = new THREE.MeshStandardMaterial({
+      color: new THREE.Color(`hsl(${Math.random() * 120}, 70%, 50%)`)
+    });
+
+    const mesh = new THREE.Mesh(geo, mat);
+    const radius = 3 - i * 0.035;
+    const angle = Math.random() * Math.PI * 2;
+
+    mesh.position.set(
+      Math.cos(angle) * radius,
+      Math.random() * 5 + 1.5,
+      Math.sin(angle) * radius
+    );
+
+    group.add(mesh);
   }
-  sphereMesh.instanceMatrix.needsUpdate=true; cubeMesh.instanceMatrix.needsUpdate=true;
-  if(sphereMesh.instanceColor) sphereMesh.instanceColor.needsUpdate=true;
-  if(cubeMesh.instanceColor) cubeMesh.instanceColor.needsUpdate=true;
 
-  // star
-  const starGeo = new THREE.OctahedronGeometry(3.4);
-  const starMat = new THREE.MeshStandardMaterial({color:0xFFF176,emissive:0xFFEE88,metalness:1,roughness:0.2});
-  starMesh = new THREE.Mesh(starGeo, starMat); starMesh.position.set(0,20,0);
-  treeGroup.add(starMesh);
+  const starGeo = new THREE.OctahedronGeometry(0.6);
+  const starMat = new THREE.MeshStandardMaterial({
+    color: 0xffff00,
+    emissive: 0xffcc00
+  });
+  const star = new THREE.Mesh(starGeo, starMat);
+  star.position.y = 7;
+  group.add(star);
 
-  addTreeParticles();
-
-  window.addEventListener('resize', ()=>{ const ww=treeCard.clientWidth, hh=treeCard.clientHeight; renderer.setSize(ww,hh); camera.aspect=ww/hh; camera.updateProjectionMatrix(); });
-
-  renderer.domElement.addEventListener('pointermove', onPointerMove);
-  renderer.domElement.addEventListener('pointerdown', onPointerDown);
+  scene.add(group);
 }
 
-let treeParticles = [];
-function addTreeParticles(){
-  const geo = new THREE.SphereGeometry(0.18,6,6);
-  for(let i=0;i<60;i++){
-    const mat = new THREE.MeshStandardMaterial({color:0xffffff,emissive:0xffffff,emissiveIntensity:0.8,transparent:true,opacity:0.9});
-    const m = new THREE.Mesh(geo, mat);
-    m.position.set((Math.random()-0.5)*16, Math.random()*24-2, (Math.random()-0.5)*12);
-    m.userData = { speed: 0.02 + Math.random()*0.02, baseY: m.position.y, phase: Math.random()*Math.PI*2 };
-    treeParticles.push(m); scene.add(m);
-  }
-}
-
-function onPointerMove(evt){
-  const rect = renderer.domElement.getBoundingClientRect();
-  mouseN.x = ((evt.clientX - rect.left) / rect.width) * 2 - 1;
-  mouseN.y = -((evt.clientY - rect.top) / rect.height) * 2 + 1;
-}
-
-function onPointerDown(evt){
-  const rect = renderer.domElement.getBoundingClientRect();
-  const x = ((evt.clientX - rect.left)/rect.width)*2 -1;
-  const y = -((evt.clientY - rect.top)/rect.height)*2 +1;
-  raycaster.setFromCamera(new THREE.Vector2(x,y), camera);
-  let intersects = raycaster.intersectObject(sphereMesh);
-  if(intersects.length>0){
-    const instId = intersects[0].instanceId;
-    if(instId !== undefined){ toggleOrnamentColor('s', instId); return; }
-  }
-  intersects = raycaster.intersectObject(cubeMesh);
-  if(intersects.length>0){
-    const instId = intersects[0].instanceId;
-    if(instId !== undefined){ toggleOrnamentColor('c', instId); return; }
-  }
-  toggleTreeScale();
-}
-
-let isTreeScaled = false;
-function toggleTreeScale(){
-  if(!isTreeScaled){ treeCard.style.transform='translateY(-50%) scale(1.12)'; isTreeScaled=true; }
-  else { treeCard.style.transform='translateY(-50%) scale(1)'; isTreeScaled=false; }
-}
-
-function toggleOrnamentColor(type, id){
-  const key = (type==='s'?'s_':'c_') + id;
-  const inst = (type==='s')? sphereMesh : cubeMesh;
-  const orig = ornamentColors[key];
-  if(!orig) return;
-  if(!inst.userData) inst.userData = {};
-  if(inst.userData[id] === 'lit'){
-    inst.setColorAt(id, orig); inst.userData[id] = null;
-  } else {
-    inst.setColorAt(id, new THREE.Color(0xFFFFFF)); inst.userData[id] = 'lit';
-    setTimeout(()=>{ if(inst.userData && inst.userData[id] === 'lit'){ inst.setColorAt(id, orig); inst.userData[id] = null; if(inst.instanceColor) inst.instanceColor.needsUpdate=true; inst.instanceMatrix.needsUpdate=true; } }, 900);
-  }
-  if(inst.instanceColor) inst.instanceColor.needsUpdate=true;
-  inst.instanceMatrix.needsUpdate=true;
-}
-
-function animateTree(){
-  requestAnimationFrame(animateTree);
-  const dt = clock.getDelta();
-  treeGroup.rotation.y += dt * 0.12;
-  treeParticles.forEach(p=>{ p.position.y = p.userData.baseY + Math.sin(clock.elapsedTime*1.2 + p.userData.phase) * 0.6; });
-  if(starMesh) starMesh.scale.setScalar(1 + Math.sin(clock.elapsedTime*6)*0.06);
+function animate() {
+  requestAnimationFrame(animate);
   controls.update();
   renderer.render(scene, camera);
 }
-
-window.addEventListener('scroll', ()=>{
-  const maxShift = 10;
-  const scrollFactor = window.scrollY / (document.body.scrollHeight - window.innerHeight);
-  if(treeGroup) treeGroup.position.y = (scrollFactor - 0.4) * maxShift;
-});
-
-/* 初始化三维树 */
-initTree3D();
-animateTree();
 </script>
 
 </body>
