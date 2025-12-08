@@ -25,7 +25,7 @@
     z-index:0;
 }
 
-/* 夜间模式 */
+/* 基本样式 */
 body {
     margin: 0;
     font-family: 'Roboto', sans-serif;
@@ -42,6 +42,7 @@ header {
     padding: 60px 20px 20px;
     position: relative;
     z-index: 2;
+    color: white;
 }
 header img {
     width: 140px; height: 140px;
@@ -65,17 +66,8 @@ nav {
     border-radius:10px;
     transition: background 0.3s, box-shadow 0.3s;
 }
-nav.scrolled {
-    background: rgba(0,0,0,0.7);
-    box-shadow:0 4px 10px rgba(0,0,0,0.3);
-}
-nav a {
-    margin:0 15px;
-    text-decoration: none;
-    color:white;
-    font-weight: bold;
-    transition: 0.3s;
-}
+nav.scrolled { background: rgba(0,0,0,0.7); box-shadow:0 4px 10px rgba(0,0,0,0.3); }
+nav a { margin:0 15px; text-decoration:none; color:white; font-weight:bold; transition:0.3s; }
 nav a.active { color:#ffeb3b; }
 nav a:hover { color:#ffeb3b; }
 
@@ -84,8 +76,7 @@ nav a:hover { color:#ffeb3b; }
     position: fixed; top:20px; right:20px;
     padding:8px 15px;
     background: linear-gradient(45deg,#2196F3,#21CBF3);
-    color:white; border-radius:20px;
-    cursor:pointer; z-index:10;
+    color:white; border-radius:20px; cursor:pointer; z-index:10;
     transition: background 0.3s;
 }
 #modeToggle:hover { background: linear-gradient(45deg,#1976d2,#1aa8c7); }
@@ -96,12 +87,12 @@ nav a:hover { color:#ffeb3b; }
     background: linear-gradient(45deg,#4caf50,#81c784);
     color:white; border:none; padding:12px 18px; border-radius:50px;
     cursor:pointer; font-size:16px; z-index:10; display:none;
-    transition: 0.3s;
+    transition:0.3s;
 }
 #toTopBtn:hover { background: linear-gradient(45deg,#388e3c,#66bb6a); }
 
 /* 分区 */
-section { padding: 60px 20px; text-align:center; position:relative; z-index:2; }
+section { padding:60px 20px; text-align:center; position:relative; z-index:2; }
 section h2 { font-size:28px; color:#4CAF50; margin-bottom:30px; }
 
 /* 卡片 */
@@ -131,11 +122,7 @@ body.dark .card { background: rgba(50,50,50,0.9); color:#eee; }
 #qrModal img { max-width:300px; border-radius:15px; border:3px solid #fff; }
 #qrModal.show { display:flex; }
 
-@media(max-width:600px){
-    header img{width:100px;height:100px;}
-    .card{width:90%;}
-    nav a{margin:0 8px; font-size:14px;}
-}
+@media(max-width:600px){ header img{width:100px;height:100px;} .card{width:90%;} nav a{margin:0 8px; font-size:14px;} }
 </style>
 </head>
 <body>
@@ -150,7 +137,7 @@ body.dark .card { background: rgba(50,50,50,0.9); color:#eee; }
 <header>
     <img src="https://github.com/Happyma-4869/Happyma-4869.github.io/blob/main/%E5%BE%AE%E4%BF%A1%E5%9B%BE%E7%89%87_20251207233412_9_79.jpg?raw=true" alt="头像">
     <h1>欢迎来到 Happy 的主页</h1>
-    <p>Hi 我是happy 我来自河南郑州市 目前是郑州市西亚斯大一学生 在此我想分享我的生活</p>
+    <p>记录我的日常和点滴 😊</p>
     <nav id="mainNav">
         <a href="#about">关于我</a>
         <a href="#diary">日记</a>
@@ -165,7 +152,7 @@ body.dark .card { background: rgba(50,50,50,0.9); color:#eee; }
 <section id="about">
     <h2>关于我</h2>
     <div class="card show">
-        <p>Hi 我是happy 我来自河南郑州市 目前是郑州市西亚斯大一学生 在此我想分享我的生活</p>
+        <p>Hi 我是happy  我来自河南郑州市  目前是郑州市西亚斯大一学生  在此我想分享我的生活</p>
     </div>
 </section>
 
@@ -177,7 +164,7 @@ body.dark .card { background: rgba(50,50,50,0.9); color:#eee; }
     <div class="card">
         <input type="date" id="diaryDate" style="padding:5px;margin-bottom:5px;width:95%;" />
         <input type="password" id="diaryPwd" placeholder="密码(可选)" style="padding:5px;margin-bottom:5px;width:95%;" />
-        <textarea id="diaryContent" placeholder="写下今天的日记..." rows="3" style="padding:5px;width:95%;">2025年12月8日 今天是我初次创建我的个人网站 目前还在测试中 以后我会逐步完善耶✌</textarea>
+        <textarea id="diaryContent" placeholder="写下今天的日记..." rows="3" style="padding:5px;width:95%;">2025年12月8日  今天是我初次创建我的个人网站  目前还在测试中  以后我会逐步完善耶✌</textarea>
         <button id="addDiaryBtn" style="margin-top:5px;padding:5px 10px;cursor:pointer;">添加日记</button>
     </div>
 
@@ -196,9 +183,7 @@ body.dark .card { background: rgba(50,50,50,0.9); color:#eee; }
     </div>
 </section>
 
-<footer>
-    &copy; 2025 Happyma.top
-</footer>
+<footer>&copy; 2025 Happyma.top</footer>
 
 <div id="qrModal">
     <img src="https://github.com/Happyma-4869/Happyma-4869.github.io/blob/main/%E5%BE%AE%E4%BF%A1%E5%9B%BE%E7%89%87_20251207233522_10_79.jpg?raw=true" alt="微信二维码大图">
