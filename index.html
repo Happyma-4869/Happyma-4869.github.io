@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+<!DOCTYPE html> 
 <html lang="zh-CN">
 <head>
 <meta charset="UTF-8">
@@ -110,11 +110,22 @@ textarea, input[type="date"] {
 }
 .diary-actions button:hover, #addDiaryBtn:hover { background:linear-gradient(135deg,#007aff,#5ac8fa); }
 
+/* 圣诞树卡片 */
+#treeCard {
+  position:fixed; left:20px; top:50%; transform:translateY(-50%);
+  width:400px; height:600px;
+  background:rgba(255,255,255,0.6); backdrop-filter:blur(20px);
+  border-radius:25px; box-shadow:0 8px 30px rgba(0,0,0,0.1); z-index:2;
+  cursor:pointer; overflow:hidden;
+}
+#treeContainer { width:100%; height:100%; }
+
 /* 响应式 */
 @media(max-width:600px){
   header img{width:100px;height:100px;}
   .card{width:90%;}
   nav a{margin:0 8px; font-size:14px;}
+  #treeCard{width:250px; height:400px; left:10px;}
 }
 </style>
 </head>
@@ -138,6 +149,11 @@ textarea, input[type="date"] {
 
 <div id="modeToggle">🌙 日/夜切换</div>
 <button id="toTopBtn">⬆️ 顶部</button>
+
+<!-- 圣诞树 -->
+<div id="treeCard">
+  <div id="treeContainer"></div>
+</div>
 
 <section id="about">
   <h2>关于我</h2>
@@ -175,6 +191,7 @@ textarea, input[type="date"] {
 <footer>&copy; 2025 Happyma.top</footer>
 <div id="qrModal"><img src="https://github.com/Happyma-4869/Happyma-4869.github.io/blob/main/%E5%BE%AE%E4%BF%A1%E5%9B%BE%E7%89%87_20251207233522_10_79.jpg?raw=true" alt="微信二维码大图"></div>
 
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r152/three.min.js"></script>
 <script>
 // ---------------- 日记 ----------------
 const diaryList=document.getElementById('diaryList');
@@ -229,16 +246,14 @@ const toTopBtn=document.getElementById('toTopBtn');
 window.addEventListener('scroll',()=>{ toTopBtn.style.display=(window.scrollY>200)?'block':'none'; });
 toTopBtn.addEventListener('click',()=>{ window.scrollTo({top:0, behavior:'smooth'}); });
 
-// ---------------- 粒子动画 ----------------
+// ---------------- 背景粒子 ----------------
 const canvas=document.getElementById('particles');
 const ctx=canvas.getContext('2d');
-let particlesArray=[];
-let mouse={x:null,y:null};
+let particlesArray=[], mouse={x:null,y:null};
 window.addEventListener('mousemove', e=>{ mouse.x=e.x; mouse.y=e.y; });
 function resizeCanvas(){ canvas.width=window.innerWidth; canvas.height=window.innerHeight; }
 window.addEventListener('resize', resizeCanvas);
 resizeCanvas();
-
 class Particle{
   constructor(){
     this.originX=Math.random()*canvas.width;
@@ -267,7 +282,6 @@ class Particle{
     ctx.fill();
   }
 }
-
 function initParticles(){
   particlesArray=[];
   let count=document.body.classList.contains('dark')?150:80;
@@ -309,18 +323,9 @@ window.addEventListener('scroll', () => {
         } else { link.classList.remove('active'); }
     });
 });
-</script>
-</body>
-</html>
-<!-- 圣诞树卡片 -->
-<div id="treeCard" style="position:fixed; left:20px; top:50%; transform:translateY(-50%); width:400px; height:600px; background:rgba(255,255,255,0.6); backdrop-filter:blur(20px); border-radius:25px; box-shadow:0 8px 30px rgba(0,0,0,0.1); z-index:2; cursor:pointer;">
-  <div id="treeContainer" style="width:100%; height:100%; border-radius:25px; overflow:hidden;"></div>
-</div>
 
-<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r152/three.min.js"></script>
-<script>
+// ---------------- 圣诞树 ----------------
 let scene, camera, renderer, treeParticles=[], treeContainer=document.getElementById('treeContainer'), treeCard=document.getElementById('treeCard'), isTreeExpanded=false;
-
 scene = new THREE.Scene();
 camera = new THREE.PerspectiveCamera(50, 400/600, 0.1, 1000);
 camera.position.z = 200;
@@ -328,7 +333,7 @@ renderer = new THREE.WebGLRenderer({ alpha:true, antialias:true });
 renderer.setSize(400,600);
 treeContainer.appendChild(renderer.domElement);
 
-// 生成圣诞树粒子
+// 圣诞树粒子
 function generateTreeParticles(){
     const geometry = new THREE.BufferGeometry();
     const positions = [];
@@ -344,57 +349,38 @@ function generateTreeParticles(){
             const z = (Math.random()-0.5)*layerWidth;
             const yy = y*layerHeight - 300;
             positions.push(x, yy, z);
-            color.setHSL(0.33 + Math.random()*0.1,0.8,0.4 + Math.random()*0.2); // 闪烁绿色
+            color.setHSL(0.33 + Math.random()*0.1,0.8,0.4 + Math.random()*0.2);
             colors.push(color.r,color.g,color.b);
         }
     }
     geometry.setAttribute('position', new THREE.Float32BufferAttribute(positions,3));
     geometry.setAttribute('color', new THREE.Float32BufferAttribute(colors,3));
-    const material = new THREE.PointsMaterial({ size:5, vertexColors:true });
+    const material = new THREE.PointsMaterial({ size:4, vertexColors:true });
     const points = new THREE.Points(geometry, material);
     scene.add(points);
     treeParticles.push(points);
 }
 generateTreeParticles();
 
-// 树顶星星
-const starGeom = new THREE.SphereGeometry(10,16,16);
-const starMat = new THREE.MeshBasicMaterial({color:0xffdd00});
-const star = new THREE.Mesh(starGeom, starMat);
-star.position.y = 320;
-scene.add(star);
-
-// 礼盒
-function generateGifts(){
-    const giftGeom = new THREE.BoxGeometry(20,20,20);
-    const giftMat = new THREE.MeshBasicMaterial({color:0xff4444});
-    const gift1 = new THREE.Mesh(giftGeom,giftMat); gift1.position.set(-60,-280,0); scene.add(gift1);
-    const gift2 = gift1.clone(); gift2.position.set(40,-280,20); scene.add(gift2);
-}
-generateGifts();
-
-// 动画
 function animateTree(){
     requestAnimationFrame(animateTree);
     treeParticles.forEach(p=>{
-        p.rotation.y += 0.001;
-        // 随机闪烁
-        p.material.size = 4 + Math.sin(Date.now()*0.005)*2;
+        p.rotation.y += 0.002;
     });
-    star.rotation.y += 0.003;
-    star.scale.setScalar(1 + Math.sin(Date.now()*0.01)*0.3); // 星星闪烁
     renderer.render(scene,camera);
 }
 animateTree();
 
-// 点击放大旋转
+// 点击卡片放大
 treeCard.addEventListener('click',()=>{
     if(!isTreeExpanded){
-        treeCard.style.transform='translateY(-50%) scale(1.3) rotate(15deg)';
+        treeCard.style.transform='translateY(-50%) scale(1.2)';
         isTreeExpanded=true;
     } else {
-        treeCard.style.transform='translateY(-50%) scale(1) rotate(0deg)';
+        treeCard.style.transform='translateY(-50%) scale(1)';
         isTreeExpanded=false;
     }
 });
 </script>
+</body>
+</html>
