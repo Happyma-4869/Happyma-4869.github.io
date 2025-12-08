@@ -1,65 +1,26 @@
-<!DOCTYPE html> 
+<!DOCTYPE html>
 <html lang="zh-CN">
 <head>
 <meta charset="UTF-8">
-<title>Happy 的个人主页</title>
+<title>Happy 的个人主页 & Merry Christmas 3D Tree</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <style>
-body, html {
-  margin:0; padding:0;
-  font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",sans-serif;
-  color:#333;
-  overflow-x:hidden;
-  transition: color 0.5s;
-}
+body, html { margin:0; padding:0; font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",sans-serif; color:#333; overflow-x:hidden; transition: color 0.5s; }
 body.dark { color:#eee; }
 
 /* 背景视频 */
-#bgVideo {
-  position:fixed; top:0; left:0;
-  width:100%; height:100%;
-  object-fit:cover;
-  z-index:0;
-  transition: filter 0.5s;
-}
+#bgVideo { position:fixed; top:0; left:0; width:100%; height:100%; object-fit:cover; z-index:0; transition: filter 0.5s; }
 body.dark #bgVideo { filter: brightness(40%) contrast(110%); }
 
 /* 粒子画布 */
-#particles {
-  position:fixed; top:0; left:0;
-  width:100%; height:100%;
-  pointer-events:none;
-  z-index:0;
-}
+#particles { position:fixed; top:0; left:0; width:100%; height:100%; pointer-events:none; z-index:0; }
 
 /* 苹果风格卡片 */
-.card {
-  background: rgba(255,255,255,0.6);
-  backdrop-filter: blur(20px);
-  border-radius: 25px;
-  box-shadow: 0 8px 30px rgba(0,0,0,0.1);
-  padding:25px 20px;
-  display:flex;
-  flex-direction:column;
-  gap:12px;
-  transition: transform 0.3s ease, box-shadow 0.3s ease, background 0.5s;
-  width:320px;
-  margin:0 auto 40px;
-}
+.card { background: rgba(255,255,255,0.6); backdrop-filter: blur(20px); border-radius: 25px; box-shadow: 0 8px 30px rgba(0,0,0,0.1); padding:25px 20px; display:flex; flex-direction:column; gap:12px; transition: transform 0.3s ease, box-shadow 0.3s ease, background 0.5s; width:320px; margin:0 auto 40px; }
 .card:hover { transform: translateY(-5px); box-shadow: 0 12px 35px rgba(0,0,0,0.15);}
 body.dark .card { background: rgba(40,40,40,0.7); color:#eee; }
-
 .card .tags { margin-top:10px; text-align:center; }
-.card .tag {
-  display:inline-block;
-  background:linear-gradient(45deg,#5ac8fa,#007aff);
-  color:white;
-  padding:5px 10px;
-  margin:3px;
-  border-radius:15px;
-  font-size:12px;
-  transition:0.2s;
-}
+.card .tag { display:inline-block; background:linear-gradient(45deg,#5ac8fa,#007aff); color:white; padding:5px 10px; margin:3px; border-radius:15px; font-size:12px; transition:0.2s; }
 .card .tag:hover { transform:scale(1.1); }
 
 /* 头部 */
@@ -99,34 +60,16 @@ nav a:hover { color:#ffeb3b; }
 section { padding:60px 20px; text-align:center; position:relative; z-index:1; }
 section h2 { font-size:28px; color:#007aff; margin-bottom:30px; }
 
-textarea, input[type="date"] {
-  width:90%; padding:10px; border-radius:20px; border:none; box-shadow: inset 0 2px 5px rgba(0,0,0,0.1);
-  resize:none; margin:0 auto; display:block; text-align:left;
-}
-.diary-actions { display:flex; justify-content:center; gap:10px; margin-top:10px; }
-.diary-actions button, #addDiaryBtn {
-  padding:8px 12px; cursor:pointer; border:none; border-radius:25px;
-  background:linear-gradient(135deg,#5ac8fa,#007aff); color:white; font-weight:bold; transition:0.3s;
-}
-.diary-actions button:hover, #addDiaryBtn:hover { background:linear-gradient(135deg,#007aff,#5ac8fa); }
-
-/* 圣诞树卡片 */
-#treeCard {
-  position:fixed; left:20px; top:50%; transform:translateY(-50%);
-  width:400px; height:600px;
-  background:rgba(255,255,255,0.6); backdrop-filter:blur(20px);
-  border-radius:25px; box-shadow:0 8px 30px rgba(0,0,0,0.1); z-index:2;
-  cursor:pointer; overflow:hidden;
-}
-#treeContainer { width:100%; height:100%; }
-
 /* 响应式 */
 @media(max-width:600px){
   header img{width:100px;height:100px;}
   .card{width:90%;}
   nav a{margin:0 8px; font-size:14px;}
-  #treeCard{width:250px; height:400px; left:10px;}
 }
+
+/* 3D 圣诞树 */
+#tree3DContainer { position:fixed; top:0; right:0; width:40%; height:100%; z-index:1; pointer-events:auto; }
+#treeTitle { position:absolute; top:20px; width:100%; text-align:center; color:#FFD700; font-size:48px; font-weight:bold; text-shadow:0 0 10px #FFD700; z-index:10; }
 </style>
 </head>
 <body>
@@ -150,10 +93,11 @@ textarea, input[type="date"] {
 <div id="modeToggle">🌙 日/夜切换</div>
 <button id="toTopBtn">⬆️ 顶部</button>
 
-<!-- 圣诞树 -->
-<div id="treeCard">
-  <div id="treeContainer"></div>
+<!-- 3D 树容器 -->
+<div id="tree3DContainer">
+  <div id="treeTitle">MERRY CHRISTMAS</div>
 </div>
+<audio id="bgMusic" src="https://www.bensound.com/bensound-music/bensound-snow.mp3" loop autoplay></audio>
 
 <section id="about">
   <h2>关于我</h2>
@@ -191,7 +135,9 @@ textarea, input[type="date"] {
 <footer>&copy; 2025 Happyma.top</footer>
 <div id="qrModal"><img src="https://github.com/Happyma-4869/Happyma-4869.github.io/blob/main/%E5%BE%AE%E4%BF%A1%E5%9B%BE%E7%89%87_20251207233522_10_79.jpg?raw=true" alt="微信二维码大图"></div>
 
-<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r152/three.min.js"></script>
+<!-- Three.js -->
+<script src="https://cdn.jsdelivr.net/npm/three@0.158.0/build/three.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.158.0/examples/js/controls/OrbitControls.js"></script>
 <script>
 // ---------------- 日记 ----------------
 const diaryList=document.getElementById('diaryList');
@@ -246,10 +192,11 @@ const toTopBtn=document.getElementById('toTopBtn');
 window.addEventListener('scroll',()=>{ toTopBtn.style.display=(window.scrollY>200)?'block':'none'; });
 toTopBtn.addEventListener('click',()=>{ window.scrollTo({top:0, behavior:'smooth'}); });
 
-// ---------------- 背景粒子 ----------------
+// ---------------- 粒子动画 ----------------
 const canvas=document.getElementById('particles');
 const ctx=canvas.getContext('2d');
-let particlesArray=[], mouse={x:null,y:null};
+let particlesArray=[];
+let mouse={x:null,y:null};
 window.addEventListener('mousemove', e=>{ mouse.x=e.x; mouse.y=e.y; });
 function resizeCanvas(){ canvas.width=window.innerWidth; canvas.height=window.innerHeight; }
 window.addEventListener('resize', resizeCanvas);
@@ -275,24 +222,11 @@ class Particle{
     if(this.y>canvas.height)this.originY=0;
     if(this.y<0)this.originY=canvas.height;
   }
-  draw(){
-    ctx.fillStyle=this.color;
-    ctx.beginPath();
-    ctx.arc(this.x,this.y,this.radius,0,Math.PI*2);
-    ctx.fill();
-  }
+  draw(){ ctx.fillStyle=this.color; ctx.beginPath(); ctx.arc(this.x,this.y,this.radius,0,Math.PI*2); ctx.fill(); }
 }
-function initParticles(){
-  particlesArray=[];
-  let count=document.body.classList.contains('dark')?150:80;
-  for(let i=0;i<count;i++){ particlesArray.push(new Particle()); }
-}
+function initParticles(){ particlesArray=[]; let count=document.body.classList.contains('dark')?150:80; for(let i=0;i<count;i++){ particlesArray.push(new Particle()); } }
 initParticles();
-function animateParticles(){
-  ctx.clearRect(0,0,canvas.width,canvas.height);
-  particlesArray.forEach(p=>{p.update();p.draw();});
-  requestAnimationFrame(animateParticles);
-}
+function animateParticles(){ ctx.clearRect(0,0,canvas.width,canvas.height); particlesArray.forEach(p=>{p.update();p.draw();}); requestAnimationFrame(animateParticles); }
 animateParticles();
 
 // ---------------- 微信二维码弹窗 ----------------
@@ -324,63 +258,78 @@ window.addEventListener('scroll', () => {
     });
 });
 
-// ---------------- 圣诞树 ----------------
-let scene, camera, renderer, treeParticles=[], treeContainer=document.getElementById('treeContainer'), treeCard=document.getElementById('treeCard'), isTreeExpanded=false;
-scene = new THREE.Scene();
-camera = new THREE.PerspectiveCamera(50, 400/600, 0.1, 1000);
-camera.position.z = 200;
-renderer = new THREE.WebGLRenderer({ alpha:true, antialias:true });
-renderer.setSize(400,600);
-treeContainer.appendChild(renderer.domElement);
+// ---------------- 3D 圣诞树 ----------------
+let scene, camera, renderer, controls, treeGroup;
+let sphereMesh, cubeMesh, starMesh;
+let treeInstancedCount = 500;
+let clock = new THREE.Clock();
 
-// 圣诞树粒子
-function generateTreeParticles(){
-    const geometry = new THREE.BufferGeometry();
-    const positions = [];
-    const colors = [];
-    const color = new THREE.Color();
-    const layers = 25;
-    for(let y=0;y<layers;y++){
-        const layerWidth = (layers - y)*8;
-        const layerHeight = 600/layers;
-        const numParticles = 60;
-        for(let i=0;i<numParticles;i++){
-            const x = (Math.random()-0.5)*layerWidth;
-            const z = (Math.random()-0.5)*layerWidth;
-            const yy = y*layerHeight - 300;
-            positions.push(x, yy, z);
-            color.setHSL(0.33 + Math.random()*0.1,0.8,0.4 + Math.random()*0.2);
-            colors.push(color.r,color.g,color.b);
-        }
+init3DTree();
+animate3DTree();
+
+function init3DTree(){
+    const container = document.getElementById('tree3DContainer');
+    scene = new THREE.Scene();
+    camera = new THREE.PerspectiveCamera(50, container.clientWidth/container.clientHeight, 0.1, 2000);
+    camera.position.set(0,50,100);
+    renderer = new THREE.WebGLRenderer({antialias:true, alpha:true});
+    renderer.setSize(container.clientWidth, container.clientHeight);
+    container.appendChild(renderer.domElement);
+    controls = new THREE.OrbitControls(camera, renderer.domElement);
+    controls.enableDamping = true;
+
+    // Lights
+    const ambient = new THREE.AmbientLight(0xffffff, 0.4); scene.add(ambient);
+    const directional = new THREE.DirectionalLight(0xffffff, 1); directional.position.set(50,100,50); scene.add(directional);
+
+    // Tree Group
+    treeGroup = new THREE.Group(); scene.add(treeGroup);
+
+    // Materials & Geometry
+    const sphereMaterialGold = new THREE.MeshStandardMaterial({color:0xFFD700, metalness:0.8, roughness:0.2});
+    const cubeMaterialGreen = new THREE.MeshStandardMaterial({color:0x006400, metalness:0.6, roughness:0.4});
+    const sphereGeo = new THREE.SphereGeometry(1.5,16,16);
+    const cubeGeo = new THREE.BoxGeometry(2,2,2);
+
+    sphereMesh = new THREE.InstancedMesh(sphereGeo, sphereMaterialGold, treeInstancedCount);
+    cubeMesh = new THREE.InstancedMesh(cubeGeo, cubeMaterialGreen, treeInstancedCount);
+    treeGroup.add(sphereMesh); treeGroup.add(cubeMesh);
+
+    const dummy = new THREE.Object3D();
+    for(let i=0;i<treeInstancedCount;i++){
+        const layer = Math.floor(Math.random()*15);
+        const radius = 2 + layer*1.5 + Math.random()*1;
+        const angle = Math.random()*Math.PI*2;
+        dummy.position.set(radius*Math.cos(angle), layer*1.5, radius*Math.sin(angle));
+        dummy.rotation.set(Math.random()*Math.PI, Math.random()*Math.PI, Math.random()*Math.PI);
+        dummy.updateMatrix();
+        if(i%2===0){ sphereMesh.setMatrixAt(i,dummy.matrix); if(Math.random()>0.5) sphereMesh.setColorAt(i,new THREE.Color(0xFF0000)); }
+        else{ cubeMesh.setMatrixAt(i,dummy.matrix); if(Math.random()>0.5) cubeMesh.setColorAt(i,new THREE.Color(0xFFD700)); }
     }
-    geometry.setAttribute('position', new THREE.Float32BufferAttribute(positions,3));
-    geometry.setAttribute('color', new THREE.Float32BufferAttribute(colors,3));
-    const material = new THREE.PointsMaterial({ size:4, vertexColors:true });
-    const points = new THREE.Points(geometry, material);
-    scene.add(points);
-    treeParticles.push(points);
-}
-generateTreeParticles();
+    sphereMesh.instanceMatrix.needsUpdate = true; cubeMesh.instanceMatrix.needsUpdate = true;
 
-function animateTree(){
-    requestAnimationFrame(animateTree);
-    treeParticles.forEach(p=>{
-        p.rotation.y += 0.002;
+    // Star
+    const starGeo = new THREE.OctahedronGeometry(3);
+    const starMat = new THREE.MeshStandardMaterial({color:0xFFFF00, metalness:1, roughness:0.2});
+    starMesh = new THREE.Mesh(starGeo, starMat);
+    starMesh.position.set(0,25,0);
+    treeGroup.add(starMesh);
+
+    // Handle resizing
+    window.addEventListener('resize', ()=>{
+        camera.aspect = container.clientWidth/container.clientHeight;
+        camera.updateProjectionMatrix();
+        renderer.setSize(container.clientWidth, container.clientHeight);
     });
-    renderer.render(scene,camera);
 }
-animateTree();
 
-// 点击卡片放大
-treeCard.addEventListener('click',()=>{
-    if(!isTreeExpanded){
-        treeCard.style.transform='translateY(-50%) scale(1.2)';
-        isTreeExpanded=true;
-    } else {
-        treeCard.style.transform='translateY(-50%) scale(1)';
-        isTreeExpanded=false;
-    }
-});
+function animate3DTree(){
+    requestAnimationFrame(animate3DTree);
+    const delta = clock.getDelta();
+    treeGroup.rotation.y += delta*0.2;
+    controls.update();
+    renderer.render(scene, camera);
+}
 </script>
 </body>
 </html>
