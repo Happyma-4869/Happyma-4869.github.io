@@ -5,7 +5,7 @@
 <title>Happy 的个人主页</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 
-<!-- FontAwesome 4 for Valine icons -->
+<!-- FontAwesome 4 for Valine icons (Valine 使用旧版图标) -->
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/font-awesome@4.7.0/css/font-awesome.min.css">
 
 <style>
@@ -85,12 +85,29 @@ textarea, input[type="date"], input[type="text"] { width:90%; padding:10px; bord
 .diary-actions button, #addDiaryBtn { padding:8px 12px; cursor:pointer; border:none; border-radius:25px; background:linear-gradient(135deg,#5ac8fa,#007aff); color:white; font-weight:bold; transition:0.3s, transform 0.2s, box-shadow 0.3s; }
 .diary-actions button:hover, #addDiaryBtn:hover { background:linear-gradient(135deg,#007aff,#5ac8fa); transform:scale(1.05); box-shadow:0 8px 20px rgba(0,0,0,0.3); }
 
-/* ---------------- Valine 调整 ---------------- */
-#vcomments .vcontainer .vinput i { margin-right:5px; vertical-align: middle; }
-#vcomments .vcontainer .vsubmit { background-color:#007aff !important; color:#fff !important; border-radius:25px; }
+/* ---------------- Valine 电脑端调整 ---------------- */
+#vcomments .vcontainer .vinput i { margin-right:5px; vertical-align: middle; font-size:16px; color:#666; }
+#vcomments .vcontainer .vsubmit { background-color:#007aff !important; color:#fff !important; border-radius:25px; padding:8px 16px; }
+
+/* Valine 在大屏幕显示为卡片风格 */
+@media (min-width:769px) {
+  #vcomments { max-width:760px; margin:20px auto 40px; padding:18px; border-radius:20px; background: rgba(255,255,255,0.85); backdrop-filter: blur(12px); box-shadow:0 12px 30px rgba(0,0,0,0.08); }
+  #vcomments .vcontainer .vinput input[type="text"], #vcomments .vcontainer .vinput input[type="email"], #vcomments .vcontainer .vinput input[type="url"] {
+    height:38px; border-radius:18px; padding:8px 12px; font-size:15px;
+  }
+  #vcomments .vcontainer .vinput textarea {
+    min-height:100px; border-radius:14px; padding:10px; font-size:15px;
+  }
+  /* 强制昵称/邮箱/网址在同一行并与图标对齐 */
+  #vcomments .vcontainer .vinput .vfield { display:inline-block; vertical-align:middle; margin-right:10px; }
+  #vcomments .vcontainer .vinput .vfield.vmeta { width:26%; }
+  #vcomments .vcontainer .vinput .vfield.vmsg { width:68%; }
+  #vcomments .vcontainer .vcomment { max-width:720px; margin:12px auto; border-radius:14px; padding:12px; background: rgba(255,255,255,0.95); box-shadow:0 8px 20px rgba(0,0,0,0.06); }
+  body.dark #vcomments .vcontainer .vcomment { background: rgba(50,50,50,0.7); color:#fff; box-shadow:none; }
+}
 
 /* ---------------- 响应式优化 ---------------- */
-@media (max-width:400px){ header img { width:80px; height:80px; } header h1 { font-size:24px; } header p { font-size:14px; } .card { width:90%; padding:20px; margin-bottom:30px; } nav a { margin:0 5px; font-size:12px; } #modeToggle, #toTopBtn, button{ padding:6px 12px; font-size:14px; } }
+@media (max-width:400px){ header img { width:80px; height:80px; } header h1 { font-size:24px; } header p { font-size:14px; } .card { width:90%; padding:20px; margin-bottom:30px; } nav a { margin:0 5px; font-size:12px; } #modeToggle,#toTopBtn,button{ padding:6px 12px; font-size:14px; } }
 @media (min-width:401px) and (max-width:768px){ header img { width:100px; height:100px; } header h1 { font-size:28px; } header p { font-size:16px; } .card { width:80%; padding:22px; margin-bottom:35px; } nav a { margin:0 10px; font-size:14px; } }
 @media (min-width:769px){ header img { width:140px; height:140px; } header h1 { font-size:36px; } header p { font-size:18px; } .card { width:320px; padding:25px; margin-bottom:40px; } nav a { margin:0 15px; font-size:16px; } }
 </style>
@@ -138,7 +155,7 @@ textarea, input[type="date"], input[type="text"] { width:90%; padding:10px; bord
 
 <section id="comments">
   <h2>留言区 💬</h2>
-  <div id="vcomments" class="card" style="max-width:600px; margin:0 auto 40px;"></div>
+  <div id="vcomments" class="card" style="max-width:760px; margin:0 auto 40px;"></div>
 </section>
 
 <section id="contact">
@@ -158,46 +175,49 @@ textarea, input[type="date"], input[type="text"] { width:90%; padding:10px; bord
 <!-- LeanCloud SDK -->
 <script src="https://cdn.jsdelivr.net/npm/leancloud-storage@4.2.0/dist/av-min.js"></script>
 <script>
+/* LeanCloud 初始化（你给的 appId/appKey） */
 AV.init({ appId: 'kCMoxHbSwRcxTuYWaayCMrva-gzGzoHsz', appKey: 'jL0hefBspKv4LQ67m5IzSLF3' });
 const DiaryCloud = AV.Object.extend('Diary');
 </script>
 
 <script>
-// ---------------- 日记 ----------------
+// ---------------- 日记（带文件上传到 LeanCloud 的实现） ----------------
 const diaryList = document.getElementById('diaryList');
 const addDiaryBtn = document.getElementById('addDiaryBtn');
 const diaryDate = document.getElementById('diaryDate');
 const diaryContent = document.getElementById('diaryContent');
 const diaryImg = document.getElementById('diaryImg');
-let imgData = '';
 
-diaryImg.addEventListener('change', e => {
-  const file = e.target.files[0];
-  if(!file) return;
-  const reader = new FileReader();
-  reader.onload = ev => imgData = ev.target.result;
-  reader.readAsDataURL(file);
-});
-
-let diaries = [];
-function fetchDiariesFromCloud(){
-  const query = new AV.Query(DiaryCloud);
-  query.descending('createdAt');
-  query.find().then(results => {
-    diaries = results.map(r=>({id:r.id, date:r.get('date'), content:r.get('content'), img:r.get('img')}));
-    renderDiaries();
-  });
-}
-
-function renderDiaries(){
+function renderDiaries(diaries){
   diaryList.innerHTML='';
   diaries.forEach(d=>{
     const card=document.createElement('div'); 
     card.className='card show';
-    let html=`<p><strong>${d.date}</strong></p><p>${d.content}</p>`;
+    let html=`<p><strong>${d.date || ''}</strong></p><p>${escapeHtml(d.content || '')}</p>`;
     if(d.img) html+=`<img src="${d.img}" style="width:100%; border-radius:15px; margin-top:10px;">`;
     card.innerHTML=html;
     diaryList.appendChild(card);
+  });
+}
+
+// 简单转义防 XSS（显示时）
+function escapeHtml(str){
+  return String(str).replace(/[&<>"']/g, function(m){ return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]; });
+}
+
+function fetchDiariesFromCloud(){
+  const query = new AV.Query(DiaryCloud);
+  query.descending('createdAt');
+  query.find().then(results => {
+    const diaries = results.map(r=>({
+      id: r.id,
+      date: r.get('date'),
+      content: r.get('content'),
+      img: r.get('img') // 可能是字符串 url 或 base64
+    }));
+    renderDiaries(diaries);
+  }).catch(err=>{
+    console.error('拉取日记失败', err);
   });
 }
 
@@ -206,13 +226,36 @@ addDiaryBtn.addEventListener('click', ()=>{
   const contentVal = diaryContent.value.trim();
   if(!contentVal){ alert('请填写内容'); return; }
 
+  const file = diaryImg.files[0];
   const obj = new DiaryCloud();
   obj.set('date', dateVal);
   obj.set('content', contentVal);
-  if(imgData) obj.set('img', imgData);
-  obj.save().then(()=> fetchDiariesFromCloud());
 
-  diaryDate.value=''; diaryContent.value=''; diaryImg.value=''; imgData='';
+  if(file){
+    // 把图片作为 AV.File 上传到 LeanCloud，保存后用 file.url()
+    const fileObj = new AV.File(file.name, file);
+    fileObj.save().then(f => {
+      const url = f.url();
+      obj.set('img', url);
+      return obj.save();
+    }).then(()=> {
+      // 成功后清空并刷新
+      diaryDate.value=''; diaryContent.value=''; diaryImg.value='';
+      fetchDiariesFromCloud();
+    }).catch(err=>{
+      console.error('上传图片或保存日记失败', err);
+      alert('保存失败，请检查控制台或网络。');
+    });
+  }else{
+    // 无图片，直接保存
+    obj.save().then(()=> {
+      diaryDate.value=''; diaryContent.value='';
+      fetchDiariesFromCloud();
+    }).catch(err=>{
+      console.error('保存日记失败', err);
+      alert('保存失败，请检查控制台或网络。');
+    });
+  }
 });
 
 // ---------------- 访客量 ----------------
@@ -228,13 +271,16 @@ toTopBtn.addEventListener('click',()=>{ window.scrollTo({top:0, behavior:'smooth
 
 // ---------------- 日夜模式 ----------------
 const modeToggle=document.getElementById('modeToggle');
-modeToggle.addEventListener('click',()=>{document.body.classList.toggle('dark'); initParticles(); });
+modeToggle.addEventListener('click',()=>{
+  document.body.classList.toggle('dark');
+  initParticles();
+});
 
 // ---------------- QR弹窗 ----------------
 const qrImg=document.getElementById('qrImg');
 const qrModal=document.getElementById('qrModal');
 qrImg.addEventListener('click',()=>qrModal.classList.add('show'));
-qrModal.addEventListener('click',()=>qrModal.classList.remove('show'));
+qrModal.addEventListener('click', (e)=>{ if(e.target === qrModal) qrModal.classList.remove('show'); });
 
 // ---------------- 卡片滚动动画 ----------------
 function showOnScroll() {
@@ -263,15 +309,15 @@ function initParticles(){
 }
 function animateParticles(){
   ctx.clearRect(0,0,canvas.width,canvas.height);
-  particles.forEach(p=>{
-    p.x+=p.dx; p.y+=p.dy;
-    if(p.x<0||p.x>canvas.width) p.dx*=-1;
-    if(p.y<0||p.y>canvas.height) p.dy*=-1;
+  for(let p of particles){
+    p.x += p.dx; p.y += p.dy;
+    if(p.x<0||p.x>canvas.width) p.dx *= -1;
+    if(p.y<0||p.y>canvas.height) p.dy *= -1;
     ctx.beginPath();
     ctx.arc(p.x,p.y,p.r,0,Math.PI*2);
     ctx.fillStyle='rgba(255,255,255,0.7)';
     ctx.fill();
-  });
+  }
   requestAnimationFrame(animateParticles);
 }
 window.addEventListener('resize', initParticles);
@@ -283,9 +329,10 @@ const nav=document.getElementById('mainNav');
 window.addEventListener('scroll',()=>{ nav.classList.toggle('scrolled', window.scrollY>50); });
 </script>
 
-<!-- ---------------- Valine 评论 ---------------- -->
+<!-- ---------------- Valine 评论区 ---------------- -->
 <script src="https://unpkg.com/valine@1/dist/Valine.min.js"></script>
 <script>
+/* Valine 初始化：使用你给的 LeanCloud appId/appKey */
 new Valine({
   el: '#vcomments',
   appId: 'kCMoxHbSwRcxTuYWaayCMrva-gzGzoHsz',
