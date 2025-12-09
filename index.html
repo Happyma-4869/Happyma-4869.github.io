@@ -61,11 +61,6 @@ nav a:hover { color:#ffeb3b; }
 #toTopBtn:hover { background:linear-gradient(135deg,#007aff,#5ac8fa); transform:scale(1.05); box-shadow:0 8px 20px rgba(0,0,0,0.3); }
 #toTopBtn:active { transform:scale(0.95); box-shadow:0 6px 18px rgba(0,0,0,0.3); }
 
-/* ---------------- 评论区苹果风格 ---------------- */
-#comments .card { background: linear-gradient(to bottom right, rgba(255,255,255,0.6), rgba(245,245,245,0.4)); backdrop-filter: blur(15px); border-radius:25px; padding:20px; width:90%; max-width:400px; margin:10px auto; box-shadow:0 8px 25px rgba(0,0,0,0.1);}
-body.dark #comments .card { background: rgba(40,40,40,0.85); color:#fff; box-shadow:0 8px 25px rgba(255,255,255,0.1); }
-#commentList .card { margin-bottom:15px; }
-
 /* ---------------- 联系我 ---------------- */
 .contact .qr { display:flex; justify-content:center; margin-top:20px; }
 .contact .qr img { width:140px; height:140px; border-radius:25px; border:2px solid #ccc; cursor:pointer; transition:0.3s, transform 0.2s, box-shadow 0.3s;}
@@ -83,8 +78,8 @@ section h2 { font-size:28px; color:#007aff; margin-bottom:30px; }
 
 textarea, input[type="date"], input[type="text"] { width:90%; padding:10px; border-radius:20px; border:none; box-shadow: inset 0 2px 5px rgba(0,0,0,0.1); resize:none; margin:0 auto; display:block; text-align:left; }
 .diary-actions { display:flex; justify-content:center; gap:10px; margin-top:10px; }
-.diary-actions button, #addDiaryBtn, #addCommentBtn { padding:8px 12px; cursor:pointer; border:none; border-radius:25px; background:linear-gradient(135deg,#5ac8fa,#007aff); color:white; font-weight:bold; transition:0.3s, transform 0.2s, box-shadow 0.3s; }
-.diary-actions button:hover, #addDiaryBtn:hover, #addCommentBtn:hover { background:linear-gradient(135deg,#007aff,#5ac8fa); transform:scale(1.05); box-shadow:0 8px 20px rgba(0,0,0,0.3); }
+.diary-actions button, #addDiaryBtn { padding:8px 12px; cursor:pointer; border:none; border-radius:25px; background:linear-gradient(135deg,#5ac8fa,#007aff); color:white; font-weight:bold; transition:0.3s, transform 0.2s, box-shadow 0.3s; }
+.diary-actions button:hover, #addDiaryBtn:hover { background:linear-gradient(135deg,#007aff,#5ac8fa); transform:scale(1.05); box-shadow:0 8px 20px rgba(0,0,0,0.3); }
 
 /* ---------------- 响应式优化 ---------------- */
 @media (max-width:400px){ header img { width:80px; height:80px; } header h1 { font-size:24px; } header p { font-size:14px; } .card { width:90%; padding:20px; margin-bottom:30px; } nav a { margin:0 5px; font-size:12px; } #modeToggle, #toTopBtn, button{ padding:6px 12px; font-size:14px; } }
@@ -107,7 +102,7 @@ textarea, input[type="date"], input[type="text"] { width:90%; padding:10px; bord
   <nav id="mainNav">
       <a href="#about">关于我</a>
       <a href="#diary">日记</a>
-      <a href="#comments">评论区</a>
+      <a href="#comments">留言区</a>
       <a href="#contact">联系我</a>
   </nav>
 </header>
@@ -118,7 +113,7 @@ textarea, input[type="date"], input[type="text"] { width:90%; padding:10px; bord
 <section id="about">
   <h2>关于我</h2>
   <div class="card show">
-    <p>Hi 我是happy  我来自河南郑州市  目前是郑州市西亚斯大一学生  在此我想分享我的生活</p>
+    <p>Hi 我是 Happy，我来自河南郑州市，目前是郑州市西亚斯大一学生。在此我想分享我的生活</p>
   </div>
 </section>
 
@@ -134,13 +129,8 @@ textarea, input[type="date"], input[type="text"] { width:90%; padding:10px; bord
 </section>
 
 <section id="comments">
-  <h2>评论区 💬</h2>
-  <div class="card">
-    <input type="text" id="commentName" placeholder="你的昵称（可不填）"/>
-    <textarea id="commentContent" placeholder="说点什么..." rows="3"></textarea>
-    <button id="addCommentBtn">添加评论</button>
-  </div>
-  <div id="commentList"></div>
+  <h2>留言区 💬</h2>
+  <div id="vcomments" class="card" style="max-width:600px; margin:0 auto 40px;"></div>
 </section>
 
 <section id="contact">
@@ -162,7 +152,6 @@ textarea, input[type="date"], input[type="text"] { width:90%; padding:10px; bord
 <script>
 AV.init({ appId: 'kCMoxHbSwRcxTuYWaayCMrva-gzGzoHsz', appKey: 'jL0hefBspKv4LQ67m5IzSLF3' });
 const DiaryCloud = AV.Object.extend('Diary');
-const CommentCloud = AV.Object.extend('Comment');
 </script>
 
 <script>
@@ -216,40 +205,6 @@ addDiaryBtn.addEventListener('click',()=>{
   saveDiaryToCloud(newDiary);
 });
 
-// ---------------- 评论 ----------------
-const commentList = document.getElementById('commentList');
-const addCommentBtn = document.getElementById('addCommentBtn');
-const commentName = document.getElementById('commentName');
-const commentContent = document.getElementById('commentContent');
-let comments = [];
-function fetchCommentsFromCloud(){
-  const query = new AV.Query(CommentCloud);
-  query.descending('createdAt');
-  query.find().then(results=>{
-    comments = results.map(r=>({id:r.id, name:r.get('name'), content:r.get('content')}));
-    renderComments();
-  });
-}
-function saveCommentToCloud(comment){
-  const obj = new CommentCloud();
-  obj.set('name', comment.name);
-  obj.set('content', comment.content);
-  obj.save().then(()=>fetchCommentsFromCloud());
-}
-function renderComments(){
-  commentList.innerHTML='';
-  comments.forEach(c=>{
-    const card=document.createElement('div'); card.className='card show';
-    card.innerHTML=`<p><strong>${c.name||'匿名'}</strong></p><p>${c.content}</p>`;
-    commentList.appendChild(card);
-  });
-}
-addCommentBtn.addEventListener('click',()=>{
-  const name=commentName.value.trim(); const content=commentContent.value.trim();
-  if(!content){ alert('请输入评论'); return; }
-  saveCommentToCloud({name, content}); commentName.value=''; commentContent.value='';
-});
-
 // ---------------- 访客量 ----------------
 const visitorCountEl = document.getElementById('visitorCount');
 let visitorCount = parseInt(localStorage.getItem('visitorCount')||0)+1;
@@ -273,40 +228,64 @@ qrModal.addEventListener('click',()=>qrModal.classList.remove('show'));
 
 // ---------------- 卡片滚动动画 ----------------
 function showOnScroll() {
-  const cards = document.querySelectorAll('.card:not(.show)');
-  const windowBottom = window.innerHeight * 0.85;
-  cards.forEach((card,i)=>{
-      const rect = card.getBoundingClientRect();
-      if(rect.top < windowBottom){
-          setTimeout(()=>card.classList.add('show'), i*100);
-      }
+  const cards = document.querySelectorAll('.card');
+  const trigger = window.innerHeight*0.85;
+  cards.forEach(card => {
+    const top = card.getBoundingClientRect().top;
+    if(top < trigger) card.classList.add('show');
   });
 }
 window.addEventListener('scroll', showOnScroll);
-window.addEventListener('load', () => { fetchDiariesFromCloud(); fetchCommentsFromCloud(); showOnScroll(); });
+window.addEventListener('load', ()=>{ fetchDiariesFromCloud(); showOnScroll(); });
 
-// ---------------- 导航高亮 ----------------
-const mainNav = document.getElementById('mainNav');
-const navLinks = mainNav.querySelectorAll('a');
-window.addEventListener('scroll', () => {
-    navLinks.forEach(link => {
-        const section = document.querySelector(link.getAttribute('href'));
-        if(section.offsetTop - 70 <= window.scrollY && section.offsetTop + section.offsetHeight > window.scrollY){
-            link.classList.add('active');
-        } else { link.classList.remove('active'); }
-    });
-});
+// ---------------- 粒子 ----------------
+let particles = [];
+const canvas = document.getElementById('particles');
+const ctx = canvas.getContext('2d');
+function initParticles(){
+  canvas.width=window.innerWidth;
+  canvas.height=window.innerHeight;
+  particles=[];
+  const n = document.body.classList.contains('dark')?90:0;
+  for(let i=0;i<n;i++){
+    particles.push({x:Math.random()*canvas.width,y:Math.random()*canvas.height,dx:(Math.random()-0.5)*1,dy:(Math.random()-0.5)*1,r:Math.random()*2+1});
+  }
+}
+function animateParticles(){
+  ctx.clearRect(0,0,canvas.width,canvas.height);
+  particles.forEach(p=>{
+    p.x+=p.dx; p.y+=p.dy;
+    if(p.x<0||p.x>canvas.width) p.dx*=-1;
+    if(p.y<0||p.y>canvas.height) p.dy*=-1;
+    ctx.beginPath();
+    ctx.arc(p.x,p.y,p.r,0,Math.PI*2);
+    ctx.fillStyle='rgba(255,255,255,0.7)';
+    ctx.fill();
+  });
+  requestAnimationFrame(animateParticles);
+}
+window.addEventListener('resize', initParticles);
+initParticles();
+animateParticles();
 
-// ---------------- 粒子动画 ----------------
-const canvas=document.getElementById('particles'); const ctx=canvas.getContext('2d'); let particlesArray=[]; let mouse={x:null,y:null};
-window.addEventListener('mousemove', e=>{ mouse.x=e.x; mouse.y=e.y; });
-function resizeCanvas(){ canvas.width=window.innerWidth; canvas.height=window.innerHeight; }
-window.addEventListener('resize', resizeCanvas);
-resizeCanvas();
-class Particle{ constructor(){ this.originX=Math.random()*canvas.width; this.originY=Math.random()*canvas.height; this.radius=Math.random()*2+1.5; this.angle=Math.random()*Math.PI*2; this.orbit=Math.random()*20+10; this.speed=(Math.random()*0.01)+0.005; this.color=document.body.classList.contains('dark')?'rgba(255,255,255,0.9)':'rgba(255,255,255,0.3)'; } update(){ this.angle+=this.speed; this.x=this.originX+Math.cos(this.angle)*this.orbit; this.y=this.originY+Math.sin(this.angle)*this.orbit; let dx=mouse.x-this.x, dy=mouse.y-this.y, dist=Math.sqrt(dx*dx+dy*dy); if(dist<100){ this.x+=dx*0.002; this.y+=dy*0.002; } } draw(){ ctx.fillStyle=this.color; ctx.beginPath(); ctx.arc(this.x,this.y,this.radius,0,Math.PI*2); ctx.fill(); } }
-function initParticles(){ particlesArray=[]; if(!document.body.classList.contains('dark')) return; let count=90; for(let i=0;i<count;i++){ particlesArray.push(new Particle()); } }
-function animateParticles(){ ctx.clearRect(0,0,canvas.width,canvas.height); particlesArray.forEach(p=>{p.update();p.draw();}); requestAnimationFrame(animateParticles); }
-initParticles(); animateParticles();
+// ---------------- 导航滚动效果 ----------------
+const nav=document.getElementById('mainNav');
+window.addEventListener('scroll',()=>{ nav.classList.toggle('scrolled', window.scrollY>50); });
 </script>
+
+<!-- ---------------- Valine 评论 ---------------- -->
+<script src="https://unpkg.com/valine@1/dist/Valine.min.js"></script>
+<script>
+new Valine({
+  el: '#vcomments',
+  appId: 'kCMoxHbSwRcxTuYWaayCMrva-gzGzoHsz',
+  appKey: 'jL0hefBspKv4LQ67m5IzSLF3',
+  placeholder: '欢迎留言...',
+  avatar: 'mp',
+  lang: 'zh-CN',
+  visitor: false
+});
+</script>
+
 </body>
 </html>
