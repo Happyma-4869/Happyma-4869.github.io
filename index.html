@@ -4,6 +4,10 @@
 <meta charset="UTF-8">
 <title>Happy 的个人主页</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+
+<!-- FontAwesome 4 for Valine icons -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/font-awesome@4.7.0/css/font-awesome.min.css">
+
 <style>
 /* ---------------- 基础 ---------------- */
 body, html {margin:0; padding:0; font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",sans-serif; color:#333; overflow-x:hidden; transition: color 0.5s, filter 0.3s; scroll-behavior: smooth;}
@@ -80,6 +84,10 @@ textarea, input[type="date"], input[type="text"] { width:90%; padding:10px; bord
 .diary-actions { display:flex; justify-content:center; gap:10px; margin-top:10px; }
 .diary-actions button, #addDiaryBtn { padding:8px 12px; cursor:pointer; border:none; border-radius:25px; background:linear-gradient(135deg,#5ac8fa,#007aff); color:white; font-weight:bold; transition:0.3s, transform 0.2s, box-shadow 0.3s; }
 .diary-actions button:hover, #addDiaryBtn:hover { background:linear-gradient(135deg,#007aff,#5ac8fa); transform:scale(1.05); box-shadow:0 8px 20px rgba(0,0,0,0.3); }
+
+/* ---------------- Valine 调整 ---------------- */
+#vcomments .vcontainer .vinput i { margin-right:5px; vertical-align: middle; }
+#vcomments .vcontainer .vsubmit { background-color:#007aff !important; color:#fff !important; border-radius:25px; }
 
 /* ---------------- 响应式优化 ---------------- */
 @media (max-width:400px){ header img { width:80px; height:80px; } header h1 { font-size:24px; } header p { font-size:14px; } .card { width:90%; padding:20px; margin-bottom:30px; } nav a { margin:0 5px; font-size:12px; } #modeToggle, #toTopBtn, button{ padding:6px 12px; font-size:14px; } }
@@ -162,6 +170,7 @@ const diaryDate = document.getElementById('diaryDate');
 const diaryContent = document.getElementById('diaryContent');
 const diaryImg = document.getElementById('diaryImg');
 let imgData = '';
+
 diaryImg.addEventListener('change', e => {
   const file = e.target.files[0];
   if(!file) return;
@@ -179,30 +188,31 @@ function fetchDiariesFromCloud(){
     renderDiaries();
   });
 }
-function saveDiaryToCloud(diary){
-  const obj = new DiaryCloud();
-  obj.set('date', diary.date);
-  obj.set('content', diary.content);
-  if(diary.img) obj.set('img', diary.img);
-  obj.save().then(()=>fetchDiariesFromCloud());
-}
+
 function renderDiaries(){
   diaryList.innerHTML='';
   diaries.forEach(d=>{
-    const card=document.createElement('div'); card.className='card show';
+    const card=document.createElement('div'); 
+    card.className='card show';
     let html=`<p><strong>${d.date}</strong></p><p>${d.content}</p>`;
     if(d.img) html+=`<img src="${d.img}" style="width:100%; border-radius:15px; margin-top:10px;">`;
     card.innerHTML=html;
     diaryList.appendChild(card);
   });
 }
-addDiaryBtn.addEventListener('click',()=>{
-  const dateVal=diaryDate.value||new Date().toISOString().split('T')[0];
-  const contentVal=diaryContent.value.trim();
+
+addDiaryBtn.addEventListener('click', ()=>{
+  const dateVal = diaryDate.value || new Date().toISOString().split('T')[0];
+  const contentVal = diaryContent.value.trim();
   if(!contentVal){ alert('请填写内容'); return; }
-  const newDiary={date:dateVal, content:contentVal, img:imgData};
+
+  const obj = new DiaryCloud();
+  obj.set('date', dateVal);
+  obj.set('content', contentVal);
+  if(imgData) obj.set('img', imgData);
+  obj.save().then(()=> fetchDiariesFromCloud());
+
   diaryDate.value=''; diaryContent.value=''; diaryImg.value=''; imgData='';
-  saveDiaryToCloud(newDiary);
 });
 
 // ---------------- 访客量 ----------------
