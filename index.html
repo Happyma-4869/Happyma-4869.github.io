@@ -213,18 +213,28 @@ const diaryList=document.getElementById('diaryList');
 const addDiaryBtn=document.getElementById('addDiaryBtn');
 const diaryDate=document.getElementById('diaryDate');
 const diaryContent=document.getElementById('diaryContent');
-let diaries=JSON.parse(localStorage.getItem('diaries'))||[{date:'2025-12-08', content:'今天是我初次创建我的个人网站  目前还在测试中  以后我会逐步完善耶✌'}];
+// === 初次日记：包含小黄鸭图片（公开可见） ===
+let diaries=JSON.parse(localStorage.getItem('diaries'))||[
+  {
+    date:'2025-12-09',
+    content:'这是我的小黄鸭，你们在学校看到不要偷走他😫',
+    image:'https://github.com/Happyma-4869/Happyma-4869.github.io/blob/main/%E5%BE%AE%E4%BF%A1%E5%9B%BE%E7%89%87_20251209203931_3_2.jpg?raw=true'
+  }
+];
 function renderDiaries(){
   diaryList.innerHTML='';
   diaries.forEach((d,i)=>{
     const card=document.createElement('div');
     card.className='card show';
-    card.innerHTML=`<p><strong>${d.date}</strong></p>
-                    <p>${d.content}</p>
-                    <div class="diary-actions">
-                      <button onclick="editDiary(${i})">编辑</button>
-                      <button onclick="deleteDiary(${i})">删除</button>
-                    </div>`;
+    card.innerHTML = `
+      <p><strong>${d.date}</strong></p>
+      <p>${d.content}</p>
+      ${d.image ? `<img src="${d.image}" style="width:100%;border-radius:18px;margin-top:10px;">` : ''}
+      <div class="diary-actions">
+        <button onclick="editDiary(${i})">编辑</button>
+        <button onclick="deleteDiary(${i})">删除</button>
+      </div>
+    `;
     diaryList.appendChild(card);
   });
   localStorage.setItem('diaries', JSON.stringify(diaries));
@@ -345,5 +355,3 @@ window.addEventListener('scroll', () => {
 </script>
 </body>
 </html>
-
-
