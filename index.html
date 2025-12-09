@@ -86,11 +86,10 @@ textarea, input[type="date"], input[type="text"] { width:90%; padding:10px; bord
 .diary-actions button, #addDiaryBtn, #addCommentBtn { padding:8px 12px; cursor:pointer; border:none; border-radius:25px; background:linear-gradient(135deg,#5ac8fa,#007aff); color:white; font-weight:bold; transition:0.3s, transform 0.2s, box-shadow 0.3s; }
 .diary-actions button:hover, #addDiaryBtn:hover, #addCommentBtn:hover { background:linear-gradient(135deg,#007aff,#5ac8fa); transform:scale(1.05); box-shadow:0 8px 20px rgba(0,0,0,0.3); }
 
-/* ---------------- 图片预览 ---------------- */
-#diaryPreviewContainer { position:relative; width:100%; margin-top:10px; display:none; }
-#diaryPreview { width:100%; border-radius:15px; display:block; }
-#diaryPreviewRemove { position:absolute; top:5px; right:5px; background:red; color:white; border:none; border-radius:50%; width:25px; height:25px; cursor:pointer; font-weight:bold; font-size:16px; }
-
+/* ---------------- 响应式优化 ---------------- */
+@media (max-width:400px){ header img { width:80px; height:80px; } header h1 { font-size:24px; } header p { font-size:14px; } .card { width:90%; padding:20px; margin-bottom:30px; } nav a { margin:0 5px; font-size:12px; } #modeToggle, #toTopBtn, button{ padding:6px 12px; font-size:14px; } }
+@media (min-width:401px) and (max-width:768px){ header img { width:100px; height:100px; } header h1 { font-size:28px; } header p { font-size:16px; } .card { width:80%; padding:22px; margin-bottom:35px; } nav a { margin:0 10px; font-size:14px; } }
+@media (min-width:769px){ header img { width:140px; height:140px; } header h1 { font-size:36px; } header p { font-size:18px; } .card { width:320px; padding:25px; margin-bottom:40px; } nav a { margin:0 15px; font-size:16px; } }
 </style>
 </head>
 <body>
@@ -129,10 +128,6 @@ textarea, input[type="date"], input[type="text"] { width:90%; padding:10px; bord
     <input type="date" id="diaryDate" />
     <textarea id="diaryContent" placeholder="写下今天的日记..." rows="3"></textarea>
     <input type="file" id="diaryImg" accept="image/*"/>
-    <div id="diaryPreviewContainer">
-      <img id="diaryPreview" alt="预览图"/>
-      <button id="diaryPreviewRemove">×</button>
-    </div>
     <button id="addDiaryBtn">添加日记</button>
   </div>
   <div id="diaryList"></div>
@@ -177,45 +172,30 @@ const addDiaryBtn = document.getElementById('addDiaryBtn');
 const diaryDate = document.getElementById('diaryDate');
 const diaryContent = document.getElementById('diaryContent');
 const diaryImg = document.getElementById('diaryImg');
-const diaryPreviewContainer = document.getElementById('diaryPreviewContainer');
-const diaryPreview = document.getElementById('diaryPreview');
-const diaryPreviewRemove = document.getElementById('diaryPreviewRemove');
-let selectedFile = null;
-
-// 图片上传预览
-diaryImg.addEventListener('change', e=>{
-    selectedFile = e.target.files[0] || null;
-    if(selectedFile){
-        const reader = new FileReader();
-        reader.onload = function(event){
-            diaryPreview.src = event.target.result;
-            diaryPreviewContainer.style.display='block';
-        }
-        reader.readAsDataURL(selectedFile);
-    } else diaryPreviewContainer.style.display='none';
+let imgData = '';
+diaryImg.addEventListener('change', e => {
+  const file = e.target.files[0];
+  if(!file) return;
+  const reader = new FileReader();
+  reader.onload = ev => imgData = ev.target.result;
+  reader.readAsDataURL(file);
 });
 
-// 删除预览图片
-diaryPreviewRemove.addEventListener('click', ()=>{
-    selectedFile = null;
-    diaryImg.value='';
-    diaryPreviewContainer.style.display='none';
-});
-
-// 获取日记
 let diaries = [];
 function fetchDiariesFromCloud(){
   const query = new AV.Query(DiaryCloud);
   query.descending('createdAt');
-  query.find().then(results=>{
-    diaries = results.map(r=>({
-      id: r.id,
-      date: r.get('date'),
-      content: r.get('content'),
-      img: r.get('img') ? r.get('img').url() : null
-    }));
+  query.find().then(results => {
+    diaries = results.map(r=>({id:r.id, date:r.get('date'), content:r.get('content'), img:r.get('img')}));
     renderDiaries();
   });
+}
+function saveDiaryToCloud(diary){
+  const obj = new DiaryCloud();
+  obj.set('date', diary.date);
+  obj.set('content', diary.content);
+  if(diary.img) obj.set('img', diary.img);
+  obj.save().then(()=>fetchDiariesFromCloud());
 }
 function renderDiaries(){
   diaryList.innerHTML='';
@@ -227,85 +207,106 @@ function renderDiaries(){
     diaryList.appendChild(card);
   });
 }
-
-// 添加日记
 addDiaryBtn.addEventListener('click',()=>{
-  const dateVal = diaryDate.value || new Date().toISOString().split('T')[0];
-  const contentVal = diaryContent.value.trim();
+  const dateVal=diaryDate.value||new Date().toISOString().split('T')[0];
+  const contentVal=diaryContent.value.trim();
   if(!contentVal){ alert('请填写内容'); return; }
-
-  addDiaryBtn.disabled = true;
-  addDiaryBtn.textContent = '上传中...';
-
-  const obj = new DiaryCloud();
-  obj.set('date', dateVal);
-  obj.set('content', contentVal);
-
-  const uploadDiary = ()=>{
-      obj.save().then(()=>{
-          alert('日记添加成功！');
-          diaryDate.value=''; diaryContent.value=''; diaryImg.value=''; diaryPreviewContainer.style.display='none'; selectedFile=null;
-          fetchDiariesFromCloud();
-      }).catch(err=>{
-          alert('保存失败，请重试'); console.error(err);
-      }).finally(()=>{
-          addDiaryBtn.disabled=false; addDiaryBtn.textContent='添加日记';
-      });
-  }
-
-  if(selectedFile){
-      const avFile = new AV.File(selectedFile.name, selectedFile);
-      avFile.save().then(file=>{
-          obj.set('img', file);
-          uploadDiary();
-      }).catch(err=>{
-          alert('上传图片失败，请重试'); console.error(err);
-          addDiaryBtn.disabled=false; addDiaryBtn.textContent='添加日记';
-      });
-  } else uploadDiary();
+  const newDiary={date:dateVal, content:contentVal, img:imgData};
+  diaryDate.value=''; diaryContent.value=''; diaryImg.value=''; imgData='';
+  saveDiaryToCloud(newDiary);
 });
 
-// ---------------- 评论区 ----------------
+// ---------------- 评论 ----------------
 const commentList = document.getElementById('commentList');
 const addCommentBtn = document.getElementById('addCommentBtn');
 const commentName = document.getElementById('commentName');
 const commentContent = document.getElementById('commentContent');
-
+let comments = [];
 function fetchCommentsFromCloud(){
   const query = new AV.Query(CommentCloud);
   query.descending('createdAt');
   query.find().then(results=>{
-    commentList.innerHTML='';
-    results.forEach(r=>{
-      const card = document.createElement('div'); card.className='card show';
-      card.innerHTML=`<p><strong>${r.get('name')||'匿名'}</strong></p><p>${r.get('content')}</p>`;
-      commentList.appendChild(card);
-    });
+    comments = results.map(r=>({id:r.id, name:r.get('name'), content:r.get('content')}));
+    renderComments();
   });
 }
-
-// 添加评论
-addCommentBtn.addEventListener('click',()=>{
-  const name = commentName.value.trim();
-  const content = commentContent.value.trim();
-  if(!content){ alert('请输入评论'); return; }
+function saveCommentToCloud(comment){
   const obj = new CommentCloud();
-  obj.set('name', name);
-  obj.set('content', content);
-  obj.save().then(()=>{
-      alert('评论添加成功！');
-      commentName.value=''; commentContent.value='';
-      fetchCommentsFromCloud();
-  }).catch(err=>{
-      alert('评论失败，请重试'); console.error(err);
+  obj.set('name', comment.name);
+  obj.set('content', comment.content);
+  obj.save().then(()=>fetchCommentsFromCloud());
+}
+function renderComments(){
+  commentList.innerHTML='';
+  comments.forEach(c=>{
+    const card=document.createElement('div'); card.className='card show';
+    card.innerHTML=`<p><strong>${c.name||'匿名'}</strong></p><p>${c.content}</p>`;
+    commentList.appendChild(card);
   });
+}
+addCommentBtn.addEventListener('click',()=>{
+  const name=commentName.value.trim(); const content=commentContent.value.trim();
+  if(!content){ alert('请输入评论'); return; }
+  saveCommentToCloud({name, content}); commentName.value=''; commentContent.value='';
 });
 
-// ---------------- 初始化 ----------------
-window.addEventListener('load', ()=>{
-    fetchDiariesFromCloud();
-    fetchCommentsFromCloud();
+// ---------------- 访客量 ----------------
+const visitorCountEl = document.getElementById('visitorCount');
+let visitorCount = parseInt(localStorage.getItem('visitorCount')||0)+1;
+localStorage.setItem('visitorCount', visitorCount);
+visitorCountEl.textContent=visitorCount;
+
+// ---------------- 返回顶部 ----------------
+const toTopBtn=document.getElementById('toTopBtn');
+window.addEventListener('scroll',()=>{ toTopBtn.style.display=(window.scrollY>200)?'block':'none'; });
+toTopBtn.addEventListener('click',()=>{ window.scrollTo({top:0, behavior:'smooth'}); });
+
+// ---------------- 日夜模式 ----------------
+const modeToggle=document.getElementById('modeToggle');
+modeToggle.addEventListener('click',()=>{document.body.classList.toggle('dark'); initParticles(); });
+
+// ---------------- QR弹窗 ----------------
+const qrImg=document.getElementById('qrImg');
+const qrModal=document.getElementById('qrModal');
+qrImg.addEventListener('click',()=>qrModal.classList.add('show'));
+qrModal.addEventListener('click',()=>qrModal.classList.remove('show'));
+
+// ---------------- 卡片滚动动画 ----------------
+function showOnScroll() {
+  const cards = document.querySelectorAll('.card:not(.show)');
+  const windowBottom = window.innerHeight * 0.85;
+  cards.forEach((card,i)=>{
+      const rect = card.getBoundingClientRect();
+      if(rect.top < windowBottom){
+          setTimeout(()=>card.classList.add('show'), i*100);
+      }
+  });
+}
+window.addEventListener('scroll', showOnScroll);
+window.addEventListener('load', () => { fetchDiariesFromCloud(); fetchCommentsFromCloud(); showOnScroll(); });
+
+// ---------------- 导航高亮 ----------------
+const mainNav = document.getElementById('mainNav');
+const navLinks = mainNav.querySelectorAll('a');
+window.addEventListener('scroll', () => {
+    navLinks.forEach(link => {
+        const section = document.querySelector(link.getAttribute('href'));
+        if(section.offsetTop - 70 <= window.scrollY && section.offsetTop + section.offsetHeight > window.scrollY){
+            link.classList.add('active');
+        } else { link.classList.remove('active'); }
+    });
 });
+
+// ---------------- 粒子动画 ----------------
+const canvas=document.getElementById('particles'); const ctx=canvas.getContext('2d'); let particlesArray=[]; let mouse={x:null,y:null};
+window.addEventListener('mousemove', e=>{ mouse.x=e.x; mouse.y=e.y; });
+function resizeCanvas(){ canvas.width=window.innerWidth; canvas.height=window.innerHeight; }
+window.addEventListener('resize', resizeCanvas);
+resizeCanvas();
+class Particle{ constructor(){ this.originX=Math.random()*canvas.width; this.originY=Math.random()*canvas.height; this.radius=Math.random()*2+1.5; this.angle=Math.random()*Math.PI*2; this.orbit=Math.random()*20+10; this.speed=(Math.random()*0.01)+0.005; this.color=document.body.classList.contains('dark')?'rgba(255,255,255,0.9)':'rgba(255,255,255,0.3)'; } update(){ this.angle+=this.speed; this.x=this.originX+Math.cos(this.angle)*this.orbit; this.y=this.originY+Math.sin(this.angle)*this.orbit; let dx=mouse.x-this.x, dy=mouse.y-this.y, dist=Math.sqrt(dx*dx+dy*dy); if(dist<100){ this.x+=dx*0.002; this.y+=dy*0.002; } } draw(){ ctx.fillStyle=this.color; ctx.beginPath(); ctx.arc(this.x,this.y,this.radius,0,Math.PI*2); ctx.fill(); } }
+function initParticles(){ particlesArray=[]; if(!document.body.classList.contains('dark')) return; let count=90; for(let i=0;i<count;i++){ particlesArray.push(new Particle()); } }
+function animateParticles(){ ctx.clearRect(0,0,canvas.width,canvas.height); particlesArray.forEach(p=>{p.update();p.draw();}); requestAnimationFrame(animateParticles); }
+initParticles(); animateParticles();
 </script>
 </body>
 </html>
