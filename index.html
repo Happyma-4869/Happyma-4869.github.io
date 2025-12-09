@@ -4,300 +4,189 @@
 <meta charset="UTF-8">
 <title>Happy 的个人主页</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-
+<script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+<script src="https://unpkg.com/valine/dist/Valine.min.js"></script>
 <style>
-/* ================= 基础 ================= */
-* { box-sizing: border-box; }
-html, body {
-  margin:0; padding:0;
-  font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",sans-serif;
-  color:#333;
-  scroll-behavior:smooth;
-  overflow-x:hidden;
+:root{
+  --primary:#007aff;
+  --primary-light:#5ac8fa;
+  --dark-bg:rgba(40,40,40,0.85);
+  --dark-card-shadow:rgba(255,255,255,0.1);
 }
-body.dark { color:#eee; }
-
-a { text-decoration:none; color:inherit; }
-section { position:relative; z-index:2; }
-
-/* ================= 背景视频 ================= */
-#bgVideo {
-  position:fixed;
-  inset:0;
-  width:100%;
-  height:100%;
-  object-fit:cover;
-  z-index:0;
-  opacity:0;
-  animation:fadeIn 1s forwards;
-  transition:filter 0.5s;
-}
-body.dark #bgVideo {
-  filter:brightness(40%) contrast(110%) saturate(120%);
-}
-@keyframes fadeIn { to { opacity:1; } }
-
-/* 夜间遮罩 */
-body.dark::before {
-  content:'';
-  position:fixed;
-  inset:0;
-  background:rgba(0,0,40,0.25);
-  z-index:1;
-  pointer-events:none;
-}
-
-/* ================= 粒子 ================= */
-#particles {
-  position:fixed;
-  inset:0;
-  pointer-events:none;
-  z-index:0;
-}
-
-/* ================= 卡片 ================= */
-.card {
-  width:320px;
-  margin:0 auto 40px;
-  padding:25px 20px;
-  border-radius:25px;
-  background:rgba(255,255,255,0.6);
-  backdrop-filter:blur(20px);
-  box-shadow:0 12px 30px rgba(0,0,0,0.08);
-  opacity:0;
-  transform:translateY(20px);
-  transition:0.6s cubic-bezier(.5,0,.1,1);
-}
-.card.show { opacity:1; transform:none; }
-.card:hover {
-  transform:translateY(-5px);
-  box-shadow:0 16px 40px rgba(0,0,0,0.15);
-}
-body.dark .card {
-  background:rgba(40,40,40,0.85);
-  box-shadow:0 12px 30px rgba(255,255,255,0.1);
-}
-
-/* ================= 头部 ================= */
-header {
-  text-align:center;
-  padding:60px 20px 20px;
-  z-index:2;
-}
-header img {
-  width:140px;
-  height:140px;
-  border-radius:50%;
-  border:4px solid rgba(255,255,255,0.8);
-  transition:0.3s;
-}
-header img:hover { transform:scale(1.08); }
-header h1 { font-size:36px; margin:10px 0; }
-header p { font-size:18px; }
-
-/* ================= 导航 ================= */
-nav {
-  margin-top:20px;
-  padding:10px 0;
-  background:rgba(255,255,255,0.25);
-  border-radius:20px;
-  position:sticky;
-  top:0;
-  z-index:5;
-  transition:0.3s;
-}
-nav.scrolled {
-  background:rgba(0,0,0,0.5);
-  backdrop-filter:blur(15px);
-}
-nav a {
-  margin:0 15px;
-  font-weight:bold;
-}
-nav a.active { color:#ffeb3b; }
-
-/* ================= 按钮 ================= */
-#modeToggle, #toTopBtn {
-  position:fixed;
-  right:20px;
-  padding:8px 15px;
-  border-radius:25px;
-  background:linear-gradient(135deg,#5ac8fa,#007aff);
-  color:#fff;
-  cursor:pointer;
-  z-index:10;
-  transition:0.3s;
-}
-#modeToggle { top:20px; }
-#toTopBtn { bottom:30px; display:none; }
-#modeToggle:hover, #toTopBtn:hover { transform:scale(1.05); }
-
-/* ================= 区块 ================= */
-section { padding:60px 20px; text-align:center; }
-section h2 { color:#007aff; margin-bottom:30px; }
-
-/* ================= 日记 ================= */
-textarea, input[type="date"] {
-  width:90%;
-  padding:10px;
-  border-radius:20px;
-  border:none;
-  box-shadow: inset 0 2px 5px rgba(0,0,0,0.1);
-  margin-bottom:10px;
-}
-button {
-  border:none;
-  border-radius:25px;
-  padding:8px 15px;
-  background:linear-gradient(135deg,#5ac8fa,#007aff);
-  color:white;
-  cursor:pointer;
-}
-
-/* ================= 减少动画 ================= */
-@media (prefers-reduced-motion: reduce) {
-  * { animation:none!important; transition:none!important; }
-}
-
-/* ================= 响应式 ================= */
-@media (max-width:768px) {
-  .card { width:90%; }
-  header h1 { font-size:28px; }
-}
+body, html{margin:0;padding:0;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",sans-serif;color:#333;overflow-x:hidden;transition:color 0.5s,filter 0.3s;scroll-behavior:smooth;}
+body.dark{color:#eee;}
+a{text-decoration:none;color:inherit;}
+section{position:relative;z-index:2;}
+#bgVideo{position:fixed;top:0;left:0;width:100%;height:100%;object-fit:cover;z-index:0;opacity:0;animation:fadeIn 1s forwards;transition:filter 0.5s;}
+body.dark #bgVideo{filter:brightness(40%) contrast(110%) sepia(10%) saturate(120%);}
+@keyframes fadeIn{to{opacity:1;}}
+body.dark::before{content:'';position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,40,0.25);z-index:1;pointer-events:none;}
+#particles{position:fixed;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:0;}
+.card{background:linear-gradient(to bottom right, rgba(255,255,255,0.6), rgba(245,245,245,0.4));backdrop-filter: blur(20px);border-radius:25px;box-shadow:0 12px 30px rgba(0,0,0,0.08);padding:25px 20px;display:flex;flex-direction:column;gap:12px;width:320px;margin:0 auto 40px;opacity:0;transform:translateY(20px);transition: transform 0.6s cubic-bezier(0.5,0,0.1,1),opacity 0.6s,box-shadow 0.4s,background 0.5s;}
+.card.show{opacity:1;transform:translateY(0);}
+.card:hover{transform:translateY(-5px);box-shadow:0 16px 40px rgba(0,0,0,0.15);}
+body.dark .card{background:var(--dark-bg);color:#fff;box-shadow:0 12px 30px var(--dark-card-shadow);}
+.card .tags{margin-top:10px;text-align:center;}
+.card .tag{display:inline-block;background:linear-gradient(45deg,var(--primary-light),var(--primary));color:white;padding:5px 10px;margin:3px;border-radius:15px;font-size:12px;transition: transform 0.2s, box-shadow 0.3s;}
+.card .tag:hover{transform:scale(1.1);box-shadow:0 4px 12px rgba(0,0,0,0.2);}
+header{text-align:center;padding:60px 20px 20px;position:relative;z-index:2;}
+header img{width:140px;height:140px;border-radius:50%;border:4px solid rgba(255,255,255,0.8);margin-bottom:20px;transition: transform 0.3s, box-shadow 0.3s;}
+header img:hover{transform:scale(1.1);box-shadow:0 8px 20px rgba(0,0,0,0.2);}
+header h1,header p{color:inherit;margin:0;}
+header h1{margin:10px 0;font-size:36px;}
+header p{font-size:18px;margin:5px 0;}
+nav{margin-top:20px;background:rgba(255,255,255,0.2);padding:10px 0;position:sticky;top:0;z-index:5;border-radius:20px;transition:0.3s;}
+nav.scrolled{background:rgba(0,0,0,0.5);box-shadow:0 4px 10px rgba(0,0,0,0.3);}
+nav a{margin:0 15px;font-weight:bold;transition:0.3s;}
+nav a.active{color:#ffeb3b;}
+nav a:hover{color:#ffeb3b;}
+#modeToggle{position:fixed;top:20px;right:20px;padding:8px 15px;background:linear-gradient(135deg,var(--primary-light),var(--primary));color:white;border-radius:25px;cursor:pointer;z-index:10;transition:0.3s, transform 0.2s;}
+#modeToggle:hover{background:linear-gradient(135deg,var(--primary),var(--primary-light));transform: scale(1.05);}
+#toTopBtn{position:fixed;bottom:30px;right:30px;background:linear-gradient(135deg,var(--primary-light),var(--primary));color:white;border:none;padding:12px 18px;border-radius:25px;cursor:pointer;font-size:16px;z-index:10;display:none;transition:0.3s, transform 0.2s, box-shadow 0.3s;}
+#toTopBtn:hover{background:linear-gradient(135deg,var(--primary),var(--primary-light));transform:scale(1.05);box-shadow:0 8px 20px rgba(0,0,0,0.3);}
+#toTopBtn:active{transform:scale(0.95);box-shadow:0 6px 18px rgba(0,0,0,0.3);}
+#visitCounter{position:fixed;top:20px;left:20px;padding:8px 15px;background:linear-gradient(135deg,var(--primary-light),var(--primary));color:white;border-radius:25px;font-weight:bold;z-index:10;transition:0.3s, transform 0.2s;}
+#visitCounter:hover{transform:scale(1.05);}
+.contact .qr{display:flex;justify-content:center;margin-top:20px;}
+.contact .qr img{width:140px;height:140px;border-radius:25px;border:2px solid #ccc;cursor:pointer;transition:0.3s, transform 0.2s, box-shadow 0.3s;}
+.contact .qr img:hover{transform:scale(1.1);box-shadow:0 8px 20px rgba(0,0,0,0.3);}
+#qrModal{display:none;position:fixed;z-index:10;left:0;top:0;width:100%;height:100%;background:rgba(255,255,255,0.3);backdrop-filter:blur(15px);justify-content:center;align-items:center;border-radius:25px;}
+#qrModal img{max-width:300px;border-radius:25px;border:3px solid #fff;transition: transform 0.3s;}
+#qrModal.show{display:flex;}
+section{padding:60px 20px;text-align:center;}
+section h2{font-size:28px;color:var(--primary);margin-bottom:30px;}
+textarea,input[type="date"]{width:90%;padding:10px;border-radius:20px;border:none;box-shadow: inset 0 2px 5px rgba(0,0,0,0.1);resize:none;margin:0 auto;display:block;text-align:left;}
+.diary-actions{display:flex;justify-content:center;gap:10px;margin-top:10px;}
+.diary-actions button,#addDiaryBtn{padding:8px 12px;cursor:pointer;border:none;border-radius:25px;background:linear-gradient(135deg,var(--primary-light),var(--primary));color:white;font-weight:bold;transition:0.3s, transform 0.2s, box-shadow 0.3s;}
+.diary-actions button:hover,#addDiaryBtn:hover{background:linear-gradient(135deg,var(--primary),var(--primary-light));transform:scale(1.05);box-shadow:0 8px 20px rgba(0,0,0,0.3);}
+#comments{padding-bottom:60px;}
+#vcomments{margin-top:20px;}
+@media(max-width:400px){header img{width:80px;height:80px;} header h1{font-size:24px;} header p{font-size:14px;} .card{width:90%;padding:20px;margin-bottom:30px;} nav a{margin:0 5px;font-size:12px;} #modeToggle,#toTopBtn,#visitCounter,button{padding:6px 12px;font-size:14px;}}
+@media(min-width:401px) and (max-width:768px){header img{width:100px;height:100px;} header h1{font-size:28px;} header p{font-size:16px;} .card{width:80%;padding:22px;margin-bottom:35px;} nav a{margin:0 10px;font-size:14px;}}
+@media(min-width:769px){header img{width:140px;height:140px;} header h1{font-size:36px;} header p{font-size:18px;} .card{width:320px;padding:25px;margin-bottom:40px;} nav a{margin:0 15px;font-size:16px;}}
 </style>
 </head>
-
 <body>
 
-<video id="bgVideo" muted loop playsinline preload="metadata">
+<video id="bgVideo" autoplay muted loop playsinline>
   <source src="https://github.com/Happyma-4869/Happyma-4869.github.io/raw/refs/heads/main/Video%20Project%204.mp4" type="video/mp4">
 </video>
 <canvas id="particles"></canvas>
 
+<div id="visitCounter">浏览量: <span id="busuanzi_value_page_pv"></span></div>
+<div id="modeToggle">🌙 日/夜切换</div>
+<button id="toTopBtn">⬆️ 顶部</button>
+
 <header>
-  <img src="https://github.com/Happyma-4869/Happyma-4869.github.io/blob/main/%E5%BE%AE%E4%BF%A1%E5%9B%BE%E7%89%87_20251207233412_9_79.jpg?raw=true">
+  <img src="https://github.com/Happyma-4869/Happyma-4869.github.io/blob/main/%E5%BE%AE%E4%BF%A1%E5%9B%BE%E7%89%87_20251207233412_9_79.jpg?raw=true" alt="头像">
   <h1>欢迎来到 Happy 的主页</h1>
   <p>记录我的日常和点滴 😊</p>
   <nav id="mainNav">
-    <a href="#about">关于我</a>
-    <a href="#diary">日记</a>
-    <a href="#contact">联系我</a>
+      <a href="#about">关于我</a>
+      <a href="#diary">日记</a>
+      <a href="#contact">联系我</a>
+      <a href="#comments">评论</a>
   </nav>
 </header>
-
-<div id="modeToggle">🌙 日/夜</div>
-<button id="toTopBtn">⬆</button>
 
 <section id="about">
   <h2>关于我</h2>
   <div class="card show">
-    <p>我是 Happy，来自河南郑州，目前是西亚斯大一学生。</p>
+    <p>Hi 我是happy，我来自河南郑州市，目前是郑州市西亚斯大一学生，在此我想分享我的生活</p>
   </div>
 </section>
 
 <section id="diary">
-  <h2>我的日记</h2>
+  <h2>我的日记 📖</h2>
   <div class="card">
-    <input type="date" id="diaryDate">
-    <textarea id="diaryContent" rows="3" placeholder="写点什么…"></textarea>
-    <button id="addDiaryBtn">添加</button>
+    <input type="date" id="diaryDate" />
+    <textarea id="diaryContent" placeholder="写下今天的日记..." rows="3"></textarea>
+    <button id="addDiaryBtn">添加日记</button>
   </div>
   <div id="diaryList"></div>
 </section>
 
 <section id="contact">
   <h2>联系我</h2>
-  <p>微信：H4ppy_ma</p>
-  <p>邮箱：1348790438@qq.com</p>
+  <p>微信：<strong>H4ppy_ma</strong></p>
+  <p>QQ邮箱：<strong>1348790438@qq.com</strong></p>
+  <div class="contact">
+      <div class="qr">
+          <img id="qrImg" src="https://github.com/Happyma-4869/Happyma-4869.github.io/blob/main/%E5%BE%AE%E4%BF%A1%E5%9B%BE%E7%89%87_20251207233522_10_79.jpg?raw=true" alt="微信二维码">
+      </div>
+  </div>
 </section>
 
-<footer style="text-align:center;padding:20px;opacity:.6;">
-  © 2025 Happyma.top
-</footer>
+<section id="comments">
+  <h2>评论区</h2>
+  <div id="vcomments" class="card"></div>
+</section>
+
+<footer>&copy; 2025 Happyma.top</footer>
+<div id="qrModal"><img src="https://github.com/Happyma-4869/Happyma-4869.github.io/blob/main/%E5%BE%AE%E4%BF%A1%E5%9B%BE%E7%89%87_20251207233522_10_79.jpg?raw=true" alt="微信二维码大图"></div>
 
 <script>
-/* ================= 视频延迟播放 ================= */
-window.addEventListener('load', () => {
-  document.getElementById('bgVideo').play().catch(()=>{});
-});
+// ---------------- 日记系统 ----------------
+const diaryList=document.getElementById('diaryList');
+const addDiaryBtn=document.getElementById('addDiaryBtn');
+const diaryDate=document.getElementById('diaryDate');
+const diaryContent=document.getElementById('diaryContent');
+let diaries=JSON.parse(localStorage.getItem('diaries'))||[{date:'2025-12-09',content:'今天是我初次创建我的个人网站，目前还在测试中✌'}];
+function renderDiaries(){diaryList.innerHTML='';diaries.forEach((d,i)=>{const card=document.createElement('div');card.className='card show';card.innerHTML=`<p><strong>${d.date}</strong></p><p>${d.content}</p><div class="diary-actions"><button onclick="editDiary(${i})">编辑</button><button onclick="deleteDiary(${i})">删除</button></div>`;diaryList.appendChild(card);});localStorage.setItem('diaries',JSON.stringify(diaries));}
+renderDiaries();
+addDiaryBtn.addEventListener('click',()=>{const dateVal=diaryDate.value||new Date().toISOString().split('T')[0];const contentVal=diaryContent.value.trim();if(!contentVal){alert('请填写内容');return;}diaries.unshift({date:dateVal,content:contentVal});diaryDate.value='';diaryContent.value='';renderDiaries();});
+function deleteDiary(i){diaries.splice(i,1);renderDiaries();}
+function editDiary(i){const newContent=prompt('请输入新的日记内容：',diaries[i].content);if(newContent===null)return;diaries[i].content=newContent;renderDiaries();}
 
-/* ================= 日夜模式记忆 ================= */
-const modeToggle = document.getElementById('modeToggle');
-if (localStorage.getItem('theme') === 'dark') {
-  document.body.classList.add('dark');
-}
-modeToggle.onclick = () => {
-  const isDark = document.body.classList.toggle('dark');
-  localStorage.setItem('theme', isDark ? 'dark' : 'light');
-  initParticles();
-};
+// ---------------- 日夜模式 ----------------
+const modeToggle=document.getElementById('modeToggle');
+modeToggle.addEventListener('click',()=>{document.body.classList.toggle('dark');initParticles();});
 
-/* ================= 返回顶部 ================= */
-const toTopBtn = document.getElementById('toTopBtn');
-window.addEventListener('scroll', () => {
-  toTopBtn.style.display = window.scrollY > 200 ? 'block' : 'none';
-});
-toTopBtn.onclick = () => scrollTo({top:0,behavior:'smooth'});
+// ---------------- 返回顶部 ----------------
+const toTopBtn=document.getElementById('toTopBtn');
+window.addEventListener('scroll',()=>{toTopBtn.style.display=(window.scrollY>200)?'block':'none';});
+toTopBtn.addEventListener('click',()=>{window.scrollTo({top:0,behavior:'smooth'});});
 
-/* ================= 导航状态 ================= */
-const nav = document.querySelector('nav');
-window.addEventListener('scroll',()=>{
-  nav.classList.toggle('scrolled',window.scrollY>50);
-});
-
-/* ================= 日记 ================= */
-const diaryList = document.getElementById('diaryList');
-let diaries = JSON.parse(localStorage.getItem('diaries')) || [];
-function render() {
-  diaryList.innerHTML='';
-  diaries.forEach(d=>{
-    const div=document.createElement('div');
-    div.className='card show';
-    div.innerHTML=`<p>${d.date}</p><p>${d.content}</p>`;
-    diaryList.appendChild(div);
-  });
-  localStorage.setItem('diaries',JSON.stringify(diaries));
-}
-render();
-document.getElementById('addDiaryBtn').onclick=()=>{
-  const content=diaryContent.value.trim();
-  if(!content) return;
-  diaries.unshift({date:new Date().toISOString().slice(0,10),content});
-  diaryContent.value='';
-  render();
-};
-
-/* ================= 粒子 ================= */
-const canvas = document.getElementById('particles');
-const ctx = canvas.getContext('2d');
-let particles=[];
-function resize(){canvas.width=innerWidth;canvas.height=innerHeight;}
-resize();addEventListener('resize',resize);
-
-class P {
-  constructor(){
-    this.x=Math.random()*canvas.width;
-    this.y=Math.random()*canvas.height;
-    this.r=Math.random()*2+1;
-  }
-  draw(){
-    ctx.fillStyle=document.body.classList.contains('dark')?'rgba(255,255,255,.8)':'rgba(255,255,255,.3)';
-    ctx.beginPath();
-    ctx.arc(this.x,this.y,this.r,0,Math.PI*2);
-    ctx.fill();
-  }
-}
-function initParticles(){
-  particles=[];
-  const count = innerWidth<768 ? 40 : 80;
-  for(let i=0;i<count;i++) particles.push(new P());
-}
+// ---------------- 粒子动画 ----------------
+const canvas=document.getElementById('particles');
+const ctx=canvas.getContext('2d');
+let particlesArray=[],mouse={x:null,y:null};
+window.addEventListener('mousemove',e=>{mouse.x=e.x;mouse.y=e.y;});
+function resizeCanvas(){canvas.width=window.innerWidth;canvas.height=window.innerHeight;}
+window.addEventListener('resize',resizeCanvas);resizeCanvas();
+class Particle{constructor(){this.originX=Math.random()*canvas.width;this.originY=Math.random()*canvas.height;this.radius=Math.random()*2+1.5;this.angle=Math.random()*Math.PI*2;this.orbit=Math.random()*20+10;this.speed=(Math.random()*0.01)+0.005;this.color=document.body.classList.contains('dark')?'rgba(255,255,255,0.9)':'rgba(255,255,255,0.3)';}update(){this.angle+=this.speed;this.x=this.originX+Math.cos(this.angle)*this.orbit;this.y=this.originY+Math.sin(this.angle)*this.orbit;let dx=mouse.x-this.x,dy=mouse.y-this.y,dist=Math.sqrt(dx*dx+dy*dy);if(dist<100){this.x+=dx*0.002;this.y+=dy*0.002;}if(this.x>canvas.width)this.originX=0;if(this.x<0)this.originX=canvas.width;if(this.y>canvas.height)this.originY=0;if(this.y<0)this.originY=canvas.height;}draw(){ctx.fillStyle=this.color;ctx.beginPath();ctx.arc(this.x,this.y,this.radius,0,Math.PI*2);ctx.fill();}}
+function initParticles(){particlesArray=[];const isMobile=/iPhone|iPad|iPod|Android/i.test(navigator.userAgent);let count=isMobile?20:(document.body.classList.contains('dark')?150:80);for(let i=0;i<count;i++){particlesArray.push(new Particle());}}
 initParticles();
-(function animate(){
-  ctx.clearRect(0,0,canvas.width,canvas.height);
-  particles.forEach(p=>p.draw());
-  requestAnimationFrame(animate);
-})();
+function animateParticles(){ctx.clearRect(0,0,canvas.width,canvas.height);particlesArray.forEach(p=>{p.update();p.draw();});requestAnimationFrame(animateParticles);}
+animateParticles();
+
+// ---------------- 微信二维码弹窗 ----------------
+const qrImg=document.getElementById('qrImg');
+const qrModal=document.getElementById('qrModal');
+qrImg.addEventListener('click',()=>{qrModal.classList.add('show');qrModal.querySelector('img').style.transform='scale(1.05)';});
+qrModal.addEventListener('click',()=>{qrModal.classList.remove('show');qrModal.querySelector('img').style.transform='scale(1)';});
+
+// ---------------- 卡片滚动动画 ----------------
+function showOnScroll(){const cards=document.querySelectorAll('.card');const triggerBottom=window.innerHeight/5*4;cards.forEach(card=>{const cardTop=card.getBoundingClientRect().top;if(cardTop<triggerBottom)card.classList.add('show');});}
+window.addEventListener('scroll',showOnScroll);
+window.addEventListener('load',showOnScroll);
+
+// ---------------- 导航高亮 ----------------
+const sections=document.querySelectorAll('section');const navLinks=document.querySelectorAll('nav a');
+window.addEventListener('scroll',()=>{let scrollPos=window.scrollY+100;sections.forEach((sec,i)=>{if(scrollPos>=sec.offsetTop&&scrollPos<sec.offsetTop+sec.offsetHeight){navLinks.forEach(a=>a.classList.remove('active'));navLinks[i].classList.add('active');}});});
+
+// ---------------- Valine 评论 ----------------
+new Valine({
+  el:'#vcomments',
+  appId:'fuokp60W4AkLxxWWHvQE1aN6-gzGzoHsz',
+  appKey:'AbvqmSqV8Cv8XChNG7ZlSsr2',
+  placeholder:'留下你的评论吧~',
+  path: window.location.pathname,
+  visitor:true,
+  avatar:'robohash',
+  pageSize:10,
+  verify:false
+});
 </script>
 
 </body>
